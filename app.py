@@ -15,13 +15,33 @@ from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
-# Configuración de página
+# PASO 1: Crear la variable de control en la memoria de la sesión
+if 'sidebar_open' not in st.session_state:
+    st.session_state.sidebar_open = 'collapsed'  # Empieza cerrado
+
+# PASO 2: Configurar la página usando esa variable
+# OJO: Si esta línea no es la primera de la UI, dará error.
 st.set_page_config(
     page_title="Actividades Madrid",
     page_icon="🎭",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state=st.session_state.sidebar_open
 )
+
+# PASO 3: El Botón de Filtros
+if st.button("🔍 Filtros", key="btn_filtros_main"):
+    # Cambiamos el valor de la variable
+    if st.session_state.sidebar_open == 'collapsed':
+        st.session_state.sidebar_open = 'expanded'
+    else:
+        st.session_state.sidebar_open = 'collapsed'
+    
+    # PASO 4: LA CLAVE. Forzar el rerun para que vuelva arriba,
+    # lea el nuevo 'sidebar_open' y lo aplique en set_page_config
+    st.rerun()
+
+# PASO 5: Ocultar la flecha original para que no confunda
+st.markdown("<style>[data-testid='collapsedControl'] {display: none;}</style>", unsafe_allow_html=True)
 
 # CSS responsive
 st.markdown("""
@@ -212,14 +232,6 @@ if 'dtstart' in df_original.columns:
 
 # Título
 st.title("🎭 Actividades Madrid")
-
-# Botón de filtros (indicación visual)
-col1, col2 = st.columns([4, 1])
-with col1:
-    st.caption("Descubre actividades culturales en Madrid")
-with col2:
-    if st.button("🔍 Filtros", use_container_width=True):
-        st.info("👈 Haz clic en el menú ☰ de la esquina superior izquierda")
 
 # Sidebar con filtros
 with st.sidebar:
