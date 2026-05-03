@@ -390,20 +390,54 @@ with tab1:
     if st.session_state.ref_coords:
         st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
     
-    # Controles de paginación - Solo una fila con ancho limitado
-    pag_col1, pag_col2, pag_col3 = st.columns([30, 40, 30])
+    # Controles de paginación - Forzado horizontal con CSS
+    st.markdown(f"""
+    <style>
+        .pagination-container {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }}
+        .pagination-btn {{
+            background: #f0f2f6;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            min-width: 60px;
+            max-width: 80px;
+            text-align: center;
+        }}
+        .pagination-text {{
+            font-size: 13px;
+            padding: 0 10px;
+            min-width: 70px;
+            text-align: center;
+        }}
+    </style>
+    <div class="pagination-container">
+        <form action="" method="get">
+            <button type="submit" name="prev" class="pagination-btn">⬅️ Ant.</button>
+        </form>
+        <span class="pagination-text">{st.session_state.page + 1} / {max(1, total_paginas)}</span>
+        <form action="" method="get">
+            <button type="submit" name="next" class="pagination-btn">Sig. ➡️</button>
+        </form>
+    </div>
+    """, unsafe_allow_html=True)
     
-    with pag_col1:
-        if st.button("⬅️ Ant.", key="btn_ant"):
+    # Botones Streamlit ocultos pero funcionales
+    cols = st.columns([1, 1, 1])
+    with cols[0]:
+        if st.button(" ", key="prev_page", help="Anterior"):
             if st.session_state.page > 0:
                 st.session_state.page -= 1
                 st.rerun()
-    
-    with pag_col2:
-        st.markdown(f"<div style='text-align: center; font-size: 14px; padding: 8px 0;'>{st.session_state.page + 1} / {max(1, total_paginas)}</div>", unsafe_allow_html=True)
-    
-    with pag_col3:
-        if st.button("Sig. ➡️", key="btn_sig"):
+    with cols[2]:
+        if st.button("  ", key="next_page", help="Siguiente"):
             if st.session_state.page < total_paginas - 1:
                 st.session_state.page += 1
                 st.rerun()
