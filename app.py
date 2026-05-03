@@ -16,6 +16,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Logo que aparece cuando el sidebar está colapsado
+st.logo(
+    image="🎭",
+    icon_image="🔍",
+    link=None
+)
+
 # CSS responsive
 st.markdown("""
 <style>
