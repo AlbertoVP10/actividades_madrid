@@ -24,7 +24,7 @@ st.set_page_config(
 
 # Logo que aparece cuando el sidebar está colapsado
 st.logo(
-    image="🎭",
+    image="🔍 Filtros",
     icon_image="🔍",
     link=None
 )
