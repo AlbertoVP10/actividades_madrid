@@ -346,50 +346,83 @@ with tab1:
     df_pagina = df.iloc[inicio:fin]
     
     for idx, row in df_pagina.iterrows():
-        with st.container():
-            col_left, col_right = st.columns([4, 1])
+        # Preparar información resumida para el título del expander
+        categoria = row.get('categoria', 'Otras')
+        titulo = row.get('title', 'Sin título')
+        
+        # Info resumida para mostrar junto al título
+        info_resumen = []
+        if 'dtstart' in row and pd.notna(row['dtstart']):
+            fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+            info_resumen.append(f"📅 {fecha}")
+        if 'event-location' in row and pd.notna(row['event-location']):
+            info_resumen.append(f"📍 {row['event-location']}")
+        if 'free' in row and row['free'] == 1:
+            info_resumen.append("💰 Gratis")
+        if 'distancia_km' in row and pd.notna(row['distancia_km']):
+            info_resumen.append(f"📏 {row['distancia_km']} km")
+        
+        texto_resumen = " | ".join(info_resumen)
+        
+        # Crear expander con título + info resumida
+        with st.expander(f"**{titulo}**  \n  *{texto_resumen}*"):
+            col1, col2 = st.columns([4, 1])
             
-            with col_left:
-                # Título con categoría
-                categoria = row.get('categoria', 'Otras')
-                st.markdown(f"### {row.get('title', 'Sin título')}")
-                st.caption(f"🏷️ {categoria}")
+            with col1:
+                st.caption(f"🏷️ Categoría: {categoria}")
                 
+                # Descripción completa
                 if 'description' in row and pd.notna(row['description']):
-                    desc = str(row['description'])[:150] + "..."
-                    st.caption(desc)
+                    st.markdown("**Descripción:**")
+                    st.write(row['description'])
                 
-                info = []
+                # Detalles completos
+                st.markdown("**Detalles:**")
+                detalles = []
+                
                 if 'dtstart' in row and pd.notna(row['dtstart']):
                     fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                    info.append(f"📅 {fecha}")
+                    detalles.append(f"📅 **Fecha:** {fecha}")
+                if 'time' in row and pd.notna(row['time']):
+                    detalles.append(f"🕐 **Hora:** {row['time']}")
                 if 'event-location' in row and pd.notna(row['event-location']):
-                    info.append(f"📍 {row['event-location']}")
+                    detalles.append(f"📍 **Lugar:** {row['event-location']}")
+                if 'address.area.district' in row and pd.notna(row['address.area.district']):
+                    detalles.append(f"🏘️ **Distrito:** {row['address.area.district']}")
+                if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']):
+                    detalles.append(f"🗺️ **Dirección:** {row['address.area.street-address']}")
                 if 'free' in row and row['free'] == 1:
-                    info.append("💰 Gratis")
-                
-                # Mostrar distancia si existe
+                    detalles.append("💰 **Precio:** Gratuito")
+                elif 'price' in row and pd.notna(row['price']):
+                    detalles.append(f"💰 **Precio:** {row['price']}")
+                if 'audience' in row and pd.notna(row['audience']):
+                    detalles.append(f"👥 **Público:** {row['audience']}")
                 if 'distancia_km' in row and pd.notna(row['distancia_km']):
-                    info.append(f"📏 {row['distancia_km']} km")
+                    detalles.append(f"📏 **Distancia:** {row['distancia_km']} km")
                 
-                st.write(" | ".join(info))
+                for detalle in detalles:
+                    st.write(detalle)
                 
+                # Enlaces
                 if 'link' in row and pd.notna(row['link']):
-                    st.markdown(f"[🔗 Más info]({row['link']})")
+                    st.markdown(f"[🔗 Ver más información]({row['link']})")
+                
+                # Enlace a Google Maps si hay coordenadas
+                if 'lat' in row and 'lon' in row and pd.notna(row['lat']) and pd.notna(row['lon']):
+                    maps_url = f"https://www.google.com/maps?q={row['lat']},{row['lon']}"
+                    st.markdown(f"[🗺️ Ver en Google Maps]({maps_url})")
             
-            with col_right:
+            with col2:
                 # Botón favorito
                 act_id = row.get('@id', str(idx))
                 es_fav = act_id in st.session_state.favoritos
                 
-                if st.button("❤️" if es_fav else "🤍", key=f"fav_{act_id}"):
+                if st.button("❤️ Favorito" if es_fav else "🤍 Añadir", key=f"fav_{act_id}"):
                     if es_fav:
                         st.session_state.favoritos.remove(act_id)
                     else:
                         st.session_state.favoritos.append(act_id)
                     st.rerun()
-            
-            st.markdown("---")
 
 # TAB 2: MAPA
 with tab2:
