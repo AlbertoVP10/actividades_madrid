@@ -155,21 +155,37 @@ st.title("🎭 Actividades Madrid")
 with st.sidebar:
     st.header("🔍 Filtros")
     
+    # Inicializar valores en session_state si no existen
+    if 'categoria_sel' not in st.session_state:
+        st.session_state.categoria_sel = 'Todas'
+    if 'distrito_sel' not in st.session_state:
+        st.session_state.distrito_sel = 'Todos'
+    if 'publico_sel' not in st.session_state:
+        st.session_state.publico_sel = 'Todos'
+    if 'fecha_tipo' not in st.session_state:
+        st.session_state.fecha_tipo = "Todas las fechas"
+    if 'franja_horaria' not in st.session_state:
+        st.session_state.franja_horaria = "Todo el día"
+    if 'solo_gratis' not in st.session_state:
+        st.session_state.solo_gratis = False
+    if 'busqueda' not in st.session_state:
+        st.session_state.busqueda = ""
+    
     # Categorías predefinidas
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
-    categoria_sel = st.selectbox("🎭 Categoría", categorias)
+    categoria_sel = st.selectbox("🎭 Categoría", categorias, key='categoria_sel')
     
     # Distrito
     if 'address.area.district' in df_original.columns:
         distritos = ['Todos'] + sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
-        distrito_sel = st.selectbox("📍 Distrito", distritos)
+        distrito_sel = st.selectbox("📍 Distrito", distritos, key='distrito_sel')
     else:
         distrito_sel = 'Todos'
     
     # Público objetivo
     st.subheader("👥 Público")
     publico_opciones = ['Todos', 'Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes']
-    publico_sel = st.selectbox("", publico_opciones, label_visibility="collapsed")
+    publico_sel = st.selectbox("", publico_opciones, label_visibility="collapsed", key='publico_sel')
     
     # Fecha
     st.subheader("📅 Fecha")
@@ -181,7 +197,7 @@ with st.sidebar:
         "Próximo mes",
         "Fecha concreta",
         "Rango de fechas"
-    ])
+    ], key='fecha_tipo')
     
     fecha_filtro = fecha_tipo  # Para compatibilidad con código existente
     
@@ -208,13 +224,13 @@ with st.sidebar:
         "Mañana (6:00 - 12:00)",
         "Tarde (12:00 - 18:00)",
         "Noche (18:00 - 24:00)"
-    ], label_visibility="collapsed")
+    ], label_visibility="collapsed", key='franja_horaria')
     
     # Gratuidad
-    solo_gratis = st.checkbox("💰 Solo gratuitas")
+    solo_gratis = st.checkbox("💰 Solo gratuitas", key='solo_gratis')
     
     # Búsqueda
-    busqueda = st.text_input("🔎 Buscar", placeholder="Título o descripción...")
+    busqueda = st.text_input("🔎 Buscar", placeholder="Título o descripción...", key='busqueda')
     
     # Dirección de referencia para distancia
     st.subheader("📍 Tu ubicación")
@@ -242,6 +258,15 @@ with st.sidebar:
 
 # Aplicar filtros
 df = df_original.copy()
+
+# Usar valores de session_state para los filtros
+categoria_sel = st.session_state.categoria_sel
+distrito_sel = st.session_state.distrito_sel
+publico_sel = st.session_state.publico_sel
+fecha_tipo = st.session_state.fecha_tipo
+franja_horaria = st.session_state.franja_horaria
+solo_gratis = st.session_state.solo_gratis
+busqueda = st.session_state.busqueda
 
 # Filtro categoría
 if categoria_sel != 'Todas':
