@@ -469,38 +469,59 @@ def limpiar_todos():
     st.session_state.solo_gratis = False
     st.session_state.busqueda = ""
 
+# FILTER CHIPS - Filtros aplicados en línea horizontal
 if filtros_activos:
-    st.markdown("**Filtros aplicados:**")
+    st.markdown("<small>**Filtros:**</small>", unsafe_allow_html=True)
     
-    # Crear filas de chips con callbacks
-    chip_cols = st.columns(min(len(filtros_activos), 4))
-    for i, filtro in enumerate(filtros_activos[:8]):  # Máximo 8 filtros
-        with chip_cols[i % 4]:
-            # Determinar qué función callback usar según el tipo de filtro
-            if "🎭" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_categoria):
-                    pass
-            elif "📍" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_distrito):
-                    pass
-            elif "👥" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_publico):
-                    pass
-            elif "📅" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_fecha):
-                    pass
-            elif "🕐" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_horario):
-                    pass
-            elif "💰" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_gratis):
-                    pass
-            elif "🔎" in filtro:
-                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_busqueda):
+    # Crear contenedor horizontal con CSS flexbox
+    chips_html = "<div style='display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0;'>"
+    
+    # Mapear filtros a sus callbacks
+    filtros_callbacks = {
+        "🎭": (quitar_categoria, "categoria"),
+        "📍": (quitar_distrito, "distrito"),
+        "👥": (quitar_publico, "publico"),
+        "📅": (quitar_fecha, "fecha"),
+        "🕐": (quitar_horario, "horario"),
+        "💰": (quitar_gratis, "gratis"),
+        "🔎": (quitar_busqueda, "busqueda")
+    }
+    
+    # Crear columnas horizontales para los chips
+    num_chips = len(filtros_activos)
+    chip_cols = st.columns(min(num_chips + 1, 6))  # +1 para el botón de limpiar
+    
+    for i, filtro in enumerate(filtros_activos[:6]):  # Máximo 6 filtros
+        with chip_cols[i]:
+            # Extraer el icono para determinar el callback
+            icono = filtro[:2] if len(filtro) >= 2 else ""
+            
+            # Acortar texto del filtro
+            texto_corto = filtro.replace("Próximos ", "").replace("Próximo ", "")
+            if len(texto_corto) > 15:
+                texto_corto = texto_corto[:12] + "..."
+            
+            # Determinar callback
+            callback = None
+            for key, (cb, name) in filtros_callbacks.items():
+                if key in filtro:
+                    callback = cb
+                    break
+            
+            # Botón pequeño con estilo compacto
+            if callback:
+                if st.button(
+                    f"{texto_corto} ✕",
+                    key=f"chip_{i}",
+                    on_click=callback,
+                    use_container_width=True
+                ):
                     pass
     
-    if st.button("🗑️ Limpiar todos", key="limpiar_filtros", on_click=limpiar_todos):
-        pass
+    # Botón limpiar en la última columna
+    with chip_cols[min(num_chips, 5)]:
+        if st.button("🗑️ Limpiar", key="limpiar_filtros", on_click=limpiar_todos, use_container_width=True):
+            pass
     
     st.markdown("---")
 
