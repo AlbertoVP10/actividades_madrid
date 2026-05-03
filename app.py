@@ -166,10 +166,38 @@ with st.sidebar:
     else:
         distrito_sel = 'Todos'
     
+    # Público objetivo
+    st.subheader("👥 Público")
+    publico_opciones = ['Todos', 'Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes']
+    publico_sel = st.selectbox("", publico_opciones, label_visibility="collapsed")
+    
     # Fecha
     st.subheader("📅 Fecha")
-    fecha_opciones = ["Todas", "Hoy", "Próximos 7 días", "Próximos 30 días"]
-    fecha_filtro = st.radio("", fecha_opciones, label_visibility="collapsed")
+    fecha_tipo = st.selectbox("Tipo de filtro", [
+        "Todas las fechas",
+        "Hoy",
+        "Mañana", 
+        "Próximos 7 días",
+        "Próximo mes",
+        "Fecha concreta",
+        "Rango de fechas"
+    ])
+    
+    fecha_filtro = fecha_tipo  # Para compatibilidad con código existente
+    
+    # Mostrar selector de fecha según el tipo
+    fecha_concreta = None
+    fecha_desde = None
+    fecha_hasta = None
+    
+    if fecha_tipo == "Fecha concreta":
+        fecha_concreta = st.date_input("Selecciona fecha", datetime.now())
+    elif fecha_tipo == "Rango de fechas":
+        col1, col2 = st.columns(2)
+        with col1:
+            fecha_desde = st.date_input("Desde", datetime.now())
+        with col2:
+            fecha_hasta = st.date_input("Hasta", datetime.now() + timedelta(days=7))
     
     # Gratuidad
     solo_gratis = st.checkbox("💰 Solo gratuitas")
@@ -212,6 +240,10 @@ if categoria_sel != 'Todas':
 if distrito_sel != 'Todos' and 'address.area.district' in df.columns:
     df = df[df['address.area.district'] == distrito_sel]
 
+# Filtro público
+if publico_sel != 'Todos' and 'audience' in df.columns:
+    df = df[df['audience'].str.contains(publico_sel, case=False, na=False)]
+
 # Filtro gratuidad
 if solo_gratis and 'free' in df.columns:
     df = df[df['free'] == 1]
@@ -224,16 +256,23 @@ if busqueda and 'title' in df.columns:
     df = df[mask]
 
 # Filtro fecha
-if fecha_filtro != "Todas" and 'dtstart' in df.columns:
+if fecha_tipo != "Todas las fechas" and 'dtstart' in df.columns:
     hoy = datetime.now()
     df = df.dropna(subset=['dtstart'])
     if len(df) > 0:
-        if fecha_filtro == "Hoy":
+        if fecha_tipo == "Hoy":
             df = df[df['dtstart'].dt.date == hoy.date()]
-        elif fecha_filtro == "Próximos 7 días":
+        elif fecha_tipo == "Mañana":
+            manana = hoy + timedelta(days=1)
+            df = df[df['dtstart'].dt.date == manana.date()]
+        elif fecha_tipo == "Próximos 7 días":
             df = df[df['dtstart'] <= hoy + timedelta(days=7)]
-        elif fecha_filtro == "Próximos 30 días":
+        elif fecha_tipo == "Próximo mes":
             df = df[df['dtstart'] <= hoy + timedelta(days=30)]
+        elif fecha_tipo == "Fecha concreta" and fecha_concreta:
+            df = df[df['dtstart'].dt.date == fecha_concreta]
+        elif fecha_tipo == "Rango de fechas" and fecha_desde and fecha_hasta:
+            df = df[(df['dtstart'].dt.date >= fecha_desde) & (df['dtstart'].dt.date <= fecha_hasta)]
 
 # Ver favoritos
 if ver_favoritos and len(st.session_state.favoritos) > 0:
