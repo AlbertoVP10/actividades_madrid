@@ -423,22 +423,69 @@ if solo_gratis:
 if busqueda:
     filtros_activos.append(f"🔎 {busqueda[:20]}...")
 
+# Funciones callback para quitar filtros
+def quitar_categoria():
+    st.session_state.categoria_sel = 'Todas'
+
+def quitar_distrito():
+    st.session_state.distrito_sel = 'Todos'
+
+def quitar_publico():
+    st.session_state.publico_sel = 'Todos'
+
+def quitar_fecha():
+    st.session_state.fecha_tipo = "Todas las fechas"
+
+def quitar_horario():
+    st.session_state.franja_horaria = "Todo el día"
+
+def quitar_gratis():
+    st.session_state.solo_gratis = False
+
+def quitar_busqueda():
+    st.session_state.busqueda = ""
+
+def limpiar_todos():
+    st.session_state.categoria_sel = 'Todas'
+    st.session_state.distrito_sel = 'Todos'
+    st.session_state.publico_sel = 'Todos'
+    st.session_state.fecha_tipo = "Todas las fechas"
+    st.session_state.franja_horaria = "Todo el día"
+    st.session_state.solo_gratis = False
+    st.session_state.busqueda = ""
+
 if filtros_activos:
     st.markdown("**Filtros aplicados:**")
     
-    # Mostrar filtros como etiquetas (no clickeables por ahora)
-    filtros_texto = " | ".join(filtros_activos)
-    st.markdown(f"<div style='background: #f0f2f6; padding: 10px; border-radius: 8px; margin: 10px 0;'>{filtros_texto}</div>", unsafe_allow_html=True)
+    # Crear filas de chips con callbacks
+    chip_cols = st.columns(min(len(filtros_activos), 4))
+    for i, filtro in enumerate(filtros_activos[:8]):  # Máximo 8 filtros
+        with chip_cols[i % 4]:
+            # Determinar qué función callback usar según el tipo de filtro
+            if "🎭" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_categoria):
+                    pass
+            elif "📍" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_distrito):
+                    pass
+            elif "👥" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_publico):
+                    pass
+            elif "📅" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_fecha):
+                    pass
+            elif "🕐" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_horario):
+                    pass
+            elif "💰" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_gratis):
+                    pass
+            elif "🔎" in filtro:
+                if st.button(f"{filtro} ✕", key=f"chip_{i}", on_click=quitar_busqueda):
+                    pass
     
-    if st.button("🗑️ Limpiar todos los filtros", key="limpiar_filtros"):
-        st.session_state['categoria_sel'] = 'Todas'
-        st.session_state['distrito_sel'] = 'Todos'
-        st.session_state['publico_sel'] = 'Todos'
-        st.session_state['fecha_tipo'] = "Todas las fechas"
-        st.session_state['franja_horaria'] = "Todo el día"
-        st.session_state['solo_gratis'] = False
-        st.session_state['busqueda'] = ""
-        st.rerun()
+    if st.button("🗑️ Limpiar todos", key="limpiar_filtros", on_click=limpiar_todos):
+        pass
     
     st.markdown("---")
 
