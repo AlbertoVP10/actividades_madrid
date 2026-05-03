@@ -220,6 +220,21 @@ with st.sidebar:
     opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
     orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
     
+    # Ubicación - Solo aparece si se ordena por cercanía
+    direccion_ref = ""  # Inicializar vacío por defecto
+    if orden_sel in ["Más cercanas", "Más lejanas"]:
+        st.subheader("📍 Tu ubicación")
+        direccion_ref = st.text_input("", placeholder="Ej: Calle Mayor 10", label_visibility="collapsed")
+        
+        if direccion_ref and st.button("📍 Calcular distancias"):
+            with st.spinner("Geocodificando..."):
+                coords = geocodificar_direccion(direccion_ref)
+                if coords:
+                    st.session_state.ref_coords = coords
+                    st.success(f"✅ Ubicación encontrada: {coords[0]:.4f}, {coords[1]:.4f}")
+                else:
+                    st.error("No se pudo encontrar la dirección")
+    
     st.markdown("---")
     
     # Filtros - SEGUNDO
@@ -319,19 +334,6 @@ with st.sidebar:
     # Búsqueda
     st.subheader("🔎 Buscar")
     busqueda = st.text_input("", placeholder="Título o descripción...", label_visibility="collapsed", key='busqueda')
-    
-    # Dirección de referencia para distancia
-    st.subheader("📍 Tu ubicación")
-    direccion_ref = st.text_input("", placeholder="Ej: Calle Mayor 10", label_visibility="collapsed")
-    
-    if direccion_ref and st.button("📍 Calcular distancias"):
-        with st.spinner("Geocodificando..."):
-            coords = geocodificar_direccion(direccion_ref)
-            if coords:
-                st.session_state.ref_coords = coords
-                st.success(f"✅ Ubicación encontrada: {coords[0]:.4f}, {coords[1]:.4f}")
-            else:
-                st.error("No se pudo encontrar la dirección")
     
     # Ver favoritos
     ver_favoritos = st.checkbox(f"❤️ Mis favoritos ({len(st.session_state.favoritos)})")
