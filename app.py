@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+Dashboard de Actividades Madrid
+Desplegado en Streamlit Cloud
+"""
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -156,12 +162,49 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
     except:
         return None
 
+# Funciones callback para quitar filtros
+def quitar_categoria():
+    st.session_state.categoria_sel = 'Todas'
+
+def quitar_distrito():
+    st.session_state.distrito_sel = 'Todos'
+
+def quitar_publico():
+    st.session_state.publico_sel = 'Todos'
+
+def quitar_fecha():
+    st.session_state.fecha_tipo = "Todas las fechas"
+
+def quitar_horario():
+    st.session_state.franja_horaria = "Todo el día"
+
+def quitar_gratis():
+    st.session_state.solo_gratis = False
+
+def quitar_busqueda():
+    st.session_state.busqueda = ""
+
+def limpiar_todos():
+    st.session_state.categoria_sel = 'Todas'
+    st.session_state.distrito_sel = 'Todos'
+    st.session_state.publico_sel = 'Todos'
+    st.session_state.fecha_tipo = "Todas las fechas"
+    st.session_state.franja_horaria = "Todo el día"
+    st.session_state.solo_gratis = False
+    st.session_state.busqueda = ""
+
 # Cargar datos
 df_original = load_data_from_api()
 
 if len(df_original) == 0:
     st.error("No se pudieron cargar los datos")
     st.stop()
+
+# Filtro para eliminar actividades pasadas (siempre activo)
+if 'dtstart' in df_original.columns:
+    hoy = datetime.now().date()
+    df_original = df_original.dropna(subset=['dtstart'])
+    df_original = df_original[df_original['dtstart'].dt.date >= hoy]
 
 # Título
 st.title("🎭 Actividades Madrid")
@@ -213,8 +256,6 @@ with st.sidebar:
         "Fecha concreta",
         "Rango de fechas"
     ], key='fecha_tipo')
-    
-    fecha_filtro = fecha_tipo  # Para compatibilidad con código existente
     
     # Mostrar selector de fecha según el tipo
     fecha_concreta = None
@@ -306,12 +347,6 @@ if busqueda and 'title' in df.columns:
         mask |= df['description'].str.contains(busqueda, case=False, na=False)
     df = df[mask]
 
-# Filtro para eliminar actividades pasadas (siempre activo)
-if 'dtstart' in df.columns:
-    hoy = datetime.now().date()
-    df = df.dropna(subset=['dtstart'])
-    df = df[df['dtstart'].dt.date >= hoy]
-
 # Filtro fecha
 if fecha_tipo != "Todas las fechas" and 'dtstart' in df.columns:
     hoy = datetime.now()
@@ -338,7 +373,6 @@ if franja_horaria != "Todo el día" and 'time' in df.columns:
         if pd.isna(time_str):
             return None
         try:
-            # Intentar parsear formatos comunes
             time_str = str(time_str)
             if ':' in time_str:
                 parts = time_str.split(':')
@@ -444,38 +478,6 @@ if solo_gratis:
 if busqueda:
     filtros_activos.append(f"🔎 {busqueda[:20]}...")
 
-# Funciones callback para quitar filtros
-def quitar_categoria():
-    st.session_state.categoria_sel = 'Todas'
-
-def quitar_distrito():
-    st.session_state.distrito_sel = 'Todos'
-
-def quitar_publico():
-    st.session_state.publico_sel = 'Todos'
-
-def quitar_fecha():
-    st.session_state.fecha_tipo = "Todas las fechas"
-
-def quitar_horario():
-    st.session_state.franja_horaria = "Todo el día"
-
-def quitar_gratis():
-    st.session_state.solo_gratis = False
-
-def quitar_busqueda():
-    st.session_state.busqueda = ""
-
-def limpiar_todos():
-    st.session_state.categoria_sel = 'Todas'
-    st.session_state.distrito_sel = 'Todos'
-    st.session_state.publico_sel = 'Todos'
-    st.session_state.fecha_tipo = "Todas las fechas"
-    st.session_state.franja_horaria = "Todo el día"
-    st.session_state.solo_gratis = False
-    st.session_state.busqueda = ""
-
-# FILTER CHIPS - Filtros aplicados en línea horizontal
 if filtros_activos:
     st.markdown("<small>**Filtros:**</small>", unsafe_allow_html=True)
     
@@ -538,231 +540,248 @@ tab1, tab2, tab3 = st.tabs(["📋 Lista", "🗺️ Mapa", "📊 Estadísticas"])
 with tab1:
     st.subheader(f"📋 {len(df)} actividades")
     
-    if st.session_state.ref_coords:
-        st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
-    
-    # Controles de paginación con pills
-    st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
-    
-    # Crear opciones de página para pills
-    opciones_pagina = []
-    if st.session_state.page > 0:
-        opciones_pagina.append("⬅️ Ant")
-    
-    pagina_actual_texto = f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}"
-    opciones_pagina.append(pagina_actual_texto)
-    
-    if st.session_state.page < total_paginas - 1:
-        opciones_pagina.append("Sig ➡️")
-    
-    # El default debe ser el texto de la página actual
-    seleccion = st.pills("Navegación", opciones_pagina, default=pagina_actual_texto, label_visibility="collapsed")
-    
-    if seleccion == "⬅️ Ant" and st.session_state.page > 0:
-        st.session_state.page -= 1
-        st.rerun()
-    elif seleccion == "Sig ➡️" and st.session_state.page < total_paginas - 1:
-        st.session_state.page += 1
-        st.rerun()
-    
-    # Mostrar actividades de la página actual
-    inicio = st.session_state.page * items_por_pagina
-    fin = inicio + items_por_pagina
-    df_pagina = df.iloc[inicio:fin]
-    
-    for idx, row in df_pagina.iterrows():
-        # Preparar información resumida para el título del expander
-        categoria = row.get('categoria', 'Otras')
-        titulo = row.get('title', 'Sin título')
+    # Verificar si hay actividades
+    if len(df) == 0:
+        st.warning("⚠️ No se encontraron actividades con los filtros seleccionados")
+        st.info("💡 Prueba a:")
+        st.info("• Quitar algunos filtros")
+        st.info("• Cambiar el rango de fechas")
+        st.info("• Buscar con otros términos")
         
-        # Info resumida para mostrar junto al título
-        info_resumen = []
-        if 'dtstart' in row and pd.notna(row['dtstart']):
-            fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-            info_resumen.append(f"📅 {fecha}")
-        if 'event-location' in row and pd.notna(row['event-location']):
-            info_resumen.append(f"📍 {row['event-location']}")
-        if 'free' in row and row['free'] == 1:
-            info_resumen.append("💰 Gratis")
-        if 'distancia_km' in row and pd.notna(row['distancia_km']):
-            info_resumen.append(f"📏 {row['distancia_km']} km")
+        if st.button("🗑️ Limpiar todos los filtros", on_click=limpiar_todos):
+            pass
+    else:
+        if st.session_state.ref_coords:
+            st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
         
-        texto_resumen = " | ".join(info_resumen)
+        # Controles de paginación con pills
+        st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
         
-        # Crear expander con título + info resumida
-        with st.expander(f"**{titulo}**  \n  *{texto_resumen}*"):
-            col1, col2 = st.columns([4, 1])
+        # Crear opciones de página para pills
+        opciones_pagina = []
+        if st.session_state.page > 0:
+            opciones_pagina.append("⬅️ Ant")
+        
+        pagina_actual_texto = f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}"
+        opciones_pagina.append(pagina_actual_texto)
+        
+        if st.session_state.page < total_paginas - 1:
+            opciones_pagina.append("Sig ➡️")
+        
+        # El default debe ser el texto de la página actual
+        seleccion = st.pills("Navegación", opciones_pagina, default=pagina_actual_texto, label_visibility="collapsed")
+        
+        if seleccion == "⬅️ Ant" and st.session_state.page > 0:
+            st.session_state.page -= 1
+            st.rerun()
+        elif seleccion == "Sig ➡️" and st.session_state.page < total_paginas - 1:
+            st.session_state.page += 1
+            st.rerun()
+        
+        # Mostrar actividades de la página actual
+        inicio = st.session_state.page * items_por_pagina
+        fin = inicio + items_por_pagina
+        df_pagina = df.iloc[inicio:fin]
+        
+        for idx, row in df_pagina.iterrows():
+            # Preparar información resumida para el título del expander
+            categoria = row.get('categoria', 'Otras')
+            titulo = row.get('title', 'Sin título')
             
-            with col1:
-                st.caption(f"🏷️ Categoría: {categoria}")
-                
-                # Descripción completa
-                if 'description' in row and pd.notna(row['description']):
-                    st.markdown("**Descripción:**")
-                    st.write(row['description'])
-                
-                # Detalles completos
-                st.markdown("**Detalles:**")
-                detalles = []
-                
-                if 'dtstart' in row and pd.notna(row['dtstart']):
-                    fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                    detalles.append(f"📅 **Fecha:** {fecha}")
-                if 'time' in row and pd.notna(row['time']):
-                    detalles.append(f"🕐 **Hora:** {row['time']}")
-                if 'event-location' in row and pd.notna(row['event-location']):
-                    detalles.append(f"📍 **Lugar:** {row['event-location']}")
-                if 'address.area.district' in row and pd.notna(row['address.area.district']):
-                    detalles.append(f"🏘️ **Distrito:** {row['address.area.district']}")
-                if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']):
-                    detalles.append(f"🗺️ **Dirección:** {row['address.area.street-address']}")
-                if 'free' in row and row['free'] == 1:
-                    detalles.append("💰 **Precio:** Gratuito")
-                elif 'price' in row and pd.notna(row['price']):
-                    detalles.append(f"💰 **Precio:** {row['price']}")
-                if 'audience' in row and pd.notna(row['audience']):
-                    detalles.append(f"👥 **Público:** {row['audience']}")
-                if 'distancia_km' in row and pd.notna(row['distancia_km']):
-                    detalles.append(f"📏 **Distancia:** {row['distancia_km']} km")
-                
-                for detalle in detalles:
-                    st.write(detalle)
-                
-                # Enlaces
-                if 'link' in row and pd.notna(row['link']):
-                    st.markdown(f"[🔗 Ver más información]({row['link']})")
-                
-                # Enlace a Google Maps si hay coordenadas
-                if 'lat' in row and 'lon' in row and pd.notna(row['lat']) and pd.notna(row['lon']):
-                    maps_url = f"https://www.google.com/maps?q={row['lat']},{row['lon']}"
-                    st.markdown(f"[🗺️ Ver en Google Maps]({maps_url})")
+            # Info resumida para mostrar junto al título
+            info_resumen = []
+            if 'dtstart' in row and pd.notna(row['dtstart']):
+                fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+                info_resumen.append(f"📅 {fecha}")
+            if 'event-location' in row and pd.notna(row['event-location']):
+                info_resumen.append(f"📍 {row['event-location']}")
+            if 'free' in row and row['free'] == 1:
+                info_resumen.append("💰 Gratis")
+            if 'distancia_km' in row and pd.notna(row['distancia_km']):
+                info_resumen.append(f"📏 {row['distancia_km']} km")
             
-            with col2:
-                # Botón favorito
-                act_id = row.get('@id', str(idx))
-                es_fav = act_id in st.session_state.favoritos
+            texto_resumen = " | ".join(info_resumen)
+            
+            # Crear expander con título + info resumida
+            with st.expander(f"**{titulo}**  \n  *{texto_resumen}*"):
+                col1, col2 = st.columns([4, 1])
                 
-                if st.button("❤️ Favorito" if es_fav else "🤍 Añadir", key=f"fav_{act_id}"):
-                    if es_fav:
-                        st.session_state.favoritos.remove(act_id)
-                    else:
-                        st.session_state.favoritos.append(act_id)
-                    st.rerun()
+                with col1:
+                    st.caption(f"🏷️ Categoría: {categoria}")
+                    
+                    # Descripción completa
+                    if 'description' in row and pd.notna(row['description']):
+                        st.markdown("**Descripción:**")
+                        st.write(row['description'])
+                    
+                    # Detalles completos
+                    st.markdown("**Detalles:**")
+                    detalles = []
+                    
+                    if 'dtstart' in row and pd.notna(row['dtstart']):
+                        fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+                        detalles.append(f"📅 **Fecha:** {fecha}")
+                    if 'time' in row and pd.notna(row['time']):
+                        detalles.append(f"🕐 **Hora:** {row['time']}")
+                    if 'event-location' in row and pd.notna(row['event-location']):
+                        detalles.append(f"📍 **Lugar:** {row['event-location']}")
+                    if 'address.area.district' in row and pd.notna(row['address.area.district']):
+                        detalles.append(f"🏘️ **Distrito:** {row['address.area.district']}")
+                    if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']):
+                        detalles.append(f"🗺️ **Dirección:** {row['address.area.street-address']}")
+                    if 'free' in row and row['free'] == 1:
+                        detalles.append("💰 **Precio:** Gratuito")
+                    elif 'price' in row and pd.notna(row['price']):
+                        detalles.append(f"💰 **Precio:** {row['price']}")
+                    if 'audience' in row and pd.notna(row['audience']):
+                        detalles.append(f"👥 **Público:** {row['audience']}")
+                    if 'distancia_km' in row and pd.notna(row['distancia_km']):
+                        detalles.append(f"📏 **Distancia:** {row['distancia_km']} km")
+                    
+                    for detalle in detalles:
+                        st.write(detalle)
+                    
+                    # Enlaces
+                    if 'link' in row and pd.notna(row['link']):
+                        st.markdown(f"[🔗 Ver más información]({row['link']})")
+                    
+                    # Enlace a Google Maps si hay coordenadas
+                    if 'lat' in row and 'lon' in row and pd.notna(row['lat']) and pd.notna(row['lon']):
+                        maps_url = f"https://www.google.com/maps?q={row['lat']},{row['lon']}"
+                        st.markdown(f"[🗺️ Ver en Google Maps]({maps_url})")
+                
+                with col2:
+                    # Botón favorito
+                    act_id = row.get('@id', str(idx))
+                    es_fav = act_id in st.session_state.favoritos
+                    
+                    if st.button("❤️ Favorito" if es_fav else "🤍 Añadir", key=f"fav_{act_id}"):
+                        if es_fav:
+                            st.session_state.favoritos.remove(act_id)
+                        else:
+                            st.session_state.favoritos.append(act_id)
+                        st.rerun()
 
 # TAB 2: MAPA
 with tab2:
     st.subheader("🗺️ Mapa de actividades")
     
-    df_map = df.dropna(subset=['lat', 'lon'])
-    
-    if len(df_map) > 0:
-        # Centro del mapa
-        if st.session_state.ref_coords:
-            center_lat, center_lon = st.session_state.ref_coords
-            zoom = 13
-        else:
-            center_lat, center_lon = 40.4168, -3.7038
-            zoom = 12
-        
-        m = folium.Map(location=[center_lat, center_lon], zoom_start=zoom)
-        
-        # Añadir marcador de referencia si existe
-        if st.session_state.ref_coords:
-            folium.Marker(
-                location=st.session_state.ref_coords,
-                popup="Tu ubicación",
-                icon=folium.Icon(color='red', icon='home'),
-                tooltip="📍 Tu ubicación"
-            ).add_to(m)
-        
-        # Añadir marcadores de actividades
-        for idx, row in df_map.head(100).iterrows():
-            popup_text = f"<b>{row.get('title', 'Sin título')}</b><br>"
-            popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
-            popup_text += f"📍 {row.get('event-location', 'N/A')}<br>"
-            if 'dtstart' in row and pd.notna(row['dtstart']):
-                fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                popup_text += f"📅 {fecha}<br>"
-            if 'distancia_km' in row and pd.notna(row['distancia_km']):
-                popup_text += f"📏 {row['distancia_km']} km<br>"
-            if 'link' in row and pd.notna(row['link']):
-                popup_text += f'<a href="{row["link"]}" target="_blank">Ver más</a>'
-            
-            folium.Marker(
-                location=[row['lat'], row['lon']],
-                popup=folium.Popup(popup_text, max_width=300),
-                tooltip=row.get('title', 'Actividad')[:50]
-            ).add_to(m)
-        
-        st_folium(m, width=700, height=500)
-        st.caption(f"Mostrando {min(len(df_map), 100)} actividades")
+    if len(df) == 0:
+        st.warning("⚠️ No hay actividades para mostrar en el mapa")
     else:
-        st.info("No hay actividades con coordenadas")
+        df_map = df.dropna(subset=['lat', 'lon'])
+        
+        if len(df_map) > 0:
+            # Centro del mapa
+            if st.session_state.ref_coords:
+                center_lat, center_lon = st.session_state.ref_coords
+                zoom = 13
+            else:
+                center_lat, center_lon = 40.4168, -3.7038
+                zoom = 12
+            
+            m = folium.Map(location=[center_lat, center_lon], zoom_start=zoom)
+            
+            # Añadir marcador de referencia si existe
+            if st.session_state.ref_coords:
+                folium.Marker(
+                    location=st.session_state.ref_coords,
+                    popup="Tu ubicación",
+                    icon=folium.Icon(color='red', icon='home'),
+                    tooltip="📍 Tu ubicación"
+                ).add_to(m)
+            
+            # Añadir marcadores de actividades
+            for idx, row in df_map.head(100).iterrows():
+                popup_text = f"<b>{row.get('title', 'Sin título')}</b><br>"
+                popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
+                popup_text += f"📍 {row.get('event-location', 'N/A')}<br>"
+                if 'dtstart' in row and pd.notna(row['dtstart']):
+                    fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+                    popup_text += f"📅 {fecha}<br>"
+                if 'distancia_km' in row and pd.notna(row['distancia_km']):
+                    popup_text += f"📏 {row['distancia_km']} km<br>"
+                if 'link' in row and pd.notna(row['link']):
+                    popup_text += f'<a href="{row["link"]}" target="_blank">Ver más</a>'
+                
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(popup_text, max_width=300),
+                    tooltip=row.get('title', 'Actividad')[:50]
+                ).add_to(m)
+            
+            st_folium(m, width=700, height=500)
+            st.caption(f"Mostrando {min(len(df_map), 100)} actividades")
+        else:
+            st.info("No hay actividades con coordenadas")
 
 # TAB 3: ESTADÍSTICAS
 with tab3:
     st.subheader("📊 Estadísticas")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Gráfico por categoría
-        st.write("**Actividades por categoría:**")
-        cat_counts = df['categoria'].value_counts().head(10)
-        if len(cat_counts) > 0:
-            fig = px.bar(x=cat_counts.index.tolist(), 
-                        y=cat_counts.values.tolist(), 
-                        labels={'x': 'Categoría', 'y': 'Actividades'},
-                        color=cat_counts.values.tolist(),
-                        color_continuous_scale='Reds')
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No hay datos de categorías")
-    
-    with col2:
-        # Gráfico por distrito
-        if 'address.area.district' in df.columns:
-            st.write("**Actividades por distrito:**")
-            dist_counts = df['address.area.district'].value_counts().head(10)
-            if len(dist_counts) > 0:
-                fig = px.bar(x=dist_counts.index.tolist(), 
-                            y=dist_counts.values.tolist(),
-                            labels={'x': 'Distrito', 'y': 'Actividades'},
-                            color=dist_counts.values.tolist(),
-                            color_continuous_scale='Blues')
+    if len(df) == 0:
+        st.warning("⚠️ No hay datos para mostrar estadísticas")
+    else:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Gráfico por categoría
+            st.write("**Actividades por categoría:**")
+            cat_counts = df['categoria'].value_counts().head(10)
+            if len(cat_counts) > 0:
+                fig = px.bar(x=cat_counts.index.tolist(), 
+                            y=cat_counts.values.tolist(), 
+                            labels={'x': 'Categoría', 'y': 'Actividades'},
+                            color=cat_counts.values.tolist(),
+                            color_continuous_scale='Reds')
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("No hay datos de distritos")
-    
-    # Gráfico de distribución por precio
-    if 'free' in df.columns:
-        st.write("**Distribución por precio:**")
-        free_counts = df['free'].value_counts()
-        labels = {1: 'Gratis', 0: 'De pago'}
-        free_counts.index = [labels.get(i, 'Desconocido') for i in free_counts.index]
-        fig = px.pie(values=free_counts.values, names=free_counts.index,
-                    color=free_counts.index,
-                    color_discrete_map={'Gratis': '#00cc96', 'De pago': '#ff4b4b'})
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Gráfico de actividades por fecha
-    if 'dtstart' in df.columns:
-        st.write("**Actividades por fecha:**")
-        df['fecha'] = pd.to_datetime(df['dtstart'], errors='coerce').dt.date
-        fecha_counts = df['fecha'].value_counts().sort_index().head(30)
-        fig = px.line(x=fecha_counts.index, y=fecha_counts.values,
-                     labels={'x': 'Fecha', 'y': 'Actividades'},
-                     markers=True)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Distribución de distancias si hay referencia
-    if 'distancia_km' in df.columns and df['distancia_km'].notna().any():
-        st.write("**Distribución de distancias:**")
-        distancias = df['distancia_km'].dropna()
-        fig = px.histogram(x=distancias, nbins=20,
-                          labels={'x': 'Distancia (km)', 'y': 'Número de actividades'},
-                          color_discrete_sequence=['#ff4b4b'])
-        st.plotly_chart(fig, use_container_width=True)
+                st.info("No hay datos de categorías")
+        
+        with col2:
+            # Gráfico por distrito
+            if 'address.area.district' in df.columns:
+                st.write("**Actividades por distrito:**")
+                dist_counts = df['address.area.district'].value_counts().head(10)
+                if len(dist_counts) > 0:
+                    fig = px.bar(x=dist_counts.index.tolist(), 
+                                y=dist_counts.values.tolist(),
+                                labels={'x': 'Distrito', 'y': 'Actividades'},
+                                color=dist_counts.values.tolist(),
+                                color_continuous_scale='Blues')
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("No hay datos de distritos")
+        
+        # Gráfico de distribución por precio
+        if 'free' in df.columns:
+            st.write("**Distribución por precio:**")
+            free_counts = df['free'].value_counts()
+            labels = {1: 'Gratis', 0: 'De pago'}
+            free_counts.index = [labels.get(i, 'Desconocido') for i in free_counts.index]
+            fig = px.pie(values=free_counts.values, names=free_counts.index,
+                        color=free_counts.index,
+                        color_discrete_map={'Gratis': '#00cc96', 'De pago': '#ff4b4b'})
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Gráfico de actividades por fecha
+        if 'dtstart' in df.columns:
+            st.write("**Actividades por fecha:**")
+            df['fecha'] = pd.to_datetime(df['dtstart'], errors='coerce').dt.date
+            fecha_counts = df['fecha'].value_counts().sort_index().head(30)
+            fig = px.line(x=fecha_counts.index, y=fecha_counts.values,
+                         labels={'x': 'Fecha', 'y': 'Actividades'},
+                         markers=True)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Distribución de distancias si hay referencia
+        if 'distancia_km' in df.columns and df['distancia_km'].notna().any():
+            st.write("**Distribución de distancias:**")
+            distancias = df['distancia_km'].dropna()
+            fig = px.histogram(x=distancias, nbins=20,
+                              labels={'x': 'Distancia (km)', 'y': 'Número de actividades'},
+                              color_discrete_sequence=['#ff4b4b'])
+            st.plotly_chart(fig, use_container_width=True)
 
 # Footer
 st.markdown("---")
