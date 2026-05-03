@@ -256,22 +256,19 @@ with st.sidebar:
     
     # Distrito - Multiselección
     st.subheader("📍 Distrito")
+    
+    # Obtener lista de distritos
+    distritos_lista = []
     if 'address.area.district' in df_original.columns:
-        distritos_disponibles = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
-        
-        # Inicializar en session_state si no existe o si es string (versión antigua)
-        if 'distrito_sel' not in st.session_state or isinstance(st.session_state.distrito_sel, str):
-            st.session_state.distrito_sel = distritos_disponibles  # Todos seleccionados por defecto
-        
-        distrito_sel = st.multiselect(
-            "Selecciona distritos",
-            options=distritos_disponibles,
-            default=st.session_state.distrito_sel,
-            label_visibility="collapsed",
-            key='distrito_sel'
-        )
-    else:
-        distrito_sel = []
+        distritos_lista = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
+    
+    # Mostrar multiselect siempre
+    distrito_sel = st.multiselect(
+        "Distritos",
+        options=distritos_lista,
+        default=distritos_lista,  # Todos seleccionados por defecto
+        key='distrito_multiselect'
+    )
     
     # Público objetivo
     st.subheader("👥 Público")
@@ -347,7 +344,8 @@ df = df_original.copy()
 
 # Usar valores de session_state para los filtros
 categoria_sel = st.session_state.categoria_sel
-distrito_sel = st.session_state.distrito_sel
+# Usar el valor directo del multiselect (no session_state)
+distrito_sel = distrito_sel if 'distrito_sel' in locals() else []
 publico_sel = st.session_state.publico_sel
 fecha_tipo = st.session_state.fecha_tipo
 franja_horaria = st.session_state.franja_horaria
