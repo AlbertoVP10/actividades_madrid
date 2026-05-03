@@ -13,7 +13,7 @@ st.set_page_config(
     page_title="Actividades Madrid",
     page_icon="🎭",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # CSS responsive
@@ -148,8 +148,16 @@ if len(df_original) == 0:
     st.error("No se pudieron cargar los datos")
     st.stop()
 
-# Título
-st.title("🎭 Actividades Madrid")
+# Título con botón de filtros
+col_title, col_filtros = st.columns([3, 1])
+with col_title:
+    st.title("🎭 Actividades Madrid")
+with col_filtros:
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔍 Filtros", use_container_width=True):
+        # En Streamlit no se puede abrir/cerrar el sidebar programáticamente
+        # Pero mostramos un mensaje indicando que está en el menú lateral
+        st.info("👈 Usa el menú lateral para filtros")
 
 # Sidebar con filtros
 with st.sidebar:
