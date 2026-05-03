@@ -267,17 +267,55 @@ if 'page' not in st.session_state:
 items_por_pagina = 20
 total_paginas = (len(df) + items_por_pagina - 1) // items_por_pagina
 
-# Métricas
+# KPIs en horizontal con diseño mejorado
 st.markdown("---")
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("📊 Total", len(df))
-col2.metric("💰 Gratis", len(df[df['free'] == 1]) if 'free' in df.columns else 0)
-col3.metric("📍 Con ubicación", len(df.dropna(subset=['lat', 'lon'])))
 
-hoy_count = 0
+# Calcular valores
+kpi_total = len(df)
+kpi_gratis = len(df[df['free'] == 1]) if 'free' in df.columns else 0
+kpi_ubicacion = len(df.dropna(subset=['lat', 'lon']))
+kpi_hoy = 0
 if 'dtstart' in df.columns and len(df) > 0:
-    hoy_count = len(df[df['dtstart'].dt.date == datetime.now().date()])
-col4.metric("📅 Hoy", hoy_count)
+    kpi_hoy = len(df[df['dtstart'].dt.date == datetime.now().date()])
+
+# Mostrar KPIs en tarjetas horizontales
+kpi_cols = st.columns(4)
+
+with kpi_cols[0]:
+    st.markdown(f"""
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+        <div style='font-size: 32px; font-weight: bold;'>{kpi_total}</div>
+        <div style='font-size: 14px; opacity: 0.9;'>📊 Total actividades</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with kpi_cols[1]:
+    st.markdown(f"""
+    <div style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+        <div style='font-size: 32px; font-weight: bold;'>{kpi_gratis}</div>
+        <div style='font-size: 14px; opacity: 0.9;'>💰 Gratuitas</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with kpi_cols[2]:
+    st.markdown(f"""
+    <div style='background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); 
+                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+        <div style='font-size: 32px; font-weight: bold;'>{kpi_ubicacion}</div>
+        <div style='font-size: 14px; opacity: 0.9;'>📍 Con ubicación</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with kpi_cols[3]:
+    st.markdown(f"""
+    <div style='background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); 
+                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+        <div style='font-size: 32px; font-weight: bold;'>{kpi_hoy}</div>
+        <div style='font-size: 14px; opacity: 0.9;'>📅 Hoy</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # TABS
 tab1, tab2, tab3 = st.tabs(["📋 Lista", "🗺️ Mapa", "📊 Estadísticas"])
