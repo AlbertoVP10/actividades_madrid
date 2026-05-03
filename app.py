@@ -13,6 +13,7 @@ import plotly.express as px
 from datetime import datetime, timedelta
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 
 # Configuración de página
 st.set_page_config(
@@ -136,11 +137,15 @@ def extraer_categoria(tipo):
 # Función para geocodificar dirección
 @st.cache_data(ttl=86400)
 def geocodificar_direccion(direccion):
-    """Convierte dirección en coordenadas usando Nominatim"""
+    """Convierte dirección en coordenadas usando Nominatim con RateLimiter"""
     try:
-        # Aumentar timeout a 10 segundos
+        # Configurar geolocator con timeout
         geolocator = Nominatim(user_agent="actividades_madrid_app", timeout=10)
-        location = geolocator.geocode(f"{direccion}, Madrid, España")
+        
+        # Usar RateLimiter para respetar límite de 1 req/seg
+        geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+        
+        location = geocode(f"{direccion}, Madrid, España")
         if location:
             return (location.latitude, location.longitude)
         return None
