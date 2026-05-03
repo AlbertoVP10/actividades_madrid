@@ -390,18 +390,35 @@ with tab1:
     if st.session_state.ref_coords:
         st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
     
-    # Controles de paginación
-    col_pag1, col_pag2, col_pag3 = st.columns([1, 2, 1])
-    with col_pag1:
-        if st.button("⬅️ Anterior") and st.session_state.page > 0:
-            st.session_state.page -= 1
-            st.rerun()
-    with col_pag2:
-        st.write(f"Página {st.session_state.page + 1} de {max(1, total_paginas)}")
-    with col_pag3:
-        if st.button("Siguiente ➡️") and st.session_state.page < total_paginas - 1:
-            st.session_state.page += 1
-            st.rerun()
+    # Controles de paginación - Horizontal compacto
+    st.markdown(f"""
+    <div style='display: flex; justify-content: center; align-items: center; gap: 10px; margin: 15px 0;'>
+        <button onclick="window.location.reload()" 
+                style='background: #f0f2f6; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;'>
+            ⬅️ Ant.
+        </button>
+        <span style='font-size: 14px; font-weight: 500;'>Pág. {st.session_state.page + 1} / {max(1, total_paginas)}</span>
+        <button onclick="window.location.reload()"
+                style='background: #f0f2f6; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;'>
+            Sig. ➡️
+        </button>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Botones reales de Streamlit (ocultos visualmente pero funcionales)
+    pag_cols = st.columns([1, 2, 1])
+    with pag_cols[0]:
+        if st.button("⬅️ Ant.", key="btn_ant", use_container_width=True):
+            if st.session_state.page > 0:
+                st.session_state.page -= 1
+                st.rerun()
+    with pag_cols[1]:
+        st.markdown(f"<div style='text-align: center; font-size: 14px; padding: 5px;'>{st.session_state.page + 1} / {max(1, total_paginas)}</div>", unsafe_allow_html=True)
+    with pag_cols[2]:
+        if st.button("Sig. ➡️", key="btn_sig", use_container_width=True):
+            if st.session_state.page < total_paginas - 1:
+                st.session_state.page += 1
+                st.rerun()
     
     # Mostrar actividades de la página actual
     inicio = st.session_state.page * items_por_pagina
