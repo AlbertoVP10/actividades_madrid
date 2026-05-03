@@ -46,23 +46,12 @@ st.markdown("""
         font-size: 12px;
     }
     /* Añade texto 'Filtros' junto al botón del sidebar */
-    button[kind="header"] {
-        display: flex !important;
-        align-items: center !important;
-    }
-    button[kind="header"] svg {
-        display: none !important;
-    }
-    button[kind="header"]::before {
-        content: "🔍" !important;
-        font-size: 20px !important;
-        margin-right: 5px !important;
-    }
-    button[kind="header"]::after {
-        content: " Filtros" !important;
-        font-weight: bold !important;
-        color: #FF4B4B !important;
-        font-size: 16px !important;
+    [data-testid="collapsedControl"]::after {
+        content: " Filtros";
+        font-weight: bold;
+        color: #FF4B4B;
+        margin-left: 5px;
+        font-size: 16px;
     }
 </style>
 """, unsafe_allow_html=True)
