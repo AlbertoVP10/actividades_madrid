@@ -249,10 +249,10 @@ with st.sidebar:
     # Distrito - Selector simple
     st.subheader("📍 Distrito")
     
-    # Obtener lista de distritos
+    # Obtener lista de distritos (usar address.district.@id)
     distritos_lista = ['Todos']
-    if 'address.area.district' in df_original.columns:
-        distritos_lista = ['Todos'] + sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
+    if 'address.district.@id' in df_original.columns:
+        distritos_lista = ['Todos'] + sorted([d for d in df_original['address.district.@id'].dropna().unique() if pd.notna(d)])
     
     # Selector simple
     distrito_sel = st.selectbox(
@@ -346,9 +346,9 @@ busqueda = st.session_state.busqueda
 if categoria_sel != 'Todas':
     df = df[df['categoria'] == categoria_sel]
 
-# Filtro distrito
-if distrito_sel != 'Todos' and 'address.area.district' in df.columns:
-    df = df[df['address.area.district'] == distrito_sel]
+# Filtro distrito (usar address.district.@id)
+if distrito_sel != 'Todos' and 'address.district.@id' in df.columns:
+    df = df[df['address.district.@id'] == distrito_sel]
 
 # Filtro público
 if publico_sel != 'Todos' and 'audience' in df.columns:
