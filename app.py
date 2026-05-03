@@ -252,13 +252,13 @@ else:
 
 # Aplicar ordenamiento
 if orden_sel == "Más recientes" and 'dtstart' in df.columns:
-    df = df.sort_values('dtstart', na_last=True)
+    df = df.sort_values('dtstart', na_position="last")
 elif orden_sel == "Más baratas (gratis primero)" and 'free' in df.columns:
-    df = df.sort_values('free', ascending=False, na_last=True)
+    df = df.sort_values('free', ascending=False, na_position="last")
 elif orden_sel == "Más cercanas" and 'distancia_km' in df.columns:
-    df = df.sort_values('distancia_km', na_last=True)
+    df = df.sort_values('distancia_km', na_position="last")
 elif orden_sel == "Más lejanas" and 'distancia_km' in df.columns:
-    df = df.sort_values('distancia_km', ascending=False, na_last=True)
+    df = df.sort_values('distancia_km', ascending=False, na_position="last")
 
 # PAGINACIÓN
 if 'page' not in st.session_state:
