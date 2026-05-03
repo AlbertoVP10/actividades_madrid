@@ -242,13 +242,15 @@ with st.sidebar:
         st.session_state.busqueda = ""
     
     # Categorías predefinidas
+    st.subheader("🎭 Categoría")
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
-    categoria_sel = st.selectbox("🎭 Categoría", categorias, key='categoria_sel')
+    categoria_sel = st.selectbox("", categorias, label_visibility="collapsed", key='categoria_sel')
     
     # Distrito
+    st.subheader("📍 Distrito")
     if 'address.area.district' in df_original.columns:
         distritos = ['Todos'] + sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
-        distrito_sel = st.selectbox("📍 Distrito", distritos, key='distrito_sel')
+        distrito_sel = st.selectbox("", distritos, label_visibility="collapsed", key='distrito_sel')
     else:
         distrito_sel = 'Todos'
     
@@ -259,7 +261,7 @@ with st.sidebar:
     
     # Fecha
     st.subheader("📅 Fecha")
-    fecha_tipo = st.selectbox("Tipo de filtro", [
+    fecha_tipo = st.selectbox("", [
         "Todas las fechas",
         "Hoy",
         "Mañana", 
@@ -267,7 +269,7 @@ with st.sidebar:
         "Próximo mes",
         "Fecha concreta",
         "Rango de fechas"
-    ], key='fecha_tipo')
+    ], label_visibility="collapsed", key='fecha_tipo')
     
     # Mostrar selector de fecha según el tipo
     fecha_concreta = None
@@ -295,14 +297,16 @@ with st.sidebar:
     ], label_visibility="collapsed", key='franja_horaria')
     
     # Gratuidad
-    solo_gratis = st.checkbox("💰 Solo gratuitas", key='solo_gratis')
+    st.subheader("💰 Precio")
+    solo_gratis = st.checkbox("Solo gratuitas", key='solo_gratis')
     
     # Búsqueda
-    busqueda = st.text_input("🔎 Buscar", placeholder="Título o descripción...", key='busqueda')
+    st.subheader("🔎 Buscar")
+    busqueda = st.text_input("", placeholder="Título o descripción...", label_visibility="collapsed", key='busqueda')
     
     # Dirección de referencia para distancia
     st.subheader("📍 Tu ubicación")
-    direccion_ref = st.text_input("Introduce una calle", placeholder="Ej: Calle Mayor 10")
+    direccion_ref = st.text_input("", placeholder="Ej: Calle Mayor 10", label_visibility="collapsed")
     
     if direccion_ref and st.button("📍 Calcular distancias"):
         with st.spinner("Geocodificando..."):
