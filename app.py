@@ -213,6 +213,14 @@ if 'dtstart' in df_original.columns:
 # Título
 st.title("🎭 Actividades Madrid")
 
+# Botón de filtros (indicación visual)
+col1, col2 = st.columns([4, 1])
+with col1:
+    st.caption("Descubre actividades culturales en Madrid")
+with col2:
+    if st.button("🔍 Filtros", use_container_width=True):
+        st.info("👈 Haz clic en el menú ☰ de la esquina superior izquierda")
+
 # Sidebar con filtros
 with st.sidebar:
     # Ordenar por - PRIMERO
