@@ -265,6 +265,9 @@ with st.sidebar:
     opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
     orden_sel = st.selectbox("", opciones_orden)
     
+    # Ocultar actividades pasadas
+    ocultar_pasadas = st.checkbox("📅 Ocultar actividades pasadas", value=True)
+    
     # Ver favoritos
     ver_favoritos = st.checkbox(f"❤️ Mis favoritos ({len(st.session_state.favoritos)})")
     
@@ -305,6 +308,12 @@ if busqueda and 'title' in df.columns:
     if 'description' in df.columns:
         mask |= df['description'].str.contains(busqueda, case=False, na=False)
     df = df[mask]
+
+# Filtro para ocultar actividades pasadas (por defecto activado)
+if ocultar_pasadas and 'dtstart' in df.columns:
+    hoy = datetime.now().date()
+    df = df.dropna(subset=['dtstart'])
+    df = df[df['dtstart'].dt.date >= hoy]
 
 # Filtro fecha
 if fecha_tipo != "Todas las fechas" and 'dtstart' in df.columns:
