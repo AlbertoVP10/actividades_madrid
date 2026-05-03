@@ -233,6 +233,13 @@ with st.sidebar:
     if 'busqueda' not in st.session_state:
         st.session_state.busqueda = ""
     
+    # Ordenar por - PRIMERO en el sidebar
+    st.subheader("📊 Ordenar por")
+    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
+    orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
+    
+    st.markdown("---")
+    
     # Categorías predefinidas
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
     categoria_sel = st.selectbox("🎭 Categoría", categorias, key='categoria_sel')
@@ -304,11 +311,6 @@ with st.sidebar:
                 st.success(f"✅ Ubicación encontrada: {coords[0]:.4f}, {coords[1]:.4f}")
             else:
                 st.error("No se pudo encontrar la dirección")
-    
-    # Ordenar por
-    st.subheader("📊 Ordenar por")
-    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
-    orden_sel = st.selectbox("", opciones_orden)
     
     # Ver favoritos
     ver_favoritos = st.checkbox(f"❤️ Mis favoritos ({len(st.session_state.favoritos)})")
