@@ -259,12 +259,12 @@ with st.sidebar:
     if 'address.area.district' in df_original.columns:
         distritos_disponibles = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
         
-        # Inicializar en session_state si no existe
-        if 'distrito_sel' not in st.session_state:
+        # Inicializar en session_state si no existe o si es string (versión antigua)
+        if 'distrito_sel' not in st.session_state or isinstance(st.session_state.distrito_sel, str):
             st.session_state.distrito_sel = distritos_disponibles  # Todos seleccionados por defecto
         
         distrito_sel = st.multiselect(
-            "",
+            "Selecciona distritos",
             options=distritos_disponibles,
             default=st.session_state.distrito_sel,
             label_visibility="collapsed",
