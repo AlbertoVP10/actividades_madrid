@@ -249,10 +249,18 @@ with st.sidebar:
     # Distrito - Selector simple
     st.subheader("📍 Distrito")
     
-    # Obtener lista de distritos (usar address.district.@id)
+    # Función para extraer nombre del distrito de la URL
+    def extraer_nombre_distrito(url):
+        if pd.isna(url):
+            return 'Desconocido'
+        partes = str(url).split('/')
+        return partes[-1] if len(partes) > 0 else 'Desconocido'
+    
+    # Obtener lista de distritos (extraer nombre de address.district.@id)
     distritos_lista = ['Todos']
     if 'address.district.@id' in df_original.columns:
-        distritos_lista = ['Todos'] + sorted([d for d in df_original['address.district.@id'].dropna().unique() if pd.notna(d)])
+        distritos_nombres = df_original['address.district.@id'].apply(extraer_nombre_distrito)
+        distritos_lista = ['Todos'] + sorted([d for d in distritos_nombres.unique() if d != 'Desconocido'])
     
     # Selector simple
     distrito_sel = st.selectbox(
@@ -346,9 +354,10 @@ busqueda = st.session_state.busqueda
 if categoria_sel != 'Todas':
     df = df[df['categoria'] == categoria_sel]
 
-# Filtro distrito (usar address.district.@id)
+# Filtro distrito (extraer nombre de address.district.@id)
 if distrito_sel != 'Todos' and 'address.district.@id' in df.columns:
-    df = df[df['address.district.@id'] == distrito_sel]
+    df['distrito_nombre'] = df['address.district.@id'].apply(lambda url: str(url).split('/')[-1] if pd.notna(url) else 'Desconocido')
+    df = df[df['distrito_nombre'] == distrito_sel]
 
 # Filtro público
 if publico_sel != 'Todos' and 'audience' in df.columns:
