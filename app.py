@@ -390,32 +390,20 @@ with tab1:
     if st.session_state.ref_coords:
         st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
     
-    # Controles de paginación - Horizontal compacto
-    st.markdown(f"""
-    <div style='display: flex; justify-content: center; align-items: center; gap: 10px; margin: 15px 0;'>
-        <button onclick="window.location.reload()" 
-                style='background: #f0f2f6; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;'>
-            ⬅️ Ant.
-        </button>
-        <span style='font-size: 14px; font-weight: 500;'>Pág. {st.session_state.page + 1} / {max(1, total_paginas)}</span>
-        <button onclick="window.location.reload()"
-                style='background: #f0f2f6; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;'>
-            Sig. ➡️
-        </button>
-    </div>
-    """, unsafe_allow_html=True)
+    # Controles de paginación - Solo una fila con ancho limitado
+    pag_col1, pag_col2, pag_col3 = st.columns([30, 40, 30])
     
-    # Botones reales de Streamlit (ocultos visualmente pero funcionales)
-    pag_cols = st.columns([1, 2, 1])
-    with pag_cols[0]:
-        if st.button("⬅️ Ant.", key="btn_ant", use_container_width=True):
+    with pag_col1:
+        if st.button("⬅️ Ant.", key="btn_ant"):
             if st.session_state.page > 0:
                 st.session_state.page -= 1
                 st.rerun()
-    with pag_cols[1]:
-        st.markdown(f"<div style='text-align: center; font-size: 14px; padding: 5px;'>{st.session_state.page + 1} / {max(1, total_paginas)}</div>", unsafe_allow_html=True)
-    with pag_cols[2]:
-        if st.button("Sig. ➡️", key="btn_sig", use_container_width=True):
+    
+    with pag_col2:
+        st.markdown(f"<div style='text-align: center; font-size: 14px; padding: 8px 0;'>{st.session_state.page + 1} / {max(1, total_paginas)}</div>", unsafe_allow_html=True)
+    
+    with pag_col3:
+        if st.button("Sig. ➡️", key="btn_sig"):
             if st.session_state.page < total_paginas - 1:
                 st.session_state.page += 1
                 st.rerun()
