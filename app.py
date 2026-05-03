@@ -443,9 +443,28 @@ elif orden_sel == "Más baratas (gratis primero)" and 'free' in df.columns:
 elif orden_sel == "Más cercanas" and 'distancia_km' in df.columns:
     df = df.sort_values('distancia_km', na_position="last")
 
-# PAGINACIÓN
+# PAGINACIÓN - Resetear a página 1 cuando cambian los filtros
 if 'page' not in st.session_state:
     st.session_state.page = 0
+
+# Guardar estado actual de filtros para detectar cambios
+filtros_actuales = {
+    'categoria': categoria_sel,
+    'distrito': distrito_sel,
+    'publico': publico_sel,
+    'fecha': fecha_tipo,
+    'horario': franja_horaria,
+    'gratis': solo_gratis,
+    'busqueda': busqueda
+}
+
+if 'filtros_anteriores' not in st.session_state:
+    st.session_state.filtros_anteriores = filtros_actuales
+
+# Si los filtros cambiaron, resetear a página 1
+if st.session_state.filtros_anteriores != filtros_actuales:
+    st.session_state.page = 0
+    st.session_state.filtros_anteriores = filtros_actuales
 
 items_por_pagina = 20
 total_paginas = (len(df) + items_por_pagina - 1) // items_por_pagina
