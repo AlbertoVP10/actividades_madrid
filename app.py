@@ -28,18 +28,6 @@ st.set_page_config(
     initial_sidebar_state=st.session_state.sidebar_open
 )
 
-# PASO 3: El Botón de Filtros
-if st.button("🔍 Filtros", key="btn_filtros_main"):
-    # Cambiamos el valor de la variable
-    if st.session_state.sidebar_open == 'collapsed':
-        st.session_state.sidebar_open = 'expanded'
-    else:
-        st.session_state.sidebar_open = 'collapsed'
-    
-    # PASO 4: LA CLAVE. Forzar el rerun para que vuelva arriba,
-    # lea el nuevo 'sidebar_open' y lo aplique en set_page_config
-    st.rerun()
-
 # PASO 5: Ocultar la flecha original para que no confunda
 st.markdown("<style>[data-testid='collapsedControl'] {display: none;}</style>", unsafe_allow_html=True)
 
@@ -232,6 +220,18 @@ if 'dtstart' in df_original.columns:
 
 # Título
 st.title("🎭 Actividades Madrid")
+
+# PASO 3: El Botón de Filtros (debajo del título)
+if st.button("🔍 Filtros", key="btn_filtros_main", use_container_width=True):
+    # Cambiamos el valor de la variable
+    if st.session_state.sidebar_open == 'collapsed':
+        st.session_state.sidebar_open = 'expanded'
+    else:
+        st.session_state.sidebar_open = 'collapsed'
+    
+    # PASO 4: LA CLAVE. Forzar el rerun para que vuelva arriba,
+    # lea el nuevo 'sidebar_open' y lo aplique en set_page_config
+    st.rerun()
 
 # Sidebar con filtros
 with st.sidebar:
