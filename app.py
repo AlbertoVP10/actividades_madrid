@@ -426,36 +426,18 @@ if busqueda:
 if filtros_activos:
     st.markdown("**Filtros aplicados:**")
     
-    # Crear filas de chips
-    chip_cols = st.columns(min(len(filtros_activos), 4))
-    for i, filtro in enumerate(filtros_activos[:8]):  # Máximo 8 filtros
-        with chip_cols[i % 4]:
-            if st.button(f"{filtro} ✕", key=f"chip_{i}", help="Quitar filtro"):
-                # Resetear el filtro correspondiente
-                if "🎭" in filtro:
-                    st.session_state.categoria_sel = 'Todas'
-                elif "📍" in filtro and "Distrito" not in filtro:
-                    st.session_state.distrito_sel = 'Todos'
-                elif "👥" in filtro:
-                    st.session_state.publico_sel = 'Todos'
-                elif "📅" in filtro:
-                    st.session_state.fecha_tipo = "Todas las fechas"
-                elif "🕐" in filtro:
-                    st.session_state.franja_horaria = "Todo el día"
-                elif "💰" in filtro:
-                    st.session_state.solo_gratis = False
-                elif "🔎" in filtro:
-                    st.session_state.busqueda = ""
-                st.rerun()
+    # Mostrar filtros como etiquetas (no clickeables por ahora)
+    filtros_texto = " | ".join(filtros_activos)
+    st.markdown(f"<div style='background: #f0f2f6; padding: 10px; border-radius: 8px; margin: 10px 0;'>{filtros_texto}</div>", unsafe_allow_html=True)
     
-    if st.button("🗑️ Limpiar todos", key="limpiar_filtros"):
-        st.session_state.categoria_sel = 'Todas'
-        st.session_state.distrito_sel = 'Todos'
-        st.session_state.publico_sel = 'Todos'
-        st.session_state.fecha_tipo = "Todas las fechas"
-        st.session_state.franja_horaria = "Todo el día"
-        st.session_state.solo_gratis = False
-        st.session_state.busqueda = ""
+    if st.button("🗑️ Limpiar todos los filtros", key="limpiar_filtros"):
+        st.session_state['categoria_sel'] = 'Todas'
+        st.session_state['distrito_sel'] = 'Todos'
+        st.session_state['publico_sel'] = 'Todos'
+        st.session_state['fecha_tipo'] = "Todas las fechas"
+        st.session_state['franja_horaria'] = "Todo el día"
+        st.session_state['solo_gratis'] = False
+        st.session_state['busqueda'] = ""
         st.rerun()
     
     st.markdown("---")
