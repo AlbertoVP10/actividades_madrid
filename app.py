@@ -53,11 +53,22 @@ st.markdown("""
         font-size: 12px;
     }
     /* Añade texto 'Filtros' junto al botón del sidebar */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        align-items: center;
+    }
+    [data-testid="collapsedControl"] svg {
+        display: none !important;
+    }
+    [data-testid="collapsedControl"]::before {
+        content: "🔍";
+        font-size: 20px;
+        margin-right: 5px;
+    }
     [data-testid="collapsedControl"]::after {
         content: " Filtros";
         font-weight: bold;
         color: #FF4B4B;
-        margin-left: 5px;
         font-size: 16px;
     }
 </style>
