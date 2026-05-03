@@ -215,6 +215,14 @@ st.title("🎭 Actividades Madrid")
 
 # Sidebar con filtros
 with st.sidebar:
+    # Ordenar por - PRIMERO
+    st.header("📊 Ordenar por")
+    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
+    orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
+    
+    st.markdown("---")
+    
+    # Filtros - SEGUNDO
     st.header("🔍 Filtros")
     
     # Inicializar valores en session_state si no existen
@@ -232,13 +240,6 @@ with st.sidebar:
         st.session_state.solo_gratis = False
     if 'busqueda' not in st.session_state:
         st.session_state.busqueda = ""
-    
-    # Ordenar por - PRIMERO en el sidebar
-    st.subheader("📊 Ordenar por")
-    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
-    orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
-    
-    st.markdown("---")
     
     # Categorías predefinidas
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
