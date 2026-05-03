@@ -197,7 +197,18 @@ with st.sidebar:
         with col1:
             fecha_desde = st.date_input("Desde", datetime.now())
         with col2:
-            fecha_hasta = st.date_input("Hasta", datetime.now() + timedelta(days=7))
+            # Validar que fecha_hasta no sea anterior a fecha_desde
+            fecha_hasta_min = fecha_desde if fecha_desde else datetime.now()
+            fecha_hasta = st.date_input("Hasta", fecha_hasta_min + timedelta(days=7), min_value=fecha_hasta_min)
+    
+    # Franja horaria
+    st.subheader("🕐 Horario")
+    franja_horaria = st.selectbox("", [
+        "Todo el día",
+        "Mañana (6:00 - 12:00)",
+        "Tarde (12:00 - 18:00)",
+        "Noche (18:00 - 24:00)"
+    ], label_visibility="collapsed")
     
     # Gratuidad
     solo_gratis = st.checkbox("💰 Solo gratuitas")
@@ -273,6 +284,32 @@ if fecha_tipo != "Todas las fechas" and 'dtstart' in df.columns:
             df = df[df['dtstart'].dt.date == fecha_concreta]
         elif fecha_tipo == "Rango de fechas" and fecha_desde and fecha_hasta:
             df = df[(df['dtstart'].dt.date >= fecha_desde) & (df['dtstart'].dt.date <= fecha_hasta)]
+
+# Filtro franja horaria
+if franja_horaria != "Todo el día" and 'time' in df.columns:
+    def extraer_hora(time_str):
+        """Extrae la hora de un string de tiempo"""
+        if pd.isna(time_str):
+            return None
+        try:
+            # Intentar parsear formatos comunes
+            time_str = str(time_str)
+            if ':' in time_str:
+                parts = time_str.split(':')
+                return int(parts[0])
+        except:
+            pass
+        return None
+    
+    df['hora'] = df['time'].apply(extraer_hora)
+    df = df.dropna(subset=['hora'])
+    
+    if franja_horaria == "Mañana (6:00 - 12:00)":
+        df = df[(df['hora'] >= 6) & (df['hora'] < 12)]
+    elif franja_horaria == "Tarde (12:00 - 18:00)":
+        df = df[(df['hora'] >= 12) & (df['hora'] < 18)]
+    elif franja_horaria == "Noche (18:00 - 24:00)":
+        df = df[(df['hora'] >= 18) & (df['hora'] < 24)]
 
 # Ver favoritos
 if ver_favoritos and len(st.session_state.favoritos) > 0:
