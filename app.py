@@ -217,12 +217,12 @@ st.title("🎭 Actividades Madrid")
 with st.sidebar:
     # Ordenar por - PRIMERO
     st.header("📊 Ordenar por")
-    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas", "Más lejanas"]
+    opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas"]
     orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
     
     # Ubicación - Solo aparece si se ordena por cercanía
     direccion_ref = ""  # Inicializar vacío por defecto
-    if orden_sel in ["Más cercanas", "Más lejanas"]:
+    if orden_sel == "Más cercanas":
         st.subheader("📍 Tu ubicación")
         direccion_ref = st.text_input("", placeholder="Ej: Calle Mayor 10", label_visibility="collapsed")
         
@@ -442,8 +442,6 @@ elif orden_sel == "Más baratas (gratis primero)" and 'free' in df.columns:
     df = df.sort_values('free', ascending=False, na_position="last")
 elif orden_sel == "Más cercanas" and 'distancia_km' in df.columns:
     df = df.sort_values('distancia_km', na_position="last")
-elif orden_sel == "Más lejanas" and 'distancia_km' in df.columns:
-    df = df.sort_values('distancia_km', ascending=False, na_position="last")
 
 # PAGINACIÓN
 if 'page' not in st.session_state:
