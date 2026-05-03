@@ -302,14 +302,14 @@ if franja_horaria != "Todo el día" and 'time' in df.columns:
         return None
     
     df['hora'] = df['time'].apply(extraer_hora)
-    df = df.dropna(subset=['hora'])
+    # NO hacer dropna - conservar actividades sin hora
     
     if franja_horaria == "Mañana (6:00 - 12:00)":
-        df = df[(df['hora'] >= 6) & (df['hora'] < 12)]
+        df = df[(df['hora'] >= 6) & (df['hora'] < 12) | df['hora'].isna()]
     elif franja_horaria == "Tarde (12:00 - 18:00)":
-        df = df[(df['hora'] >= 12) & (df['hora'] < 18)]
+        df = df[(df['hora'] >= 12) & (df['hora'] < 18) | df['hora'].isna()]
     elif franja_horaria == "Noche (18:00 - 24:00)":
-        df = df[(df['hora'] >= 18) & (df['hora'] < 24)]
+        df = df[(df['hora'] >= 18) & (df['hora'] < 24) | df['hora'].isna()]
 
 # Ver favoritos
 if ver_favoritos and len(st.session_state.favoritos) > 0:
