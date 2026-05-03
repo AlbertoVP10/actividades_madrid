@@ -15,12 +15,13 @@ from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
-# PASO 1: Crear la variable de control en la memoria de la sesión
+# 1. Usar un contador para forzar el refresco del componente
 if 'sidebar_open' not in st.session_state:
-    st.session_state.sidebar_open = 'collapsed'  # Empieza cerrado
+    st.session_state.sidebar_open = 'collapsed'
+if 'sidebar_counter' not in st.session_state:
+    st.session_state.sidebar_counter = 0
 
-# PASO 2: Configurar la página usando esa variable
-# OJO: Si esta línea no es la primera de la UI, dará error.
+# 2. Configuración de página
 st.set_page_config(
     page_title="Actividades Madrid",
     page_icon="🎭",
@@ -28,7 +29,7 @@ st.set_page_config(
     initial_sidebar_state=st.session_state.sidebar_open
 )
 
-# PASO 5: Ocultar la flecha original para que no confunda
+# 3. CSS para ocultar la flecha y evitar el parpadeo
 st.markdown("<style>[data-testid='collapsedControl'] {display: none;}</style>", unsafe_allow_html=True)
 
 # CSS responsive
@@ -221,22 +222,30 @@ if 'dtstart' in df_original.columns:
 # Título
 st.title("🎭 Actividades Madrid")
 
-# PASO 3: El Botón de Filtros (debajo del título)
-if st.button("🔍 Filtros", key="btn_filtros_main", use_container_width=True):
-    # Cambiamos el valor de la variable
-    if st.session_state.sidebar_open == 'collapsed':
-        st.session_state.sidebar_open = 'expanded'
-    else:
-        st.session_state.sidebar_open = 'collapsed'
-    
-    # PASO 4: LA CLAVE. Forzar el rerun para que vuelva arriba,
-    # lea el nuevo 'sidebar_open' y lo aplique en set_page_config
+# 4. BOTÓN CORREGIDO
+if st.button("🔍 Filtros", key=f"btn_filtros_{st.session_state.sidebar_counter}", use_container_width=True):
+    # Cambiamos el estado
+    st.session_state.sidebar_open = 'expanded' if st.session_state.sidebar_open == 'collapsed' else 'collapsed'
+    # Incrementamos el contador para que la app detecte un cambio real en el estado
+    st.session_state.sidebar_counter += 1
     st.rerun()
 
 # Sidebar con filtros
 with st.sidebar:
+    # Botón para cerrar sidebar
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.header("🔍 Filtros")
+    with col2:
+        if st.button("❌", key="btn_cerrar_sidebar"):
+            st.session_state.sidebar_open = 'collapsed'
+            st.session_state.sidebar_counter += 1
+            st.rerun()
+    
+    st.markdown("---")
+    
     # Ordenar por - PRIMERO
-    st.header("📊 Ordenar por")
+    st.subheader("📊 Ordenar por")
     opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas"]
     orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
     
