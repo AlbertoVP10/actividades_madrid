@@ -709,22 +709,30 @@ with tab3:
         # Gráfico por categoría
         st.write("**Actividades por categoría:**")
         cat_counts = df['categoria'].value_counts().head(10)
-        fig = px.bar(x=cat_counts.index, y=cat_counts.values, 
-                    labels={'x': 'Categoría', 'y': 'Actividades'},
-                    color=cat_counts.values,
-                    color_continuous_scale='Reds')
-        st.plotly_chart(fig, use_container_width=True)
+        if len(cat_counts) > 0:
+            fig = px.bar(x=cat_counts.index.tolist(), 
+                        y=cat_counts.values.tolist(), 
+                        labels={'x': 'Categoría', 'y': 'Actividades'},
+                        color=cat_counts.values.tolist(),
+                        color_continuous_scale='Reds')
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No hay datos de categorías")
     
     with col2:
         # Gráfico por distrito
         if 'address.area.district' in df.columns:
             st.write("**Actividades por distrito:**")
             dist_counts = df['address.area.district'].value_counts().head(10)
-            fig = px.bar(x=dist_counts.index, y=dist_counts.values,
-                        labels={'x': 'Distrito', 'y': 'Actividades'},
-                        color=dist_counts.values,
-                        color_continuous_scale='Blues')
-            st.plotly_chart(fig, use_container_width=True)
+            if len(dist_counts) > 0:
+                fig = px.bar(x=dist_counts.index.tolist(), 
+                            y=dist_counts.values.tolist(),
+                            labels={'x': 'Distrito', 'y': 'Actividades'},
+                            color=dist_counts.values.tolist(),
+                            color_continuous_scale='Blues')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No hay datos de distritos")
     
     # Gráfico de distribución por precio
     if 'free' in df.columns:
