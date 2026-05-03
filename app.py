@@ -138,13 +138,19 @@ def extraer_categoria(tipo):
 def geocodificar_direccion(direccion):
     """Convierte dirección en coordenadas usando Nominatim"""
     try:
-        geolocator = Nominatim(user_agent="actividades_madrid_app")
+        # Aumentar timeout a 10 segundos
+        geolocator = Nominatim(user_agent="actividades_madrid_app", timeout=10)
         location = geolocator.geocode(f"{direccion}, Madrid, España")
         if location:
             return (location.latitude, location.longitude)
         return None
     except Exception as e:
-        st.error(f"Error geocodificando: {e}")
+        # Manejo graceful del error - no bloquear la app
+        st.warning("⚠️ No se pudo conectar con el servicio de geocodificación")
+        st.info("💡 Posibles soluciones:")
+        st.info("• Intenta de nuevo en unos segundos")
+        st.info("• Verifica tu conexión a internet")
+        st.info("• Prueba con una dirección más simple (solo calle y número)")
         return None
 
 # Función para calcular distancia
