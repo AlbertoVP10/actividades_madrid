@@ -390,25 +390,27 @@ with tab1:
     if st.session_state.ref_coords:
         st.info(f"📍 Distancias calculadas desde: {st.session_state.ref_coords[0]:.4f}, {st.session_state.ref_coords[1]:.4f}")
     
-    # Controles de paginación
+    # Controles de paginación con pills
     st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
     
-    pag_col1, pag_col2, pag_col3 = st.columns([1, 1, 1])
+    # Crear opciones de página para pills
+    opciones_pagina = []
+    if st.session_state.page > 0:
+        opciones_pagina.append("⬅️ Ant")
     
-    with pag_col1:
-        if st.button("⬅️ Anterior", key="btn_ant"):
-            if st.session_state.page > 0:
-                st.session_state.page -= 1
-                st.rerun()
+    opciones_pagina.append(f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}")
     
-    with pag_col2:
-        st.markdown(f"<div style='text-align: center; padding: 10px 0; font-weight: 500;'>{st.session_state.page + 1} de {max(1, total_paginas)}</div>", unsafe_allow_html=True)
+    if st.session_state.page < total_paginas - 1:
+        opciones_pagina.append("Sig ➡️")
     
-    with pag_col3:
-        if st.button("Siguiente ➡️", key="btn_sig"):
-            if st.session_state.page < total_paginas - 1:
-                st.session_state.page += 1
-                st.rerun()
+    seleccion = st.pills("Navegación", opciones_pagina, default=opciones_pagina[1] if len(opciones_pagina) > 1 else None, label_visibility="collapsed")
+    
+    if seleccion == "⬅️ Ant" and st.session_state.page > 0:
+        st.session_state.page -= 1
+        st.rerun()
+    elif seleccion == "Sig ➡️" and st.session_state.page < total_paginas - 1:
+        st.session_state.page += 1
+        st.rerun()
     
     # Mostrar actividades de la página actual
     inicio = st.session_state.page * items_por_pagina
