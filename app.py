@@ -343,7 +343,7 @@ if 'page' not in st.session_state:
 items_por_pagina = 20
 total_paginas = (len(df) + items_por_pagina - 1) // items_por_pagina
 
-# KPIs en horizontal con diseño mejorado
+# KPIs en horizontal - Compactos para móvil
 st.markdown("---")
 
 # Calcular valores
@@ -354,44 +354,31 @@ kpi_hoy = 0
 if 'dtstart' in df.columns and len(df) > 0:
     kpi_hoy = len(df[df['dtstart'].dt.date == datetime.now().date()])
 
-# Mostrar KPIs en tarjetas horizontales
-kpi_cols = st.columns(4)
-
-with kpi_cols[0]:
-    st.markdown(f"""
+# Mostrar KPIs en grid compacto
+st.markdown(f"""
+<div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;'>
     <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
-        <div style='font-size: 32px; font-weight: bold;'>{kpi_total}</div>
-        <div style='font-size: 14px; opacity: 0.9;'>📊 Total actividades</div>
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_total}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📊 Total</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with kpi_cols[1]:
-    st.markdown(f"""
     <div style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
-                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
-        <div style='font-size: 32px; font-weight: bold;'>{kpi_gratis}</div>
-        <div style='font-size: 14px; opacity: 0.9;'>💰 Gratuitas</div>
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_gratis}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>💰 Gratis</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with kpi_cols[2]:
-    st.markdown(f"""
     <div style='background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); 
-                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
-        <div style='font-size: 32px; font-weight: bold;'>{kpi_ubicacion}</div>
-        <div style='font-size: 14px; opacity: 0.9;'>📍 Con ubicación</div>
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_ubicacion}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📍 Mapa</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with kpi_cols[3]:
-    st.markdown(f"""
     <div style='background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); 
-                padding: 20px; border-radius: 10px; text-align: center; color: white;'>
-        <div style='font-size: 32px; font-weight: bold;'>{kpi_hoy}</div>
-        <div style='font-size: 14px; opacity: 0.9;'>📅 Hoy</div>
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_hoy}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📅 Hoy</div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 # TABS
 tab1, tab2, tab3 = st.tabs(["📋 Lista", "🗺️ Mapa", "📊 Estadísticas"])
