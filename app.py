@@ -398,12 +398,14 @@ with tab1:
     if st.session_state.page > 0:
         opciones_pagina.append("⬅️ Ant")
     
-    opciones_pagina.append(f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}")
+    pagina_actual_texto = f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}"
+    opciones_pagina.append(pagina_actual_texto)
     
     if st.session_state.page < total_paginas - 1:
         opciones_pagina.append("Sig ➡️")
     
-    seleccion = st.pills("Navegación", opciones_pagina, default=opciones_pagina[1] if len(opciones_pagina) > 1 else None, label_visibility="collapsed")
+    # El default debe ser el texto de la página actual
+    seleccion = st.pills("Navegación", opciones_pagina, default=pagina_actual_texto, label_visibility="collapsed")
     
     if seleccion == "⬅️ Ant" and st.session_state.page > 0:
         st.session_state.page -= 1
