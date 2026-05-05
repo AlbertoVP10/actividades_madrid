@@ -426,9 +426,12 @@ busqueda = st.session_state.busqueda
 if categoria_sel != 'Todas':
     df = df[df['categoria'] == categoria_sel]
 
-# Filtro distrito (usar misma función de formateo que en el selector)
-if distrito_sel != 'Todos' and 'address.district.@id' in df.columns:
+# Crear columna distrito_nombre siempre (para mostrar en detalles)
+if 'address.district.@id' in df.columns:
     df['distrito_nombre'] = df['address.district.@id'].apply(extraer_nombre_distrito)
+
+# Filtro distrito
+if distrito_sel != 'Todos' and 'distrito_nombre' in df.columns:
     df = df[df['distrito_nombre'] == distrito_sel]
 
 # Filtro público
