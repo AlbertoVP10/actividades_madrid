@@ -377,12 +377,24 @@ with st.sidebar:
     # Distrito - Selector simple
     st.subheader("📍 Distrito")
     
-    # Función para extraer nombre del distrito de la URL
+    # Función para extraer y formatear nombre del distrito de la URL
     def extraer_nombre_distrito(url):
         if pd.isna(url):
             return 'Desconocido'
         partes = str(url).split('/')
-        return partes[-1] if len(partes) > 0 else 'Desconocido'
+        nombre_raw = partes[-1] if len(partes) > 0 else 'Desconocido'
+        
+        # Mapeo de nombres de distritos a formato legible
+        distrito_map = {
+            'Fuencarral-ElPardo': 'Fuencarral - El Pardo',
+            'CiudadLineal': 'Ciudad Lineal',
+            'PuenteDeVallecas': 'Puente de Vallecas',
+            'Moncloa-Aravaca': 'Moncloa - Aravaca',
+            'SanBlas-Canillejas': 'San Blas-Canillejas',
+            'VillaDeVallecas': 'Villa de Vallecas'
+        }
+        
+        return distrito_map.get(nombre_raw, nombre_raw)
     
     # Obtener lista de distritos (extraer nombre de address.district.@id)
     distritos_lista = ['Todos']
@@ -469,9 +481,9 @@ busqueda = st.session_state.busqueda
 if categoria_sel != 'Todas':
     df = df[df['categoria'] == categoria_sel]
 
-# Filtro distrito (extraer nombre de address.district.@id)
+# Filtro distrito (usar misma función de formateo que en el selector)
 if distrito_sel != 'Todos' and 'address.district.@id' in df.columns:
-    df['distrito_nombre'] = df['address.district.@id'].apply(lambda url: str(url).split('/')[-1] if pd.notna(url) else 'Desconocido')
+    df['distrito_nombre'] = df['address.district.@id'].apply(extraer_nombre_distrito)
     df = df[df['distrito_nombre'] == distrito_sel]
 
 # Filtro público
