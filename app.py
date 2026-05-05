@@ -140,7 +140,36 @@ def extraer_categoria(tipo):
     if pd.isna(tipo):
         return 'Otras'
     tipo_str = str(tipo).lower()
-    if 'cine' in tipo_str or 'film' in tipo_str:
+    
+    # Mapeos específicos (prioridad alta)
+    if 'cuentacuentostiteresmarionetas' in tipo_str:
+        return 'Infantil'
+    elif 'circomagia' in tipo_str:
+        return 'Infantil'
+    elif 'fiestassanisidro' in tipo_str:
+        return 'Fiestas'
+    elif 'fiestas' in tipo_str:
+        return 'Fiestas'
+    elif 'programaciondestacadaagendacultura' in tipo_str:
+        return 'Destacada'
+    elif 'conferenciascoloquios' in tipo_str:
+        return 'Conferencias'
+    elif 'recitalespresentacionesactosliterarios' in tipo_str:
+        return 'Conferencias'
+    elif 'excursionesitinerariosvisitas' in tipo_str:
+        return 'Excursiones'
+    elif 'campamentos' in tipo_str:
+        return 'Campamentos'
+    elif 'clubeslectura' in tipo_str:
+        return 'Literatura'
+    elif 'performance' in tipo_str:
+        return 'Teatro'
+    elif 'congresosjornadas' in tipo_str:
+        return 'Eventos'
+    elif 'comemoracioneshomenajes' in tipo_str:
+        return 'Eventos'
+    # Mapeos generales
+    elif 'cine' in tipo_str or 'film' in tipo_str:
         return 'Cine'
     elif 'teatro' in tipo_str or 'theatre' in tipo_str:
         return 'Teatro'
