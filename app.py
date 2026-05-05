@@ -5,7 +5,6 @@ Desplegado en Streamlit Cloud
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import requests
 import folium
@@ -31,22 +30,7 @@ st.set_page_config(
 )
 
 # 3. CSS para ocultar la flecha y evitar el parpadeo
-# NOTA: En móvil NO ocultamos el control para permitir el toggle nativo
-st.markdown("""
-<style>
-    /* Solo ocultar en desktop (min-width: 769px) */
-    @media (min-width: 769px) {
-        [data-testid='collapsedControl'] {display: none;}
-    }
-    
-    /* En móvil, asegurar que el sidebar se comporte correctamente */
-    @media (max-width: 768px) {
-        [data-testid='stSidebar'] {
-            transition: transform 0.3s ease-in-out;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
+st.markdown("<style>[data-testid='collapsedControl'] {display: none;}</style>", unsafe_allow_html=True)
 
 # CSS responsive
 st.markdown("""
@@ -267,81 +251,13 @@ if 'dtstart' in df_original.columns:
 # Título
 st.title("🎭 Actividades Madrid")
 
-# 4. BOTÓN DE FILTROS - Solución simplificada con componente HTML
-# El truco: usar un componente HTML invisible que maneje el click
-
-# Variable para controlar el toggle
-toggle_sidebar = False
-
-# Botón de filtros
+# 4. BOTÓN CORREGIDO
 if st.button("🔍 Filtros", key=f"btn_filtros_{st.session_state.sidebar_counter}", use_container_width=True):
-    toggle_sidebar = True
+    # Cambiamos el estado
+    st.session_state.sidebar_open = 'expanded' if st.session_state.sidebar_open == 'collapsed' else 'collapsed'
+    # Incrementamos el contador para que la app detecte un cambio real en el estado
     st.session_state.sidebar_counter += 1
-
-# Componente HTML que maneja el toggle de forma nativa
-toggle_js = 'true' if toggle_sidebar else 'false'
-components.html(f"""
-<script>
-    (function() {{
-        const shouldToggle = {toggle_js};
-        
-        if (shouldToggle) {{
-            // Intentar encontrar y hacer click en el botón de sidebar
-            function tryToggle() {{
-                // Búsqueda exhaustiva del botón
-                const possibleButtons = [
-                    document.querySelector('[data-testid="collapsedControl"]'),
-                    document.querySelector('[data-testid="stSidebarCollapsedControl"]'),
-                    document.querySelector('button[aria-label*="sidebar" i]'),
-                    document.querySelector('button[aria-label*="Expand" i]'),
-                    document.querySelector('button[aria-label*="Collapse" i]'),
-                    document.querySelector('.stApp header button'),
-                    document.querySelector('[data-testid="stHeader"] button')
-                ];
-                
-                for (const btn of possibleButtons) {{
-                    if (btn) {{
-                        btn.click();
-                        console.log('Sidebar toggled via:', btn);
-                        return true;
-                    }}
-                }}
-                
-                // Si no encontramos el botón, intentar manipular el sidebar directamente
-                const sidebar = document.querySelector('[data-testid="stSidebar"]');
-                const overlay = document.querySelector('[data-testid="stSidebarOverlay"]');
-                
-                if (sidebar) {{
-                    const currentTransform = sidebar.style.transform;
-                    const isHidden = currentTransform.includes('-100%') || sidebar.getAttribute('aria-expanded') === 'false';
-                    
-                    if (isHidden) {{
-                        // Abrir
-                        sidebar.style.transform = 'translateX(0)';
-                        sidebar.setAttribute('aria-expanded', 'true');
-                        if (overlay) overlay.style.display = 'block';
-                    }} else {{
-                        // Cerrar
-                        sidebar.style.transform = 'translateX(-100%)';
-                        sidebar.setAttribute('aria-expanded', 'false');
-                        if (overlay) overlay.style.display = 'none';
-                    }}
-                    return true;
-                }}
-                
-                return false;
-            }}
-            
-            // Intentar inmediatamente y con retraso
-            if (!tryToggle()) {{
-                setTimeout(tryToggle, 100);
-                setTimeout(tryToggle, 300);
-                setTimeout(tryToggle, 500);
-            }}
-        }}
-    }})();
-</script>
-""", height=0)
+    st.rerun()
 
 # Sidebar con filtros
 with st.sidebar:
