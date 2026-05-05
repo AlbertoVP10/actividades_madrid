@@ -171,7 +171,11 @@ def quitar_categoria():
     st.session_state.categoria_sel = 'Todas'
 
 def quitar_distrito():
-    st.session_state.distrito_sel = 'Todos'
+    # Resetear a todos los distritos disponibles
+    if 'address.area.district' in df_original.columns:
+        st.session_state.distrito_sel = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
+    else:
+        st.session_state.distrito_sel = []
 
 def quitar_publico():
     st.session_state.publico_sel = 'Todos'
@@ -190,7 +194,11 @@ def quitar_busqueda():
 
 def limpiar_todos():
     st.session_state.categoria_sel = 'Todas'
-    st.session_state.distrito_sel = 'Todos'
+    # Resetear distrito a todos los disponibles
+    if 'address.area.district' in df_original.columns:
+        st.session_state.distrito_sel = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
+    else:
+        st.session_state.distrito_sel = []
     st.session_state.publico_sel = 'Todos'
     st.session_state.fecha_tipo = "Todas las fechas"
     st.session_state.franja_horaria = "Todo el día"
@@ -246,20 +254,20 @@ with st.sidebar:
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
     categoria_sel = st.selectbox("", categorias, label_visibility="collapsed", key='categoria_sel')
     
-    # Distrito - Selector simple
+    # Distrito - Multiselección
     st.subheader("📍 Distrito")
     
     # Obtener lista de distritos
-    distritos_lista = ['Todos']
+    distritos_lista = []
     if 'address.area.district' in df_original.columns:
-        distritos_lista = ['Todos'] + sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
+        distritos_lista = sorted([d for d in df_original['address.area.district'].dropna().unique() if pd.notna(d)])
     
-    # Selector simple
-    distrito_sel = st.selectbox(
-        "",
+    # Mostrar multiselect siempre
+    distrito_sel = st.multiselect(
+        "Distritos",
         options=distritos_lista,
-        label_visibility="collapsed",
-        key='distrito_sel'
+        default=distritos_lista,  # Todos seleccionados por defecto
+        key='distrito_multiselect'
     )
     
     # Público objetivo
@@ -336,6 +344,8 @@ df = df_original.copy()
 
 # Usar valores de session_state para los filtros
 categoria_sel = st.session_state.categoria_sel
+# Usar el valor directo del multiselect (no session_state)
+distrito_sel = distrito_sel if 'distrito_sel' in locals() else []
 publico_sel = st.session_state.publico_sel
 fecha_tipo = st.session_state.fecha_tipo
 franja_horaria = st.session_state.franja_horaria
@@ -346,9 +356,9 @@ busqueda = st.session_state.busqueda
 if categoria_sel != 'Todas':
     df = df[df['categoria'] == categoria_sel]
 
-# Filtro distrito
-if distrito_sel != 'Todos' and 'address.area.district' in df.columns:
-    df = df[df['address.area.district'] == distrito_sel]
+# Filtro distrito (multiselección)
+if distrito_sel and len(distrito_sel) > 0 and 'address.area.district' in df.columns:
+    df = df[df['address.area.district'].isin(distrito_sel)]
 
 # Filtro público
 if publico_sel != 'Todos' and 'audience' in df.columns:
@@ -483,8 +493,14 @@ filtros_activos = []
 
 if categoria_sel != 'Todas':
     filtros_activos.append(f"🎭 {categoria_sel}")
-if distrito_sel != 'Todos':
-    filtros_activos.append(f"📍 {distrito_sel}")
+# Distrito: mostrar número de distritos seleccionados o nombres si son pocos
+if distrito_sel and len(distrito_sel) > 0:
+    if len(distrito_sel) == 1:
+        filtros_activos.append(f"📍 {distrito_sel[0]}")
+    elif len(distrito_sel) <= 3:
+        filtros_activos.append(f"📍 {', '.join(distrito_sel)}")
+    else:
+        filtros_activos.append(f"📍 {len(distrito_sel)} distritos")
 if publico_sel != 'Todos':
     filtros_activos.append(f"👥 {publico_sel}")
 if fecha_tipo != "Todas las fechas":
