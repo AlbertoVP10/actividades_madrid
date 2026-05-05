@@ -741,8 +741,8 @@ with tab1:
                         detalles.append(f"🕐 **Hora:** {row['time']}")
                     if 'event-location' in row and pd.notna(row['event-location']):
                         detalles.append(f"📍 **Lugar:** {row['event-location']}")
-                    if 'address.area.district' in row and pd.notna(row['address.area.district']):
-                        detalles.append(f"🏘️ **Distrito:** {row['address.area.district']}")
+                    if 'distrito_nombre' in row and pd.notna(row['distrito_nombre']):
+                        detalles.append(f"🏘️ **Distrito:** {row['distrito_nombre']}")
                     if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']):
                         detalles.append(f"🗺️ **Dirección:** {row['address.area.street-address']}")
                     if 'free' in row and row['free'] == 1:
@@ -856,9 +856,9 @@ with tab3:
         
         with col2:
             # Gráfico por distrito
-            if 'address.area.district' in df.columns:
+            if 'distrito_nombre' in df.columns:
                 st.write("**Actividades por distrito:**")
-                dist_counts = df['address.area.district'].value_counts().head(10)
+                dist_counts = df['distrito_nombre'].value_counts().head(10)
                 if len(dist_counts) > 0:
                     fig = px.bar(x=dist_counts.index.tolist(), 
                                 y=dist_counts.values.tolist(),
