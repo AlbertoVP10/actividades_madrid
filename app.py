@@ -836,10 +836,21 @@ with tab2:
                     row = actividades[0]
                     popup_text = f"<b>{row.get('title', 'Sin título')}</b><br>"
                     popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
-                    popup_text += f"📍 {row.get('event-location', 'N/A')}<br>"
+                    if 'event-location' in row and pd.notna(row['event-location']):
+                        popup_text += f"📍 {row['event-location']}<br>"
+                    # Fecha y hora juntas
+                    fecha_hora = ""
                     if 'dtstart' in row and pd.notna(row['dtstart']):
                         fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                        popup_text += f"📅 {fecha}<br>"
+                        fecha_hora = f"📅 {fecha}"
+                    if 'time' in row and pd.notna(row['time']):
+                        hora = row['time']
+                        if fecha_hora:
+                            fecha_hora += f" - 🕐 {hora}"
+                        else:
+                            fecha_hora = f"🕐 {hora}"
+                    if fecha_hora:
+                        popup_text += f"{fecha_hora}<br>"
                     if 'distancia_km' in row and pd.notna(row['distancia_km']):
                         popup_text += f"📏 {row['distancia_km']} km<br>"
                     if 'link' in row and pd.notna(row['link']):
@@ -855,9 +866,21 @@ with tab2:
                         popup_text += f"<div style='padding: 8px; border-bottom: 1px solid #eee;'>"
                         popup_text += f"<b>{i+1}. {row.get('title', 'Sin título')}</b><br>"
                         popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
+                        if 'event-location' in row and pd.notna(row['event-location']):
+                            popup_text += f"📍 {row['event-location']}<br>"
+                        # Fecha y hora juntas
+                        fecha_hora = ""
                         if 'dtstart' in row and pd.notna(row['dtstart']):
                             fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                            popup_text += f"📅 {fecha}<br>"
+                            fecha_hora = f"📅 {fecha}"
+                        if 'time' in row and pd.notna(row['time']):
+                            hora = row['time']
+                            if fecha_hora:
+                                fecha_hora += f" - 🕐 {hora}"
+                            else:
+                                fecha_hora = f"🕐 {hora}"
+                        if fecha_hora:
+                            popup_text += f"{fecha_hora}<br>"
                         if 'distancia_km' in row and pd.notna(row['distancia_km']):
                             popup_text += f"📏 {row['distancia_km']} km<br>"
                         if 'link' in row and pd.notna(row['link']):
