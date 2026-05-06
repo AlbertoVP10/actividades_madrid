@@ -810,27 +810,71 @@ with tab2:
                     tooltip="📍 Tu ubicación"
                 ).add_to(m)
             
-            # Añadir marcadores de actividades
+            # Agrupar actividades por ubicación (lat, lon redondeado a 5 decimales para agrupar cercanas)
+            df_map['lat_round'] = df_map['lat'].round(5)
+            df_map['lon_round'] = df_map['lon'].round(5)
+            
+            # Crear diccionario de grupos por ubicación
+            grupos_ubicacion = {}
             for idx, row in df_map.head(100).iterrows():
-                popup_text = f"<b>{row.get('title', 'Sin título')}</b><br>"
-                popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
-                popup_text += f"📍 {row.get('event-location', 'N/A')}<br>"
-                if 'dtstart' in row and pd.notna(row['dtstart']):
-                    fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
-                    popup_text += f"📅 {fecha}<br>"
-                if 'distancia_km' in row and pd.notna(row['distancia_km']):
-                    popup_text += f"📏 {row['distancia_km']} km<br>"
-                if 'link' in row and pd.notna(row['link']):
-                    popup_text += f'<a href="{row["link"]}" target="_blank">Ver más</a>'
+                key = (row['lat_round'], row['lon_round'])
+                if key not in grupos_ubicacion:
+                    grupos_ubicacion[key] = {
+                        'lat': row['lat'],
+                        'lon': row['lon'],
+                        'actividades': []
+                    }
+                grupos_ubicacion[key]['actividades'].append(row)
+            
+            # Añadir marcadores de actividades (agrupados por ubicación)
+            for key, grupo in grupos_ubicacion.items():
+                actividades = grupo['actividades']
+                num_actividades = len(actividades)
+                
+                if num_actividades == 1:
+                    # Una sola actividad - popup simple
+                    row = actividades[0]
+                    popup_text = f"<b>{row.get('title', 'Sin título')}</b><br>"
+                    popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
+                    popup_text += f"📍 {row.get('event-location', 'N/A')}<br>"
+                    if 'dtstart' in row and pd.notna(row['dtstart']):
+                        fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+                        popup_text += f"📅 {fecha}<br>"
+                    if 'distancia_km' in row and pd.notna(row['distancia_km']):
+                        popup_text += f"📏 {row['distancia_km']} km<br>"
+                    if 'link' in row and pd.notna(row['link']):
+                        popup_text += f'<a href="{row["link"]}" target="_blank">Ver más</a>'
+                    
+                    tooltip_text = row.get('title', 'Actividad')[:50]
+                else:
+                    # Múltiples actividades - popup con lista scrollable
+                    popup_text = f"<div style='max-height: 300px; overflow-y: auto;'>"
+                    popup_text += f"<b>📍 {num_actividades} actividades en esta ubicación</b><hr style='margin: 8px 0;'>"
+                    
+                    for i, row in enumerate(actividades):
+                        popup_text += f"<div style='padding: 8px; border-bottom: 1px solid #eee;'>"
+                        popup_text += f"<b>{i+1}. {row.get('title', 'Sin título')}</b><br>"
+                        popup_text += f"🏷️ {row.get('categoria', 'Otras')}<br>"
+                        if 'dtstart' in row and pd.notna(row['dtstart']):
+                            fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
+                            popup_text += f"📅 {fecha}<br>"
+                        if 'distancia_km' in row and pd.notna(row['distancia_km']):
+                            popup_text += f"📏 {row['distancia_km']} km<br>"
+                        if 'link' in row and pd.notna(row['link']):
+                            popup_text += f'<a href="{row["link"]}" target="_blank">Ver más</a>'
+                        popup_text += "</div>"
+                    
+                    popup_text += "</div>"
+                    tooltip_text = f"{num_actividades} actividades"
                 
                 folium.Marker(
-                    location=[row['lat'], row['lon']],
-                    popup=folium.Popup(popup_text, max_width=300),
-                    tooltip=row.get('title', 'Actividad')[:50]
+                    location=[grupo['lat'], grupo['lon']],
+                    popup=folium.Popup(popup_text, max_width=350),
+                    tooltip=tooltip_text
                 ).add_to(m)
             
             st_folium(m, width=700, height=500)
-            st.caption(f"Mostrando {min(len(df_map), 100)} actividades")
+            st.caption(f"Mostrando {len(df_map)} actividades en {len(grupos_ubicacion)} ubicaciones")
         else:
             st.info("No hay actividades con coordenadas")
 
