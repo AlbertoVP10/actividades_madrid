@@ -234,27 +234,23 @@ def limpiar_todos():
     st.session_state.franja_horaria = "Todo el día"
     st.session_state.solo_gratis = False
     st.session_state.busqueda = ""
-    st.session_state.kpi_filtro = None
+    st.session_state.kpi_hoy = False
+    st.session_state.kpi_destacados = False
+    st.session_state.kpi_cerca = False
+    st.session_state.kpi_favoritos = False
 
-# Funciones callback para filtros de KPI
-def filtrar_kpi_hoy():
-    st.session_state.kpi_filtro = 'hoy'
-    st.session_state.fecha_tipo = "Hoy"
+# Funciones callback para filtros de KPI (toggle)
+def toggle_kpi_hoy():
+    st.session_state.kpi_hoy = not st.session_state.kpi_hoy
 
-def filtrar_kpi_destacados():
-    st.session_state.kpi_filtro = 'destacados'
-    st.session_state.categoria_sel = 'Destacada'
+def toggle_kpi_destacados():
+    st.session_state.kpi_destacados = not st.session_state.kpi_destacados
 
-def filtrar_kpi_cerca():
-    st.session_state.kpi_filtro = 'cerca'
-    # El filtro de cercanía se aplica automáticamente si hay coordenadas
+def toggle_kpi_cerca():
+    st.session_state.kpi_cerca = not st.session_state.kpi_cerca
 
-def filtrar_kpi_favoritos():
-    st.session_state.kpi_filtro = 'favoritos'
-    st.session_state.ver_favoritos = True
-
-def quitar_filtro_kpi():
-    st.session_state.kpi_filtro = None
+def toggle_kpi_favoritos():
+    st.session_state.kpi_favoritos = not st.session_state.kpi_favoritos
 
 # Cargar datos
 df_original = load_data_from_api()
@@ -336,8 +332,14 @@ with st.sidebar:
         st.session_state.solo_gratis = False
     if 'busqueda' not in st.session_state:
         st.session_state.busqueda = ""
-    if 'kpi_filtro' not in st.session_state:
-        st.session_state.kpi_filtro = None
+    if 'kpi_hoy' not in st.session_state:
+        st.session_state.kpi_hoy = False
+    if 'kpi_destacados' not in st.session_state:
+        st.session_state.kpi_destacados = False
+    if 'kpi_cerca' not in st.session_state:
+        st.session_state.kpi_cerca = False
+    if 'kpi_favoritos' not in st.session_state:
+        st.session_state.kpi_favoritos = False
     if 'ver_favoritos' not in st.session_state:
         st.session_state.ver_favoritos = False
     
@@ -521,13 +523,26 @@ if franja_horaria != "Todo el día" and 'time' in df.columns:
     elif franja_horaria == "Noche (18:00 - 24:00)":
         df = df[(df['hora'] >= 18) & (df['hora'] < 24) | df['hora'].isna()]
 
-# Ver favoritos (desde KPI o checkbox)
-if st.session_state.get('ver_favoritos', False) and len(st.session_state.favoritos) > 0:
-    df = df[df['@id'].isin(st.session_state.favoritos)]
+# Filtro KPI "Hoy"
+if st.session_state.kpi_hoy and 'dtstart' in df.columns:
+    hoy = datetime.now()
+    df = df[df['dtstart'].dt.date == hoy.date()]
+
+# Filtro KPI "Destacados"
+if st.session_state.kpi_destacados and 'categoria' in df.columns:
+    df = df[df['categoria'] == 'Destacada']
 
 # Filtro KPI "Cerca de mí" (distancia < 2km)
-if st.session_state.kpi_filtro == 'cerca' and 'distancia_km' in df.columns and st.session_state.ref_coords:
+if st.session_state.kpi_cerca and 'distancia_km' in df.columns and st.session_state.ref_coords:
     df = df[(df['distancia_km'] < 2) & (df['distancia_km'].notna())]
+
+# Filtro KPI "Favoritos"
+if st.session_state.kpi_favoritos and len(st.session_state.favoritos) > 0:
+    df = df[df['@id'].isin(st.session_state.favoritos)]
+
+# Ver favoritos (desde checkbox del sidebar)
+if st.session_state.get('ver_favoritos', False) and len(st.session_state.favoritos) > 0:
+    df = df[df['@id'].isin(st.session_state.favoritos)]
 
 # Calcular distancias si hay referencia
 if st.session_state.ref_coords and 'lat' in df.columns and 'lon' in df.columns:
@@ -561,7 +576,10 @@ filtros_actuales = {
     'horario': franja_horaria,
     'gratis': solo_gratis,
     'busqueda': busqueda,
-    'kpi_filtro': st.session_state.kpi_filtro,
+    'kpi_hoy': st.session_state.kpi_hoy,
+    'kpi_destacados': st.session_state.kpi_destacados,
+    'kpi_cerca': st.session_state.kpi_cerca,
+    'kpi_favoritos': st.session_state.kpi_favoritos,
     'ver_favoritos': st.session_state.ver_favoritos
 }
 
@@ -596,64 +614,108 @@ if 'distancia_km' in df.columns and st.session_state.ref_coords:
 # Mis favoritos
 kpi_favoritos = len(st.session_state.favoritos)
 
-# Mostrar KPIs en grid compacto - AHORA CLICKEABLES
+# Mostrar KPIs en grid compacto - AHORA CLICKEABLES con colores originales
 st.markdown("---")
+
+# CSS para KPIs con colores originales y borde de activo
+st.markdown("""
+<style>
+    .kpi-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+    .kpi-card {
+        padding: 10px 5px;
+        border-radius: 8px;
+        text-align: center;
+        color: white;
+        min-width: 0;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.2s;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .kpi-card.active {
+        border: 3px solid #FFD700;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    .kpi-hoy { background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); }
+    .kpi-destacados { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .kpi-cerca { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .kpi-favoritos { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .kpi-number { font-size: 20px; font-weight: bold; line-height: 1; }
+    .kpi-label { font-size: 10px; opacity: 0.9; margin-top: 2px; }
+</style>
+""", unsafe_allow_html=True)
 
 # Crear columnas para los KPIs
 kpi_cols = st.columns(4)
 
 with kpi_cols[0]:
     # KPI Hoy - Azul
-    btn_hoy = st.button(
-        f"📅 Hoy\n\n**{kpi_hoy}**",
-        key="kpi_hoy",
-        on_click=filtrar_kpi_hoy,
-        use_container_width=True,
-        type="primary" if st.session_state.kpi_filtro == 'hoy' else "secondary"
-    )
+    active_class_hoy = "active" if st.session_state.kpi_hoy else ""
+    st.markdown(f"""
+        <div class="kpi-card kpi-hoy {active_class_hoy}" id="kpi-hoy-card">
+            <div class="kpi-number">{kpi_hoy}</div>
+            <div class="kpi-label">📅 Hoy</div>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Hoy", key="btn_kpi_hoy", on_click=toggle_kpi_hoy, use_container_width=True, label_visibility="collapsed"):
+        pass
 
 with kpi_cols[1]:
     # KPI Destacados - Rosa
-    btn_destacados = st.button(
-        f"⭐ Destacados\n\n**{kpi_destacados}**",
-        key="kpi_destacados",
-        on_click=filtrar_kpi_destacados,
-        use_container_width=True,
-        type="primary" if st.session_state.kpi_filtro == 'destacados' else "secondary"
-    )
+    active_class_dest = "active" if st.session_state.kpi_destacados else ""
+    st.markdown(f"""
+        <div class="kpi-card kpi-destacados {active_class_dest}" id="kpi-destacados-card">
+            <div class="kpi-number">{kpi_destacados}</div>
+            <div class="kpi-label">⭐ Destacados</div>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Destacados", key="btn_kpi_destacados", on_click=toggle_kpi_destacados, use_container_width=True, label_visibility="collapsed"):
+        pass
 
 with kpi_cols[2]:
     # KPI Cerca de mí - Cian
-    btn_cerca = st.button(
-        f"📍 Cerca de mí\n\n**{kpi_cerca}**",
-        key="kpi_cerca",
-        on_click=filtrar_kpi_cerca,
-        use_container_width=True,
-        type="primary" if st.session_state.kpi_filtro == 'cerca' else "secondary"
-    )
+    active_class_cerca = "active" if st.session_state.kpi_cerca else ""
+    st.markdown(f"""
+        <div class="kpi-card kpi-cerca {active_class_cerca}" id="kpi-cerca-card">
+            <div class="kpi-number">{kpi_cerca}</div>
+            <div class="kpi-label">📍 Cerca de mí</div>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Cerca", key="btn_kpi_cerca", on_click=toggle_kpi_cerca, use_container_width=True, label_visibility="collapsed"):
+        pass
 
 with kpi_cols[3]:
     # KPI Favoritos - Naranja/Rosa
-    btn_favoritos = st.button(
-        f"❤️ Favoritos\n\n**{kpi_favoritos}**",
-        key="kpi_favoritos",
-        on_click=filtrar_kpi_favoritos,
-        use_container_width=True,
-        type="primary" if st.session_state.kpi_filtro == 'favoritos' else "secondary"
-    )
+    active_class_fav = "active" if st.session_state.kpi_favoritos else ""
+    st.markdown(f"""
+        <div class="kpi-card kpi-favoritos {active_class_fav}" id="kpi-favoritos-card">
+            <div class="kpi-number">{kpi_favoritos}</div>
+            <div class="kpi-label">❤️ Favoritos</div>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Favoritos", key="btn_kpi_favoritos", on_click=toggle_kpi_favoritos, use_container_width=True, label_visibility="collapsed"):
+        pass
 
 # FILTER CHIPS - Filtros aplicados
 filtros_activos = []
 
-# Añadir filtro de KPI si está activo
-if st.session_state.kpi_filtro == 'hoy':
-    filtros_activos.append("📅 Hoy (KPI)")
-elif st.session_state.kpi_filtro == 'destacados':
-    filtros_activos.append("⭐ Destacados (KPI)")
-elif st.session_state.kpi_filtro == 'cerca':
-    filtros_activos.append("📍 Cerca de mí (KPI)")
-elif st.session_state.kpi_filtro == 'favoritos':
-    filtros_activos.append("❤️ Favoritos (KPI)")
+# Añadir filtros de KPI si están activos
+if st.session_state.kpi_hoy:
+    filtros_activos.append("📅 Hoy")
+if st.session_state.kpi_destacados:
+    filtros_activos.append("⭐ Destacados")
+if st.session_state.kpi_cerca:
+    filtros_activos.append("📍 Cerca de mí")
+if st.session_state.kpi_favoritos:
+    filtros_activos.append("❤️ Favoritos")
 
 if categoria_sel != 'Todas':
     filtros_activos.append(f"🎭 {categoria_sel}")
@@ -678,25 +740,31 @@ if filtros_activos:
     
     # Mapear filtros a sus callbacks
     filtros_callbacks = {
-        "🎭": (quitar_categoria, "categoria"),
-        "📍": (quitar_distrito, "distrito"),
-        "👥": (quitar_publico, "publico"),
-        "🕐": (quitar_horario, "horario"),
-        "💰": (quitar_gratis, "gratis"),
-        "🔎": (quitar_busqueda, "busqueda"),
-        "⭐": (quitar_filtro_kpi, "kpi"),
-        "❤️": (quitar_filtro_kpi, "kpi")
+        "🎭": quitar_categoria,
+        "👥": quitar_publico,
+        "🕐": quitar_horario,
+        "💰": quitar_gratis,
+        "🔎": quitar_busqueda
     }
     
     # Función para determinar el callback correcto
     def get_callback(filtro_texto):
-        # Primero verificar si es un filtro de KPI
-        if "(KPI)" in filtro_texto:
-            return quitar_filtro_kpi
-        # Luego buscar por icono
-        for key, (cb, name) in filtros_callbacks.items():
+        # Verificar filtros de KPI primero
+        if "📅 Hoy" in filtro_texto:
+            return toggle_kpi_hoy
+        if "⭐ Destacados" in filtro_texto:
+            return toggle_kpi_destacados
+        if "📍 Cerca de mí" in filtro_texto:
+            return toggle_kpi_cerca
+        if "❤️ Favoritos" in filtro_texto:
+            return toggle_kpi_favoritos
+        # Luego buscar por icono en filtros normales
+        for key, cb in filtros_callbacks.items():
             if key in filtro_texto:
                 return cb
+        # Distrito tiene el mismo icono que Cerca de mí, verificar después
+        if "📍" in filtro_texto:
+            return quitar_distrito
         return None
     
     # Crear columnas horizontales para los chips
