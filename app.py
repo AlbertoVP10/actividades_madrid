@@ -284,14 +284,16 @@ with st.sidebar:
         st.subheader("📍 Tu ubicación")
         direccion_ref = st.text_input("", placeholder="Ej: Calle Mayor 10", label_visibility="collapsed")
         
-        if direccion_ref and st.button("📍 Calcular distancias"):
+        # Calcular distancias automáticamente si hay dirección
+        if direccion_ref:
             with st.spinner("Geocodificando..."):
                 coords = geocodificar_direccion(direccion_ref)
                 if coords:
                     st.session_state.ref_coords = coords
                     st.success(f"✅ Ubicación encontrada: {coords[0]:.4f}, {coords[1]:.4f}")
                 else:
-                    st.error("No se pudo encontrar la dirección")
+                    st.session_state.ref_coords = None
+                    st.error("❌ No ha sido posible geolocalizar")
     
     st.markdown("---")
     
