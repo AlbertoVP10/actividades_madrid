@@ -550,6 +550,14 @@ st.markdown("---")
 
 # Calcular valores
 kpi_total = len(df)
+
+# Esta semana (próximos 7 días)
+kpi_esta_semana = 0
+if 'dtstart' in df.columns and len(df) > 0:
+    hoy = datetime.now()
+    fin_semana = hoy + timedelta(days=7)
+    kpi_esta_semana = len(df[(df['dtstart'] >= hoy) & (df['dtstart'] <= fin_semana)])
+
 kpi_hoy = 0
 if 'dtstart' in df.columns and len(df) > 0:
     kpi_hoy = len(df[df['dtstart'].dt.date == datetime.now().date()])
@@ -567,7 +575,12 @@ kpi_favoritos = len(st.session_state.favoritos)
 
 # Mostrar KPIs en grid compacto
 st.markdown(f"""
-<div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;'>
+<div style='display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px;'>
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_esta_semana}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📆 Esta semana</div>
+    </div>
     <div style='background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); 
                 padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
         <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_hoy}</div>
