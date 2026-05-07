@@ -550,34 +550,43 @@ st.markdown("---")
 
 # Calcular valores
 kpi_total = len(df)
-kpi_gratis = len(df[df['free'] == 1]) if 'free' in df.columns else 0
-kpi_ubicacion = len(df.dropna(subset=['lat', 'lon']))
 kpi_hoy = 0
 if 'dtstart' in df.columns and len(df) > 0:
     kpi_hoy = len(df[df['dtstart'].dt.date == datetime.now().date()])
 
+# Destacados (categoría 'Destacada')
+kpi_destacados = len(df[df['categoria'] == 'Destacada']) if 'categoria' in df.columns else 0
+
+# Cerca de mí (distancia < 2km si hay ubicación)
+kpi_cerca = 0
+if 'distancia_km' in df.columns and st.session_state.ref_coords:
+    kpi_cerca = len(df[(df['distancia_km'] < 2) & (df['distancia_km'].notna())])
+
+# Mis favoritos
+kpi_favoritos = len(st.session_state.favoritos)
+
 # Mostrar KPIs en grid compacto
 st.markdown(f"""
 <div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;'>
-    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_total}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📊 Total</div>
-    </div>
-    <div style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_gratis}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>💰 Gratis</div>
-    </div>
-    <div style='background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_ubicacion}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📍 Mapa</div>
-    </div>
     <div style='background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); 
                 padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
         <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_hoy}</div>
         <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📅 Hoy</div>
+    </div>
+    <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_destacados}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>⭐ Destacados</div>
+    </div>
+    <div style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_cerca}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📍 Cerca de mí</div>
+    </div>
+    <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
+                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
+        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_favoritos}</div>
+        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>❤️ Favoritos</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
