@@ -740,19 +740,19 @@ with tab1:
                     if 'dtstart' in row and pd.notna(row['dtstart']):
                         fecha = row['dtstart'].strftime('%d/%m/%Y') if hasattr(row['dtstart'], 'strftime') else str(row['dtstart'])
                         detalles.append(f"📅 **Fecha:** {fecha}")
-                    if 'time' in row and pd.notna(row['time']):
+                    if 'time' in row and pd.notna(row['time']) and str(row['time']).strip():
                         detalles.append(f"🕐 **Hora:** {row['time']}")
-                    if 'event-location' in row and pd.notna(row['event-location']):
+                    if 'event-location' in row and pd.notna(row['event-location']) and str(row['event-location']).strip():
                         detalles.append(f"📍 **Lugar:** {row['event-location']}")
-                    if 'distrito_nombre' in row and pd.notna(row['distrito_nombre']):
+                    if 'distrito_nombre' in row and pd.notna(row['distrito_nombre']) and str(row['distrito_nombre']).strip() and row['distrito_nombre'] != 'Desconocido':
                         detalles.append(f"🏘️ **Distrito:** {row['distrito_nombre']}")
-                    if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']):
+                    if 'address.area.street-address' in row and pd.notna(row['address.area.street-address']) and str(row['address.area.street-address']).strip():
                         detalles.append(f"🗺️ **Dirección:** {row['address.area.street-address']}")
                     if 'free' in row and row['free'] == 1:
                         detalles.append("💰 **Precio:** Gratuito")
-                    elif 'price' in row and pd.notna(row['price']):
+                    elif 'price' in row and pd.notna(row['price']) and str(row['price']).strip():
                         detalles.append(f"💰 **Precio:** {row['price']}")
-                    if 'audience' in row and pd.notna(row['audience']):
+                    if 'audience' in row and pd.notna(row['audience']) and str(row['audience']).strip():
                         detalles.append(f"👥 **Público:** {row['audience']}")
                     if 'distancia_km' in row and pd.notna(row['distancia_km']):
                         detalles.append(f"📏 **Distancia:** {row['distancia_km']} km")
