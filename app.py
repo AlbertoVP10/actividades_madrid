@@ -729,9 +729,11 @@ with tab1:
                     st.caption(f"🏷️ Categoría: {categoria}")
                     
                     # Descripción completa
-                    if 'description' in row and pd.notna(row['description']):
-                        st.markdown("**Descripción:**")
+                    st.markdown("**Descripción:**")
+                    if 'description' in row and pd.notna(row['description']) and str(row['description']).strip():
                         st.write(row['description'])
+                    else:
+                        st.write("*Sin descripción*")
                     
                     # Detalles completos
                     st.markdown("**Detalles:**")
