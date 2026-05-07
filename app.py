@@ -797,7 +797,6 @@ with tab1:
         
         # Controles de paginación al final del listado
         if total_paginas > 1:
-            st.markdown("---")
             st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
             
             # Crear opciones de página para pills (mismo formato que arriba)
