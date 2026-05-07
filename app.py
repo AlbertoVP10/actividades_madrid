@@ -276,7 +276,7 @@ with st.sidebar:
     # Ordenar por - PRIMERO
     st.subheader("📊 Ordenar por")
     opciones_orden = ["Más recientes", "Más baratas (gratis primero)", "Más cercanas"]
-    orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed")
+    orden_sel = st.selectbox("", opciones_orden, label_visibility="collapsed", filter_mode=None)
     
     # Ubicación - Solo aparece si se ordena por cercanía
     direccion_ref = ""  # Inicializar vacío por defecto
@@ -319,7 +319,7 @@ with st.sidebar:
     # Categorías predefinidas
     st.subheader("🎭 Categoría")
     categorias = ['Todas'] + sorted(df_original['categoria'].unique().tolist())
-    categoria_sel = st.selectbox("", categorias, label_visibility="collapsed", key='categoria_sel')
+    categoria_sel = st.selectbox("", categorias, label_visibility="collapsed", key='categoria_sel', filter_mode=None)
     
     # Distrito - Selector simple
     st.subheader("📍 Distrito")
@@ -354,13 +354,14 @@ with st.sidebar:
         "",
         options=distritos_lista,
         label_visibility="collapsed",
-        key='distrito_sel'
+        key='distrito_sel',
+        filter_mode=None
     )
     
     # Público objetivo
     st.subheader("👥 Público")
     publico_opciones = ['Todos', 'Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes']
-    publico_sel = st.selectbox("", publico_opciones, label_visibility="collapsed", key='publico_sel')
+    publico_sel = st.selectbox("", publico_opciones, label_visibility="collapsed", key='publico_sel', filter_mode=None)
     
     # Fecha
     st.subheader("📅 Fecha")
@@ -372,7 +373,7 @@ with st.sidebar:
         "Próximo mes",
         "Fecha concreta",
         "Rango de fechas"
-    ], label_visibility="collapsed", key='fecha_tipo')
+    ], label_visibility="collapsed", key='fecha_tipo', filter_mode=None)
     
     # Mostrar selector de fecha según el tipo
     fecha_concreta = None
@@ -397,7 +398,7 @@ with st.sidebar:
         "Mañana (6:00 - 12:00)",
         "Tarde (12:00 - 18:00)",
         "Noche (18:00 - 24:00)"
-    ], label_visibility="collapsed", key='franja_horaria')
+    ], label_visibility="collapsed", key='franja_horaria', filter_mode=None)
     
     # Gratuidad
     st.subheader("💰 Precio")
