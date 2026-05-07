@@ -743,21 +743,29 @@ with kpi_cols[4]:
 # FILTER CHIPS - Filtros aplicados
 filtros_activos = []
 
-# Nota: Los filtros de KPI Hoy, Esta semana y Destacados se muestran 
-# a través de los selectores sincronizados (fecha_tipo y categoria_sel)
-# Solo Cerca de mí y Favoritos son KPIs independientes
+# KPIs sincronizados (aparecen como chips clickeables)
+if st.session_state.fecha_tipo == "Hoy":
+    filtros_activos.append("📅 Hoy")
+if st.session_state.fecha_tipo == "Próximos 7 días":
+    filtros_activos.append("📆 Esta semana")
+if st.session_state.categoria_sel == 'Destacada':
+    filtros_activos.append("⭐ Destacados")
+
+# KPIs independientes
 if st.session_state.kpi_cerca:
     filtros_activos.append("📍 Cerca de mí")
 if st.session_state.kpi_favoritos:
     filtros_activos.append("❤️ Favoritos")
 
-if categoria_sel != 'Todas':
+# Categoría: solo mostrar si NO es Destacada (ya que Destacada se muestra como KPI)
+if categoria_sel != 'Todas' and categoria_sel != 'Destacada':
     filtros_activos.append(f"🎭 {categoria_sel}")
 if distrito_sel != 'Todos':
     filtros_activos.append(f"📍 {distrito_sel}")
 if publico_sel != 'Todos':
     filtros_activos.append(f"👥 {publico_sel}")
-if fecha_tipo != "Todas las fechas":
+# Fecha: solo mostrar si NO es Hoy ni Próximos 7 días (ya que se muestran como KPIs)
+if fecha_tipo not in ["Todas las fechas", "Hoy", "Próximos 7 días"]:
     filtros_activos.append(f"📅 {fecha_tipo}")
 if franja_horaria != "Todo el día":
     filtros_activos.append(f"🕐 {franja_horaria}")
@@ -783,14 +791,16 @@ if filtros_activos:
     
     # Función para determinar el callback correcto
     def get_callback(filtro_texto):
-        # Verificar filtros de KPI primero
-        if "📅 Hoy" in filtro_texto:
+        # Verificar filtros de KPI primero (orden específico antes de genérico)
+        if filtro_texto == "📅 Hoy":
             return toggle_kpi_hoy
-        if "⭐ Destacados" in filtro_texto:
+        if filtro_texto == "📆 Esta semana":
+            return toggle_kpi_esta_semana
+        if filtro_texto == "⭐ Destacados":
             return toggle_kpi_destacados
-        if "📍 Cerca de mí" in filtro_texto:
+        if filtro_texto == "📍 Cerca de mí":
             return toggle_kpi_cerca
-        if "❤️ Favoritos" in filtro_texto:
+        if filtro_texto == "❤️ Favoritos":
             return toggle_kpi_favoritos
         # Luego buscar por icono en filtros normales
         for key, cb in filtros_callbacks.items():
