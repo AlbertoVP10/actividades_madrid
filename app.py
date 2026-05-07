@@ -794,6 +794,32 @@ with tab1:
                         else:
                             st.session_state.favoritos.append(act_id)
                         st.rerun()
+        
+        # Controles de paginación al final del listado
+        if total_paginas > 1:
+            st.markdown("---")
+            st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
+            
+            # Crear opciones de página para pills (mismo formato que arriba)
+            opciones_pagina_bottom = []
+            if st.session_state.page > 0:
+                opciones_pagina_bottom.append("⬅️ Ant")
+            
+            pagina_actual_texto_bottom = f"📄 {st.session_state.page + 1}/{max(1, total_paginas)}"
+            opciones_pagina_bottom.append(pagina_actual_texto_bottom)
+            
+            if st.session_state.page < total_paginas - 1:
+                opciones_pagina_bottom.append("Sig ➡️")
+            
+            # El default debe ser el texto de la página actual
+            seleccion_bottom = st.pills("Navegación inferior", opciones_pagina_bottom, default=pagina_actual_texto_bottom, label_visibility="collapsed")
+            
+            if seleccion_bottom == "⬅️ Ant" and st.session_state.page > 0:
+                st.session_state.page -= 1
+                st.rerun()
+            elif seleccion_bottom == "Sig ➡️" and st.session_state.page < total_paginas - 1:
+                st.session_state.page += 1
+                st.rerun()
 
 # TAB 2: MAPA
 with tab2:
