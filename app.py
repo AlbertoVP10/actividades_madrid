@@ -758,21 +758,21 @@ if st.session_state.kpi_favoritos:
     filtros_activos.append("❤️ Favoritos")
 
 # Categoría: solo mostrar si NO es Destacada (ya que Destacada se muestra como KPI)
-if categoria_sel != 'Todas' and categoria_sel != 'Destacada':
-    filtros_activos.append(f"🎭 {categoria_sel}")
-if distrito_sel != 'Todos':
-    filtros_activos.append(f"📍 {distrito_sel}")
-if publico_sel != 'Todos':
-    filtros_activos.append(f"👥 {publico_sel}")
+if st.session_state.categoria_sel != 'Todas' and st.session_state.categoria_sel != 'Destacada':
+    filtros_activos.append(f"🎭 {st.session_state.categoria_sel}")
+if st.session_state.distrito_sel != 'Todos':
+    filtros_activos.append(f"📍 {st.session_state.distrito_sel}")
+if st.session_state.publico_sel != 'Todos':
+    filtros_activos.append(f"👥 {st.session_state.publico_sel}")
 # Fecha: solo mostrar si NO es Hoy ni Próximos 7 días (ya que se muestran como KPIs)
-if fecha_tipo not in ["Todas las fechas", "Hoy", "Próximos 7 días"]:
-    filtros_activos.append(f"📅 {fecha_tipo}")
-if franja_horaria != "Todo el día":
-    filtros_activos.append(f"🕐 {franja_horaria}")
-if solo_gratis:
+if st.session_state.fecha_tipo not in ["Todas las fechas", "Hoy", "Próximos 7 días"]:
+    filtros_activos.append(f"📅 {st.session_state.fecha_tipo}")
+if st.session_state.franja_horaria != "Todo el día":
+    filtros_activos.append(f"🕐 {st.session_state.franja_horaria}")
+if st.session_state.solo_gratis:
     filtros_activos.append("💰 Gratis")
-if busqueda:
-    filtros_activos.append(f"🔎 {busqueda[:20]}...")
+if st.session_state.busqueda:
+    filtros_activos.append(f"🔎 {st.session_state.busqueda[:20]}...")
 
 if filtros_activos:
     st.markdown("<small>**Filtros:**</small>", unsafe_allow_html=True)
