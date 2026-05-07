@@ -730,7 +730,7 @@ with tab1:
                     
                     # Descripción completa
                     st.markdown("**Descripción:**")
-                    if 'description' in row and pd.notna(row['description']) and str(row['description']).strip():
+                    if 'description' in row and pd.notna(row['description']) and str(row['description']).strip() != "":
                         st.write(row['description'])
                     else:
                         st.write("*Sin descripción*")
