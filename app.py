@@ -234,22 +234,37 @@ def limpiar_todos():
     st.session_state.franja_horaria = "Todo el día"
     st.session_state.solo_gratis = False
     st.session_state.busqueda = ""
-    st.session_state.kpi_hoy = False
-    st.session_state.kpi_destacados = False
     st.session_state.kpi_cerca = False
     st.session_state.kpi_favoritos = False
 
-# Funciones callback para filtros de KPI (toggle)
+# Funciones callback para filtros de KPI (sincronizados con selectores)
 def toggle_kpi_hoy():
-    st.session_state.kpi_hoy = not st.session_state.kpi_hoy
+    """Toggle KPI Hoy - sincronizado con selector de fecha"""
+    if st.session_state.fecha_tipo == "Hoy":
+        st.session_state.fecha_tipo = "Todas las fechas"
+    else:
+        st.session_state.fecha_tipo = "Hoy"
+
+def toggle_kpi_esta_semana():
+    """Toggle KPI Esta Semana - sincronizado con selector de fecha"""
+    if st.session_state.fecha_tipo == "Próximos 7 días":
+        st.session_state.fecha_tipo = "Todas las fechas"
+    else:
+        st.session_state.fecha_tipo = "Próximos 7 días"
 
 def toggle_kpi_destacados():
-    st.session_state.kpi_destacados = not st.session_state.kpi_destacados
+    """Toggle KPI Destacados - sincronizado con selector de categoría"""
+    if st.session_state.categoria_sel == 'Destacada':
+        st.session_state.categoria_sel = 'Todas'
+    else:
+        st.session_state.categoria_sel = 'Destacada'
 
 def toggle_kpi_cerca():
+    """Toggle KPI Cerca de mí"""
     st.session_state.kpi_cerca = not st.session_state.kpi_cerca
 
 def toggle_kpi_favoritos():
+    """Toggle KPI Favoritos"""
     st.session_state.kpi_favoritos = not st.session_state.kpi_favoritos
 
 # Cargar datos
@@ -332,10 +347,6 @@ with st.sidebar:
         st.session_state.solo_gratis = False
     if 'busqueda' not in st.session_state:
         st.session_state.busqueda = ""
-    if 'kpi_hoy' not in st.session_state:
-        st.session_state.kpi_hoy = False
-    if 'kpi_destacados' not in st.session_state:
-        st.session_state.kpi_destacados = False
     if 'kpi_cerca' not in st.session_state:
         st.session_state.kpi_cerca = False
     if 'kpi_favoritos' not in st.session_state:
@@ -523,15 +534,6 @@ if franja_horaria != "Todo el día" and 'time' in df.columns:
     elif franja_horaria == "Noche (18:00 - 24:00)":
         df = df[(df['hora'] >= 18) & (df['hora'] < 24) | df['hora'].isna()]
 
-# Filtro KPI "Hoy"
-if st.session_state.kpi_hoy and 'dtstart' in df.columns:
-    hoy = datetime.now()
-    df = df[df['dtstart'].dt.date == hoy.date()]
-
-# Filtro KPI "Destacados"
-if st.session_state.kpi_destacados and 'categoria' in df.columns:
-    df = df[df['categoria'] == 'Destacada']
-
 # Filtro KPI "Cerca de mí" (distancia < 2km)
 if st.session_state.kpi_cerca and 'distancia_km' in df.columns and st.session_state.ref_coords:
     df = df[(df['distancia_km'] < 2) & (df['distancia_km'].notna())]
@@ -576,8 +578,6 @@ filtros_actuales = {
     'horario': franja_horaria,
     'gratis': solo_gratis,
     'busqueda': busqueda,
-    'kpi_hoy': st.session_state.kpi_hoy,
-    'kpi_destacados': st.session_state.kpi_destacados,
     'kpi_cerca': st.session_state.kpi_cerca,
     'kpi_favoritos': st.session_state.kpi_favoritos,
     'ver_favoritos': st.session_state.ver_favoritos
@@ -597,22 +597,45 @@ total_paginas = (len(df) + items_por_pagina - 1) // items_por_pagina
 # KPIs en horizontal - Compactos para móvil
 st.markdown("---")
 
-# Calcular valores
-kpi_total = len(df)
+# Calcular valores (basados en df_original, no en df filtrado)
+kpi_total = len(df_original)
+
+# Hoy - calculado desde df_original
 kpi_hoy = 0
-if 'dtstart' in df.columns and len(df) > 0:
-    kpi_hoy = len(df[df['dtstart'].dt.date == datetime.now().date()])
+if 'dtstart' in df_original.columns and len(df_original) > 0:
+    kpi_hoy = len(df_original[df_original['dtstart'].dt.date == datetime.now().date()])
 
-# Destacados (categoría 'Destacada')
-kpi_destacados = len(df[df['categoria'] == 'Destacada']) if 'categoria' in df.columns else 0
+# Esta semana - calculado desde df_original
+kpi_esta_semana = 0
+if 'dtstart' in df_original.columns and len(df_original) > 0:
+    hoy = datetime.now()
+    kpi_esta_semana = len(df_original[df_original['dtstart'] <= hoy + timedelta(days=7)])
 
-# Cerca de mí (distancia < 2km si hay ubicación)
+# Destacados (categoría 'Destacada') - calculado desde df_original
+kpi_destacados = len(df_original[df_original['categoria'] == 'Destacada']) if 'categoria' in df_original.columns else 0
+
+# Cerca de mí (distancia < 2km si hay ubicación) - calculado desde df_original
 kpi_cerca = 0
-if 'distancia_km' in df.columns and st.session_state.ref_coords:
-    kpi_cerca = len(df[(df['distancia_km'] < 2) & (df['distancia_km'].notna())])
+if st.session_state.ref_coords:
+    # Calcular distancias en df_original para el KPI
+    ref_lat, ref_lon = st.session_state.ref_coords
+    df_temp = df_original.copy()
+    df_temp['distancia_km'] = df_temp.apply(
+        lambda row: calcular_distancia(ref_lat, ref_lon, row.get('lat'), row.get('lon')) 
+        if pd.notna(row.get('lat')) and pd.notna(row.get('lon')) else None,
+        axis=1
+    )
+    kpi_cerca = len(df_temp[(df_temp['distancia_km'] < 2) & (df_temp['distancia_km'].notna())])
 
 # Mis favoritos
 kpi_favoritos = len(st.session_state.favoritos)
+
+# Determinar estado activo basado en filtros sincronizados
+is_hoy_active = st.session_state.fecha_tipo == "Hoy"
+is_esta_semana_active = st.session_state.fecha_tipo == "Próximos 7 días"
+is_destacados_active = st.session_state.categoria_sel == 'Destacada'
+is_cerca_active = st.session_state.kpi_cerca
+is_favoritos_active = st.session_state.kpi_favoritos
 
 # Mostrar KPIs en grid compacto - AHORA CLICKEABLES con colores originales
 st.markdown("---")
@@ -622,7 +645,7 @@ st.markdown("""
 <style>
     .kpi-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 8px;
         margin-bottom: 20px;
     }
@@ -645,20 +668,21 @@ st.markdown("""
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
     .kpi-hoy { background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); }
+    .kpi-semana { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .kpi-destacados { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
     .kpi-cerca { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
     .kpi-favoritos { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-    .kpi-number { font-size: 20px; font-weight: bold; line-height: 1; }
-    .kpi-label { font-size: 10px; opacity: 0.9; margin-top: 2px; }
+    .kpi-number { font-size: 18px; font-weight: bold; line-height: 1; }
+    .kpi-label { font-size: 9px; opacity: 0.9; margin-top: 2px; }
 </style>
 """, unsafe_allow_html=True)
 
-# Crear columnas para los KPIs
-kpi_cols = st.columns(4)
+# Crear columnas para los KPIs (5 columnas ahora)
+kpi_cols = st.columns(5)
 
 with kpi_cols[0]:
     # KPI Hoy - Azul
-    active_class_hoy = "active" if st.session_state.kpi_hoy else ""
+    active_class_hoy = "active" if is_hoy_active else ""
     st.markdown(f"""
         <div class="kpi-card kpi-hoy {active_class_hoy}" id="kpi-hoy-card">
             <div class="kpi-number">{kpi_hoy}</div>
@@ -669,8 +693,20 @@ with kpi_cols[0]:
         pass
 
 with kpi_cols[1]:
+    # KPI Esta Semana - Morado
+    active_class_semana = "active" if is_esta_semana_active else ""
+    st.markdown(f"""
+        <div class="kpi-card kpi-semana {active_class_semana}" id="kpi-semana-card">
+            <div class="kpi-number">{kpi_esta_semana}</div>
+            <div class="kpi-label">📆 Esta semana</div>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Semana", key="btn_kpi_semana", on_click=toggle_kpi_esta_semana, use_container_width=True, label_visibility="collapsed"):
+        pass
+
+with kpi_cols[2]:
     # KPI Destacados - Rosa
-    active_class_dest = "active" if st.session_state.kpi_destacados else ""
+    active_class_dest = "active" if is_destacados_active else ""
     st.markdown(f"""
         <div class="kpi-card kpi-destacados {active_class_dest}" id="kpi-destacados-card">
             <div class="kpi-number">{kpi_destacados}</div>
@@ -680,9 +716,9 @@ with kpi_cols[1]:
     if st.button("Destacados", key="btn_kpi_destacados", on_click=toggle_kpi_destacados, use_container_width=True, label_visibility="collapsed"):
         pass
 
-with kpi_cols[2]:
+with kpi_cols[3]:
     # KPI Cerca de mí - Cian
-    active_class_cerca = "active" if st.session_state.kpi_cerca else ""
+    active_class_cerca = "active" if is_cerca_active else ""
     st.markdown(f"""
         <div class="kpi-card kpi-cerca {active_class_cerca}" id="kpi-cerca-card">
             <div class="kpi-number">{kpi_cerca}</div>
@@ -692,9 +728,9 @@ with kpi_cols[2]:
     if st.button("Cerca", key="btn_kpi_cerca", on_click=toggle_kpi_cerca, use_container_width=True, label_visibility="collapsed"):
         pass
 
-with kpi_cols[3]:
+with kpi_cols[4]:
     # KPI Favoritos - Naranja/Rosa
-    active_class_fav = "active" if st.session_state.kpi_favoritos else ""
+    active_class_fav = "active" if is_favoritos_active else ""
     st.markdown(f"""
         <div class="kpi-card kpi-favoritos {active_class_fav}" id="kpi-favoritos-card">
             <div class="kpi-number">{kpi_favoritos}</div>
@@ -707,11 +743,9 @@ with kpi_cols[3]:
 # FILTER CHIPS - Filtros aplicados
 filtros_activos = []
 
-# Añadir filtros de KPI si están activos
-if st.session_state.kpi_hoy:
-    filtros_activos.append("📅 Hoy")
-if st.session_state.kpi_destacados:
-    filtros_activos.append("⭐ Destacados")
+# Nota: Los filtros de KPI Hoy, Esta semana y Destacados se muestran 
+# a través de los selectores sincronizados (fecha_tipo y categoria_sel)
+# Solo Cerca de mí y Favoritos son KPIs independientes
 if st.session_state.kpi_cerca:
     filtros_activos.append("📍 Cerca de mí")
 if st.session_state.kpi_favoritos:
