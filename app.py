@@ -234,6 +234,27 @@ def limpiar_todos():
     st.session_state.franja_horaria = "Todo el día"
     st.session_state.solo_gratis = False
     st.session_state.busqueda = ""
+    st.session_state.kpi_filtro = None
+
+# Funciones callback para filtros de KPI
+def filtrar_kpi_hoy():
+    st.session_state.kpi_filtro = 'hoy'
+    st.session_state.fecha_tipo = "Hoy"
+
+def filtrar_kpi_destacados():
+    st.session_state.kpi_filtro = 'destacados'
+    st.session_state.categoria_sel = 'Destacada'
+
+def filtrar_kpi_cerca():
+    st.session_state.kpi_filtro = 'cerca'
+    # El filtro de cercanía se aplica automáticamente si hay coordenadas
+
+def filtrar_kpi_favoritos():
+    st.session_state.kpi_filtro = 'favoritos'
+    st.session_state.ver_favoritos = True
+
+def quitar_filtro_kpi():
+    st.session_state.kpi_filtro = None
 
 # Cargar datos
 df_original = load_data_from_api()
@@ -315,6 +336,10 @@ with st.sidebar:
         st.session_state.solo_gratis = False
     if 'busqueda' not in st.session_state:
         st.session_state.busqueda = ""
+    if 'kpi_filtro' not in st.session_state:
+        st.session_state.kpi_filtro = None
+    if 'ver_favoritos' not in st.session_state:
+        st.session_state.ver_favoritos = False
     
     # Categorías predefinidas
     st.subheader("🎭 Categoría")
@@ -409,7 +434,7 @@ with st.sidebar:
     busqueda = st.text_input("", placeholder="Título o descripción...", label_visibility="collapsed", key='busqueda')
     
     # Ver favoritos
-    ver_favoritos = st.checkbox(f"❤️ Mis favoritos ({len(st.session_state.favoritos)})")
+    st.checkbox(f"❤️ Mis favoritos ({len(st.session_state.favoritos)})", key='ver_favoritos')
     
     st.markdown("---")
     st.caption(f"📊 {len(df_original)} actividades")
@@ -496,9 +521,13 @@ if franja_horaria != "Todo el día" and 'time' in df.columns:
     elif franja_horaria == "Noche (18:00 - 24:00)":
         df = df[(df['hora'] >= 18) & (df['hora'] < 24) | df['hora'].isna()]
 
-# Ver favoritos
-if ver_favoritos and len(st.session_state.favoritos) > 0:
+# Ver favoritos (desde KPI o checkbox)
+if st.session_state.get('ver_favoritos', False) and len(st.session_state.favoritos) > 0:
     df = df[df['@id'].isin(st.session_state.favoritos)]
+
+# Filtro KPI "Cerca de mí" (distancia < 2km)
+if st.session_state.kpi_filtro == 'cerca' and 'distancia_km' in df.columns and st.session_state.ref_coords:
+    df = df[(df['distancia_km'] < 2) & (df['distancia_km'].notna())]
 
 # Calcular distancias si hay referencia
 if st.session_state.ref_coords and 'lat' in df.columns and 'lon' in df.columns:
@@ -531,7 +560,9 @@ filtros_actuales = {
     'fecha': fecha_tipo,
     'horario': franja_horaria,
     'gratis': solo_gratis,
-    'busqueda': busqueda
+    'busqueda': busqueda,
+    'kpi_filtro': st.session_state.kpi_filtro,
+    'ver_favoritos': st.session_state.ver_favoritos
 }
 
 if 'filtros_anteriores' not in st.session_state:
@@ -565,34 +596,64 @@ if 'distancia_km' in df.columns and st.session_state.ref_coords:
 # Mis favoritos
 kpi_favoritos = len(st.session_state.favoritos)
 
-# Mostrar KPIs en grid compacto
-st.markdown(f"""
-<div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;'>
-    <div style='background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_hoy}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📅 Hoy</div>
-    </div>
-    <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_destacados}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>⭐ Destacados</div>
-    </div>
-    <div style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_cerca}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>📍 Cerca de mí</div>
-    </div>
-    <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
-                padding: 10px 5px; border-radius: 8px; text-align: center; color: white; min-width: 0;'>
-        <div style='font-size: 20px; font-weight: bold; line-height: 1;'>{kpi_favoritos}</div>
-        <div style='font-size: 10px; opacity: 0.9; margin-top: 2px;'>❤️ Favoritos</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Mostrar KPIs en grid compacto - AHORA CLICKEABLES
+st.markdown("---")
+
+# Crear columnas para los KPIs
+kpi_cols = st.columns(4)
+
+with kpi_cols[0]:
+    # KPI Hoy - Azul
+    btn_hoy = st.button(
+        f"📅 Hoy\n\n**{kpi_hoy}**",
+        key="kpi_hoy",
+        on_click=filtrar_kpi_hoy,
+        use_container_width=True,
+        type="primary" if st.session_state.kpi_filtro == 'hoy' else "secondary"
+    )
+
+with kpi_cols[1]:
+    # KPI Destacados - Rosa
+    btn_destacados = st.button(
+        f"⭐ Destacados\n\n**{kpi_destacados}**",
+        key="kpi_destacados",
+        on_click=filtrar_kpi_destacados,
+        use_container_width=True,
+        type="primary" if st.session_state.kpi_filtro == 'destacados' else "secondary"
+    )
+
+with kpi_cols[2]:
+    # KPI Cerca de mí - Cian
+    btn_cerca = st.button(
+        f"📍 Cerca de mí\n\n**{kpi_cerca}**",
+        key="kpi_cerca",
+        on_click=filtrar_kpi_cerca,
+        use_container_width=True,
+        type="primary" if st.session_state.kpi_filtro == 'cerca' else "secondary"
+    )
+
+with kpi_cols[3]:
+    # KPI Favoritos - Naranja/Rosa
+    btn_favoritos = st.button(
+        f"❤️ Favoritos\n\n**{kpi_favoritos}**",
+        key="kpi_favoritos",
+        on_click=filtrar_kpi_favoritos,
+        use_container_width=True,
+        type="primary" if st.session_state.kpi_filtro == 'favoritos' else "secondary"
+    )
 
 # FILTER CHIPS - Filtros aplicados
 filtros_activos = []
+
+# Añadir filtro de KPI si está activo
+if st.session_state.kpi_filtro == 'hoy':
+    filtros_activos.append("📅 Hoy (KPI)")
+elif st.session_state.kpi_filtro == 'destacados':
+    filtros_activos.append("⭐ Destacados (KPI)")
+elif st.session_state.kpi_filtro == 'cerca':
+    filtros_activos.append("📍 Cerca de mí (KPI)")
+elif st.session_state.kpi_filtro == 'favoritos':
+    filtros_activos.append("❤️ Favoritos (KPI)")
 
 if categoria_sel != 'Todas':
     filtros_activos.append(f"🎭 {categoria_sel}")
@@ -620,11 +681,23 @@ if filtros_activos:
         "🎭": (quitar_categoria, "categoria"),
         "📍": (quitar_distrito, "distrito"),
         "👥": (quitar_publico, "publico"),
-        "📅": (quitar_fecha, "fecha"),
         "🕐": (quitar_horario, "horario"),
         "💰": (quitar_gratis, "gratis"),
-        "🔎": (quitar_busqueda, "busqueda")
+        "🔎": (quitar_busqueda, "busqueda"),
+        "⭐": (quitar_filtro_kpi, "kpi"),
+        "❤️": (quitar_filtro_kpi, "kpi")
     }
+    
+    # Función para determinar el callback correcto
+    def get_callback(filtro_texto):
+        # Primero verificar si es un filtro de KPI
+        if "(KPI)" in filtro_texto:
+            return quitar_filtro_kpi
+        # Luego buscar por icono
+        for key, (cb, name) in filtros_callbacks.items():
+            if key in filtro_texto:
+                return cb
+        return None
     
     # Crear columnas horizontales para los chips
     num_chips = len(filtros_activos)
@@ -641,11 +714,7 @@ if filtros_activos:
                 texto_corto = texto_corto[:12] + "..."
             
             # Determinar callback
-            callback = None
-            for key, (cb, name) in filtros_callbacks.items():
-                if key in filtro:
-                    callback = cb
-                    break
+            callback = get_callback(filtro)
             
             # Botón pequeño con estilo compacto
             if callback:
