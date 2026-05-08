@@ -179,8 +179,16 @@ body { min-height: max(884px, 100dvh); }
   </button>
 </header>
 
-<!-- Filters Panel (Hidden by default) -->
-<div id="filtersPanel" class="hidden bg-surface border-b border-surface-variant/30 px-4 py-4 space-y-4">
+<!-- Filters Modal (Hidden by default) -->
+<div id="filtersPanel" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
+  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
+      <h2 class="font-title-lg text-title-lg text-on-surface">Filtros</h2>
+      <button onclick="toggleFilters()" class="p-2 hover:bg-surface-variant rounded-full">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="px-4 py-4 space-y-4">
   <!-- Search -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-1 block">🔎 Buscar</label>
@@ -282,16 +290,17 @@ body { min-height: max(884px, 100dvh); }
     </div>
   </div>
   
-  <!-- Action Buttons -->
-  <div class="flex gap-3">
-    <button onclick="toggleFilters()" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-2">
-      <span class="material-symbols-outlined">check</span>
-      Aplicar filtros (<span id="filterResultCount">0</span>)
-    </button>
-    <button onclick="clearFilters()" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
-      <span class="material-symbols-outlined">delete</span>
-      Limpiar
-    </button>
+    <!-- Action Buttons -->
+    <div class="flex gap-3 pb-6">
+      <button onclick="toggleFilters()" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined">check</span>
+        Aplicar filtros (<span id="filterResultCount">0</span>)
+      </button>
+      <button onclick="clearFilters()" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined">delete</span>
+        Limpiar
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1283,6 +1292,13 @@ function clearFilters() {
 document.getElementById('detailModal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeDetail();
+  }
+});
+
+// Close filters modal on outside click
+document.getElementById('filtersPanel').addEventListener('click', function(e) {
+  if (e.target === this) {
+    toggleFilters();
   }
 });
 
