@@ -499,6 +499,7 @@ async function loadActivities() {
         lat: parseFloat(item.location?.latitude),
         lon: parseFloat(item.location?.longitude),
         date: item.dtstart ? new Date(item.dtstart) : null,
+        endDate: item.dtend ? new Date(item.dtend) : null,
         time: item.time || '',
         free: item.free === 1 || item.free === true,
         price: item.price || '',
@@ -837,8 +838,17 @@ function renderActivities() {
   document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades`;
   
   container.innerHTML = pageActivities.map(activity => {
-    const dateStr = activity.date ? 
-      activity.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+    // Construir string de fecha (rango si hay fecha fin diferente)
+    let dateStr = '';
+    if (activity.date) {
+      const startStr = activity.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+      if (activity.endDate && activity.endDate.getTime() !== activity.date.getTime()) {
+        const endStr = activity.endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        dateStr = `${startStr} - ${endStr}`;
+      } else {
+        dateStr = startStr;
+      }
+    }
     const distanceStr = activity.distance ? 
       `a ${activity.distance.toFixed(1)} km` : '';
     const isFav = favorites.includes(activity.id);
@@ -907,8 +917,19 @@ function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
   if (!activity) return;
   
-  const dateStr = activity.date ? 
-    activity.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha no disponible';
+  // Construir string de fecha para el detalle (rango si aplica)
+  let dateStr = 'Fecha no disponible';
+  let dateLabel = 'Fecha';
+  if (activity.date) {
+    const startStr = activity.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    if (activity.endDate && activity.endDate.getTime() !== activity.date.getTime()) {
+      const endStr = activity.endDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      dateStr = `De ${startStr} a ${endStr}`;
+      dateLabel = 'Fechas';
+    } else {
+      dateStr = startStr;
+    }
+  }
   const isFav = favorites.includes(id);
   
   document.getElementById('detailTitle').textContent = activity.title;
@@ -925,7 +946,7 @@ function showDetail(id) {
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
           <div>
-            <p class="text-label-sm text-on-surface-variant">Fecha</p>
+            <p class="text-label-sm text-on-surface-variant">${dateLabel}</p>
             <p class="text-body-md font-medium">${dateStr}</p>
           </div>
         </div>
