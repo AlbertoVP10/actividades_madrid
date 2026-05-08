@@ -32,9 +32,10 @@ tailwind.config = {
         "surface-variant": "#e8e8e8",
         "on-surface-variant": "#5b4039",
         "surface-container": "#f3f3f3",
-        "surface-container-low": "#ffffff",
+        "surface-container-low": "#fafafa",
         "surface-container-high": "#e8e8e8",
         "surface-container-highest": "#e2e2e2",
+        "surface-container-lowest": "#ffffff",
         "outline": "#907067",
         "outline-variant": "#e4beb4",
         "error": "#ba1a1a",
@@ -158,8 +159,8 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Filters Modal (Hidden by default) -->
 <div id="filtersPanel" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
-  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
+  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
       <h2 class="font-title-lg text-title-lg text-on-surface">Filtros</h2>
       <button onclick="toggleFilters()" class="p-2 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
@@ -388,8 +389,8 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Activity Detail Modal -->
 <div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
-  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
-    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
+  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
+    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
       <h2 id="detailTitle" class="font-title-lg text-title-lg pr-4"></h2>
       <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
