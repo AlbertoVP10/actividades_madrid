@@ -869,10 +869,7 @@ function renderActivities() {
       <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-lg shadow-black/10 border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
         <div class="p-3 space-y-1">
           <div class="flex justify-between items-start gap-2">
-            <div class="flex items-center gap-2 flex-1">
-              <span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-sm font-medium rounded-full">${activity.category}</span>
-              <h2 class="font-title-md text-title-md text-on-surface leading-tight font-bold">${activity.title}</h2>
-            </div>
+            <h2 class="font-title-md text-title-md text-on-surface leading-tight font-bold flex-1">${activity.title}</h2>
             <button onclick="toggleFavorite(event, '${activity.id}')" class="p-1 hover:bg-surface-variant rounded-full transition-colors">
               <span class="material-symbols-outlined text-[18px] ${isFav ? 'filled text-primary' : 'text-primary'}" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0};">favorite</span>
             </button>
@@ -888,7 +885,10 @@ function renderActivities() {
               <p>${dateStr}</p>
             </div>
             ` : '<div></div>'}
-            <span class="text-primary font-body-md text-body-md whitespace-nowrap">${formatPrice(activity)}</span>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-sm font-medium rounded-full">${activity.category}</span>
+              <span class="text-primary font-body-md text-body-md whitespace-nowrap">${formatPrice(activity)}</span>
+            </div>
           </div>
         </div>
       </article>
