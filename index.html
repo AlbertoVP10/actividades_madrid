@@ -858,25 +858,25 @@ function renderActivities() {
     
     return `
       <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
-        <div class="p-4 space-y-3">
+        <div class="p-3 space-y-1">
           <div class="flex justify-between items-start gap-2">
             <div class="flex items-center gap-2 flex-1">
-              <span class="px-2 py-1 bg-primary-container text-on-primary-container text-label-sm font-medium rounded-full">${activity.category}</span>
-              <h2 class="font-title-md text-title-md text-on-surface leading-tight">${activity.title}</h2>
+              <span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-sm font-medium rounded-full">${activity.category}</span>
+              <h2 class="font-title-md text-title-md text-on-surface leading-tight font-bold">${activity.title}</h2>
             </div>
-            <button onclick="toggleFavorite(event, '${activity.id}')" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
-              <span class="material-symbols-outlined text-[20px] ${isFav ? 'filled text-primary' : 'text-primary'}" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0};">favorite</span>
+            <button onclick="toggleFavorite(event, '${activity.id}')" class="p-1 hover:bg-surface-variant rounded-full transition-colors">
+              <span class="material-symbols-outlined text-[18px] ${isFav ? 'filled text-primary' : 'text-primary'}" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0};">favorite</span>
             </button>
           </div>
-          <div class="flex items-start gap-1 text-on-surface-variant text-body-md">
-            <span class="material-symbols-outlined text-base mt-0.5">location_on</span>
-            <p class="leading-snug">${activity.location || 'Madrid'}${distanceStr ? ` • ${distanceStr}` : ''}</p>
+          <div class="flex items-center gap-1 text-on-surface-variant text-body-md leading-none">
+            <span class="material-symbols-outlined text-base">location_on</span>
+            <p class="truncate">${activity.location || 'Madrid'}${distanceStr ? ` • ${distanceStr}` : ''}</p>
           </div>
           <div class="flex justify-between items-center">
             ${dateStr ? `
-            <div class="flex items-center gap-1 text-on-surface-variant text-body-md">
+            <div class="flex items-center gap-1 text-on-surface-variant text-body-md leading-none">
               <span class="material-symbols-outlined text-base">calendar_today</span>
-              <p>${dateStr} ${activity.time ? '• ' + activity.time : ''}</p>
+              <p>${dateStr}</p>
             </div>
             ` : '<div></div>'}
             <span class="text-primary font-title-md text-title-md whitespace-nowrap">${activity.free ? 'Gratis' : (activity.price || 'Consultar')}</span>
