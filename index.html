@@ -840,6 +840,15 @@ function updateKPIs() {
   document.getElementById('kpiFavorites').textContent = favorites.length;
 }
 
+// Format price display
+function formatPrice(activity) {
+  if (activity.free) return 'Gratis';
+  if (!activity.price) return 'Consultar';
+  const wordCount = activity.price.trim().split(/\s+/).length;
+  if (wordCount > 2) return 'Consultar';
+  return activity.price;
+}
+
 // Render activities
 function renderActivities() {
   const container = document.getElementById('listView');
@@ -879,7 +888,7 @@ function renderActivities() {
               <p>${dateStr}</p>
             </div>
             ` : '<div></div>'}
-            <span class="text-primary font-body-md text-body-md whitespace-nowrap">${activity.free ? 'Gratis' : (activity.price || 'Consultar')}</span>
+            <span class="text-primary font-body-md text-body-md whitespace-nowrap">${formatPrice(activity)}</span>
           </div>
         </div>
       </article>
