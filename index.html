@@ -15,16 +15,16 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        "primary": "#e85d04",
-        "primary-dark": "#d00000",
-        "primary-light": "#ff8500",
-        "primary-container": "#ff6b35",
+        "primary": "#F08080",
+        "primary-dark": "#D06060",
+        "primary-light": "#F4978E",
+        "primary-container": "#F8AD9D",
         "on-primary": "#ffffff",
-        "on-primary-container": "#370617",
-        "secondary": "#f48c06",
-        "secondary-container": "#faa307",
-        "on-secondary": "#ffffff",
-        "on-secondary-container": "#6a040f",
+        "on-primary-container": "#5a2525",
+        "secondary": "#FBC4AB",
+        "secondary-container": "#FFDAB9",
+        "on-secondary": "#5a3d2b",
+        "on-secondary-container": "#7a4d35",
         "background": "#ffffff",
         "on-background": "#1a1c1c",
         "surface": "#ffffff",
@@ -117,7 +117,7 @@ body { min-height: max(884px, 100dvh); }
 .tab-inactive { background-color: #e8e8e8; color: #5b4039; }
 .loading-spinner {
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #b02f00;
+  border-top: 3px solid #F08080;
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -297,22 +297,22 @@ body { min-height: max(884px, 100dvh); }
 <!-- KPI Cards -->
 <section id="kpiSection" class="px-4 py-4">
   <div class="grid grid-cols-4 gap-2">
-    <div style="background: linear-gradient(135deg, #e85d04 0%, #ff8500 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">calendar_today</span>
       <div id="kpiToday" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Hoy</div>
     </div>
-    <div style="background: linear-gradient(135deg, #d00000 0%, #e85d04 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">star</span>
       <div id="kpiFeatured" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Destacados</div>
     </div>
-    <div style="background: linear-gradient(135deg, #f48c06 0%, #faa307 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">location_on</span>
       <div id="kpiNear" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Cerca</div>
     </div>
-    <div style="background: linear-gradient(135deg, #ff6b35 0%, #f48c06 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">favorite</span>
       <div id="kpiFavorites" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Favoritos</div>
