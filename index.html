@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Madrid Explore - Actividades Culturales</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "inverse-primary": "#ffb5a0",
+        "surface-dim": "#dadada",
+        "surface-container-high": "#e8e8e8",
+        "error": "#ba1a1a",
+        "primary-fixed-dim": "#ffb5a0",
+        "on-secondary": "#ffffff",
+        "surface-variant": "#e2e2e2",
+        "outline-variant": "#e4beb4",
+        "primary": "#b02f00",
+        "inverse-surface": "#2f3131",
+        "on-secondary-fixed-variant": "#343d96",
+        "secondary-fixed": "#e0e0ff",
+        "on-error-container": "#93000a",
+        "primary-container": "#ff5722",
+        "outline": "#907067",
+        "tertiary": "#006673",
+        "surface-container": "#eeeeee",
+        "error-container": "#ffdad6",
+        "on-surface": "#1a1c1c",
+        "surface-container-lowest": "#ffffff",
+        "on-surface-variant": "#5b4039",
+        "surface-container-low": "#f3f3f3",
+        "on-primary-fixed": "#3b0900",
+        "inverse-on-surface": "#f1f1f1",
+        "surface-tint": "#b02f00",
+        "background": "#f9f9f9",
+        "secondary": "#4c56af",
+        "on-tertiary": "#ffffff",
+        "tertiary-fixed-dim": "#44d8f1",
+        "on-secondary-container": "#27308a",
+        "on-error": "#ffffff",
+        "tertiary-container": "#008091",
+        "on-tertiary-fixed": "#001f25",
+        "on-background": "#1a1c1c",
+        "surface-bright": "#f9f9f9",
+        "on-secondary-fixed": "#000767",
+        "secondary-fixed-dim": "#bdc2ff",
+        "on-primary-container": "#541200",
+        "primary-fixed": "#ffdbd1",
+        "surface-container-highest": "#e2e2e2",
+        "on-primary-fixed-variant": "#862200",
+        "on-tertiary-fixed-variant": "#004e59",
+        "on-tertiary-container": "#f8fdff",
+        "on-primary": "#ffffff",
+        "tertiary-fixed": "#a1efff",
+        "surface": "#f9f9f9",
+        "secondary-container": "#959efd"
+      },
+      borderRadius: {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "0.75rem",
+        "full": "9999px"
+      },
+      spacing: {
+        "margin": "16px",
+        "md": "16px",
+        "gutter": "16px",
+        "lg": "24px",
+        "xl": "32px",
+        "base": "4px",
+        "xs": "4px",
+        "sm": "8px"
+      },
+      fontFamily: {
+        "label-lg": ["Inter"],
+        "headline-lg": ["Inter"],
+        "display-lg": ["Inter"],
+        "body-lg": ["Inter"],
+        "title-md": ["Inter"],
+        "title-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "body-md": ["Inter"],
+        "label-sm": ["Inter"]
+      },
+      fontSize: {
+        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+        "title-md": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+        "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}]
+      }
+    }
+  }
+}
+</script>
+<style>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+body { font-family: 'Inter', sans-serif; }
+body { min-height: max(884px, 100dvh); }
+#map { height: 400px; width: 100%; border-radius: 12px; }
+.activity-card { transition: transform 0.15s ease; }
+.activity-card:active { transform: scale(0.98); }
+.tab-active { background-color: #ff5722; color: white; }
+.tab-inactive { background-color: #e8e8e8; color: #5b4039; }
+.loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #b02f00;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.filter-chip {
+  transition: all 0.2s ease;
+}
+.filter-chip.active {
+  background-color: #ff5722;
+  color: white;
+  border-color: #b02f00;
+}
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+
+<!-- Login Modal -->
+<div id="loginModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+  <div class="bg-surface-container-lowest rounded-xl p-6 m-4 max-w-sm w-full shadow-xl">
+    <div class="text-center mb-6">
+      <span class="material-symbols-outlined text-4xl text-primary mb-2">lock</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Acceso Privado</h2>
+    </div>
+    <input type="password" id="passwordInput" placeholder="Contraseña" 
+           class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface mb-4 focus:outline-none focus:border-primary">
+    <p id="loginError" class="text-error text-sm mb-4 hidden">Contraseña incorrecta</p>
+    <button onclick="checkPassword()" class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors">
+      Entrar
+    </button>
+  </div>
+</div>
+
+<!-- TopAppBar Section -->
+<header class="bg-secondary text-on-secondary flex justify-between items-center w-full px-4 h-16 sticky top-0 z-50">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined">search</span>
+    <h1 class="font-title-lg text-title-lg font-bold">Madrid Explore</h1>
+  </div>
+  <button onclick="toggleFilters()" class="hover:bg-on-secondary/10 p-2 rounded-full active:scale-95 transition-transform">
+    <span class="material-symbols-outlined">settings</span>
+  </button>
+</header>
+
+<!-- Filters Panel (Hidden by default) -->
+<div id="filtersPanel" class="hidden bg-surface border-b border-surface-variant/30 px-4 py-4 space-y-4">
+  <!-- Search -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">Buscar</label>
+    <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
+      <span class="material-symbols-outlined text-on-surface-variant">search</span>
+      <input type="text" id="searchInput" placeholder="Título o descripción..." 
+             class="bg-transparent flex-1 outline-none text-body-md"
+             oninput="applyFilters()">
+    </div>
+  </div>
+  
+  <!-- Sort -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">Ordenar por</label>
+    <select id="sortSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="recent">Más recientes</option>
+      <option value="price">Más baratas</option>
+      <option value="distance">Más cercanas</option>
+    </select>
+  </div>
+  
+  <!-- Location (for distance sort) -->
+  <div id="locationInput" class="hidden">
+    <label class="text-label-sm text-on-surface-variant mb-1 block">Tu ubicación</label>
+    <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
+      <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
+      <input type="text" id="addressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
+             class="bg-transparent flex-1 outline-none text-body-md">
+      <button onclick="geocodeAddress()" class="bg-primary text-on-primary px-3 py-1 rounded text-label-sm">Buscar</button>
+    </div>
+    <p id="locationStatus" class="text-label-sm mt-1"></p>
+  </div>
+  
+  <!-- Categories -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">Categoría</label>
+    <div class="flex flex-wrap gap-2" id="categoryFilters">
+      <button onclick="setCategory('all')" class="filter-chip active px-3 py-1.5 rounded-full border border-outline-variant text-label-lg" data-cat="all">Todas</button>
+    </div>
+  </div>
+  
+  <!-- Districts -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">Distrito</label>
+    <select id="districtSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="all">Todos</option>
+    </select>
+  </div>
+  
+  <!-- Date Filter -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">Fecha</label>
+    <div class="flex flex-wrap gap-2">
+      <button onclick="setDateFilter('all')" class="date-filter active px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="all">Todas</button>
+      <button onclick="setDateFilter('today')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="today">Hoy</button>
+      <button onclick="setDateFilter('week')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="week">Esta semana</button>
+      <button onclick="setDateFilter('month')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="month">Este mes</button>
+    </div>
+  </div>
+  
+  <!-- Free Only -->
+  <div class="flex items-center gap-2">
+    <input type="checkbox" id="freeOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
+    <label for="freeOnly" class="text-body-md">Solo gratuitas</label>
+  </div>
+  
+  <!-- Favorites Only -->
+  <div class="flex items-center gap-2">
+    <input type="checkbox" id="favoritesOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
+    <label for="favoritesOnly" class="text-body-md">Mis favoritos</label>
+    <span id="favCount" class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-label-sm">0</span>
+  </div>
+  
+  <!-- Clear Filters -->
+  <button onclick="clearFilters()" class="w-full bg-surface-container-high text-on-surface py-2 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+    <span class="material-symbols-outlined">delete</span>
+    Limpiar filtros
+  </button>
+</div>
+
+<!-- Tab Navigation Section -->
+<nav class="bg-surface sticky top-16 z-40 px-4 py-3 border-b border-surface-variant/30 overflow-x-auto">
+  <div class="flex gap-3 whitespace-nowrap">
+    <button onclick="setMainTab('nearby')" class="main-tab active px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-lg" data-tab="nearby">Cerca de mí</button>
+    <button onclick="setMainTab('popular')" class="main-tab px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg" data-tab="popular">Más populares</button>
+    <button onclick="setMainTab('week')" class="main-tab px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg" data-tab="week">Esta semana</button>
+  </div>
+</nav>
+
+<!-- Category Pills -->
+<section class="bg-surface px-4 py-3 border-b border-surface-variant/20">
+  <div class="flex flex-wrap gap-2" id="categoryPills">
+    <button onclick="toggleCategoryPill('free')" class="cat-pill px-3 py-1.5 rounded-lg border border-primary bg-primary-container text-on-primary-container text-label-lg font-medium" data-cat="free">Gratis</button>
+    <button onclick="toggleCategoryPill('cultura')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="cultura">Cultura</button>
+    <button onclick="toggleCategoryPill('gastronomia')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="gastronomia">Gastronomía</button>
+    <button onclick="toggleCategoryPill('arte')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="arte">Arte</button>
+    <button onclick="toggleCategoryPill('musica')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="musica">Música</button>
+    <button onclick="toggleCategoryPill('deportes')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="deportes">Deportes</button>
+    <button onclick="toggleCategoryPill('ferias')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="ferias">Ferias</button>
+  </div>
+</section>
+
+<!-- KPI Cards -->
+<section class="px-4 py-4">
+  <div class="grid grid-cols-4 gap-2">
+    <div class="bg-gradient-to-br from-[#2193b0] to-[#6dd5ed] p-3 rounded-lg text-center text-white">
+      <div id="kpiToday" class="text-xl font-bold">0</div>
+      <div class="text-xs opacity-90">Hoy</div>
+    </div>
+    <div class="bg-gradient-to-br from-[#f093fb] to-[#f5576c] p-3 rounded-lg text-center text-white">
+      <div id="kpiFeatured" class="text-xl font-bold">0</div>
+      <div class="text-xs opacity-90">Destacados</div>
+    </div>
+    <div class="bg-gradient-to-br from-[#4facfe] to-[#00f2fe] p-3 rounded-lg text-center text-white">
+      <div id="kpiNear" class="text-xl font-bold">0</div>
+      <div class="text-xs opacity-90">Cerca</div>
+    </div>
+    <div class="bg-gradient-to-br from-[#fa709a] to-[#fee140] p-3 rounded-lg text-center text-white">
+      <div id="kpiFavorites" class="text-xl font-bold">0</div>
+      <div class="text-xs opacity-90">Favoritos</div>
+    </div>
+  </div>
+</section>
+
+<!-- View Tabs -->
+<section class="px-4 pb-2">
+  <div class="flex bg-surface-container-high rounded-lg p-1">
+    <button onclick="setViewTab('list')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium bg-primary-container text-on-primary-container" data-view="list">Lista</button>
+    <button onclick="setViewTab('map')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium text-on-surface-variant" data-view="map">Mapa</button>
+    <button onclick="setViewTab('stats')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium text-on-surface-variant" data-view="stats">Estadísticas</button>
+  </div>
+</section>
+
+<!-- Loading State -->
+<div id="loadingState" class="flex flex-col items-center justify-center py-12">
+  <div class="loading-spinner mb-4"></div>
+  <p class="text-on-surface-variant text-body-md">Cargando actividades...</p>
+</div>
+
+<!-- Content Canvas -->
+<main id="mainContent" class="px-4 pt-4 space-y-4 hidden">
+  <!-- Results count -->
+  <div class="flex justify-between items-center">
+    <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
+    <p id="locationInfo" class="text-label-sm text-on-surface-variant hidden"></p>
+  </div>
+  
+  <!-- List View -->
+  <div id="listView" class="space-y-4">
+    <!-- Activities will be inserted here -->
+  </div>
+  
+  <!-- Map View -->
+  <div id="mapView" class="hidden">
+    <div id="map"></div>
+    <p id="mapCaption" class="text-label-sm text-on-surface-variant mt-2 text-center"></p>
+  </div>
+  
+  <!-- Stats View -->
+  <div id="statsView" class="hidden space-y-6">
+    <div>
+      <h3 class="font-title-md text-title-md mb-3">Por categoría</h3>
+      <div id="categoryChart" class="space-y-2">
+        <!-- Bars will be inserted here -->
+      </div>
+    </div>
+    <div>
+      <h3 class="font-title-md text-title-md mb-3">Por distrito</h3>
+      <div id="districtChart" class="space-y-2">
+        <!-- Bars will be inserted here -->
+      </div>
+    </div>
+    <div>
+      <h3 class="font-title-md text-title-md mb-3">Gratuidad</h3>
+      <div class="flex items-center gap-4">
+        <div class="flex-1">
+          <div id="freeChart" class="h-4 rounded-full overflow-hidden flex">
+            <!-- Segments will be inserted here -->
+          </div>
+        </div>
+        <div id="freeLegend" class="text-label-sm">
+          <!-- Legend will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Pagination -->
+  <div id="pagination" class="flex justify-center items-center gap-2 py-4">
+    <button onclick="prevPage()" id="prevBtn" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface disabled:opacity-50" disabled>
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <span id="pageInfo" class="text-body-md">1 / 1</span>
+    <button onclick="nextPage()" id="nextBtn" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface disabled:opacity-50" disabled>
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </div>
+</main>
+
+<!-- Activity Detail Modal -->
+<div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center">
+  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center">
+      <h2 id="detailTitle" class="font-title-lg text-title-lg pr-4"></h2>
+      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="detailContent" class="p-4 space-y-4">
+      <!-- Content will be inserted here -->
+    </div>
+  </div>
+</div>
+
+<!-- BottomNavBar Section -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface shadow-lg rounded-t-xl">
+  <button onclick="setBottomTab('map')" class="bottom-tab flex flex-col items-center justify-center px-4 py-1 text-on-surface-variant" data-tab="map">
+    <span class="material-symbols-outlined text-2xl">map</span>
+    <span class="font-label-sm text-label-sm">Mapa</span>
+  </button>
+  <button onclick="setBottomTab('list')" class="bottom-tab active flex flex-col items-center justify-center px-4 py-1 bg-primary-container text-on-primary-container rounded-xl" data-tab="list">
+    <span class="material-symbols-outlined text-2xl">list</span>
+    <span class="font-label-sm text-label-sm">Lista</span>
+  </button>
+  <button onclick="setBottomTab('favorites')" class="bottom-tab flex flex-col items-center justify-center px-4 py-1 text-on-surface-variant" data-tab="favorites">
+    <span class="material-symbols-outlined text-2xl">favorite</span>
+    <span class="font-label-sm text-label-sm">Favoritos</span>
+  </button>
+  <button onclick="setBottomTab('profile')" class="bottom-tab flex flex-col items-center justify-center px-4 py-1 text-on-surface-variant" data-tab="profile">
+    <span class="material-symbols-outlined text-2xl">person</span>
+    <span class="font-label-sm text-label-sm">Perfil</span>
+  </button>
+</nav>
+
+<script>
+// Global state
+let allActivities = [];
+let filteredActivities = [];
+let favorites = JSON.parse(localStorage.getItem('madridFavorites') || '[]');
+let currentPage = 0;
+let itemsPerPage = 10;
+let userLocation = null;
+let map = null;
+let markers = [];
+let currentView = 'list';
+let currentFilters = {
+  category: 'all',
+  district: 'all',
+  date: 'all',
+  search: '',
+  freeOnly: false,
+  favoritesOnly: false,
+  sort: 'recent'
+};
+
+// Category mapping
+const categoryMap = {
+  'Cine': 'cultura',
+  'Teatro': 'cultura',
+  'Música': 'musica',
+  'Exposiciones': 'arte',
+  'Talleres': 'cultura',
+  'Deportes': 'deportes',
+  'Danza': 'cultura',
+  'Literatura': 'cultura',
+  'Infantil': 'cultura',
+  'Fiestas': 'ferias',
+  'Destacada': 'cultura',
+  'Conferencias': 'cultura',
+  'Excursiones': 'cultura',
+  'Campamentos': 'cultura',
+  'Gastronomía': 'gastronomia',
+  'Otras': 'cultura'
+};
+
+// Initialize
+async function init() {
+  updateFavCount();
+  await loadActivities();
+}
+
+// Check password
+function checkPassword() {
+  const pwd = document.getElementById('passwordInput').value;
+  if (pwd === 'abc123') {
+    document.getElementById('loginModal').classList.add('hidden');
+    init();
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+// Load activities from API
+async function loadActivities() {
+  try {
+    const response = await fetch('https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json');
+    const data = await response.json();
+    
+    if (data['@graph']) {
+      allActivities = data['@graph'].map(item => ({
+        id: item['@id'] || Math.random().toString(),
+        title: item.title || 'Sin título',
+        description: item.description || '',
+        category: extractCategory(item['@type']),
+        location: item['event-location'] || '',
+        district: extractDistrict(item['address']?.district?.['@id']),
+        lat: parseFloat(item.location?.latitude),
+        lon: parseFloat(item.location?.longitude),
+        date: item.dtstart ? new Date(item.dtstart) : null,
+        time: item.time || '',
+        free: item.free === 1 || item.free === true,
+        price: item.price || '',
+        audience: item.audience || '',
+        link: item.link || '',
+        street: item.address?.area?.['street-address'] || ''
+      }));
+      
+      // Filter out past activities
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      
+      populateFilters();
+      applyFilters();
+      
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading activities:', error);
+    document.getElementById('loadingState').innerHTML = `
+      <p class="text-error text-body-md">Error cargando datos</p>
+      <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
+    `;
+  }
+}
+
+// Extract category
+function extractCategory(type) {
+  if (!type) return 'Otras';
+  const typeStr = String(type).toLowerCase();
+  
+  if (typeStr.includes('cine') || typeStr.includes('film')) return 'Cine';
+  if (typeStr.includes('teatro') || typeStr.includes('theatre')) return 'Teatro';
+  if (typeStr.includes('musica') || typeStr.includes('music') || typeStr.includes('concierto')) return 'Música';
+  if (typeStr.includes('exposicion') || typeStr.includes('exhibition')) return 'Exposiciones';
+  if (typeStr.includes('taller') || typeStr.includes('workshop')) return 'Talleres';
+  if (typeStr.includes('deporte') || typeStr.includes('sport')) return 'Deportes';
+  if (typeStr.includes('danza') || typeStr.includes('dance')) return 'Danza';
+  if (typeStr.includes('literatura') || typeStr.includes('book')) return 'Literatura';
+  if (typeStr.includes('infantil') || typeStr.includes('cuentacuentos') || typeStr.includes('circo')) return 'Infantil';
+  if (typeStr.includes('fiesta') || typeStr.includes('sanisidro')) return 'Fiestas';
+  if (typeStr.includes('destacada')) return 'Destacada';
+  if (typeStr.includes('conferencia')) return 'Conferencias';
+  if (typeStr.includes('excursion') || typeStr.includes('visita')) return 'Excursiones';
+  if (typeStr.includes('campamento')) return 'Campamentos';
+  
+  return 'Otras';
+}
+
+// Extract district
+function extractDistrict(districtUrl) {
+  if (!districtUrl) return 'Desconocido';
+  const parts = districtUrl.split('/');
+  const name = parts[parts.length - 1];
+  
+  const districtMap = {
+    'Fuencarral-ElPardo': 'Fuencarral - El Pardo',
+    'CiudadLineal': 'Ciudad Lineal',
+    'PuenteDeVallecas': 'Puente de Vallecas',
+    'Moncloa-Aravaca': 'Moncloa - Aravaca',
+    'SanBlas-Canillejas': 'San Blas-Canillejas',
+    'VillaDeVallecas': 'Villa de Vallecas'
+  };
+  
+  return districtMap[name] || name;
+}
+
+// Populate filter options
+function populateFilters() {
+  // Categories
+  const categories = [...new Set(allActivities.map(a => a.category))].sort();
+  const catContainer = document.getElementById('categoryFilters');
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container-low text-label-lg';
+    btn.textContent = cat;
+    btn.onclick = () => setCategory(cat);
+    btn.dataset.cat = cat;
+    catContainer.appendChild(btn);
+  });
+  
+  // Districts
+  const districts = [...new Set(allActivities.map(a => a.district))]
+    .filter(d => d && d !== 'Desconocido')
+    .sort();
+  const districtSelect = document.getElementById('districtSelect');
+  districts.forEach(d => {
+    const option = document.createElement('option');
+    option.value = d;
+    option.textContent = d;
+    districtSelect.appendChild(option);
+  });
+}
+
+// Toggle filters panel
+function toggleFilters() {
+  const panel = document.getElementById('filtersPanel');
+  panel.classList.toggle('hidden');
+}
+
+// Set category filter
+function setCategory(cat) {
+  currentFilters.category = cat;
+  
+  // Update UI
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    if (btn.dataset.cat === cat) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  applyFilters();
+}
+
+// Toggle category pill
+function toggleCategoryPill(cat) {
+  const pill = document.querySelector(`.cat-pill[data-cat="${cat}"]`);
+  const isActive = pill.classList.contains('bg-primary-container');
+  
+  // Reset all pills
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
+    p.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+  });
+  
+  if (!isActive) {
+    pill.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+    pill.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary');
+    currentFilters.category = cat;
+  } else {
+    currentFilters.category = 'all';
+  }
+  
+  applyFilters();
+}
+
+// Set date filter
+function setDateFilter(date) {
+  currentFilters.date = date;
+  
+  document.querySelectorAll('.date-filter').forEach(btn => {
+    if (btn.dataset.date === date) {
+      btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
+      btn.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+    } else {
+      btn.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
+      btn.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+    }
+  });
+  
+  applyFilters();
+}
+
+// Geocode address
+async function geocodeAddress() {
+  const address = document.getElementById('addressInput').value;
+  if (!address) return;
+  
+  const status = document.getElementById('locationStatus');
+  status.textContent = 'Buscando ubicación...';
+  status.className = 'text-label-sm mt-1 text-on-surface-variant';
+  
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Madrid, España')}`);
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      userLocation = {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon)
+      };
+      status.textContent = `✓ Ubicación encontrada`;
+      status.className = 'text-label-sm mt-1 text-green-600';
+      applyFilters();
+    } else {
+      status.textContent = '✗ No se encontró la ubicación';
+      status.className = 'text-label-sm mt-1 text-error';
+    }
+  } catch (error) {
+    status.textContent = '✗ Error al buscar';
+    status.className = 'text-label-sm mt-1 text-error';
+  }
+}
+
+// Calculate distance
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Apply filters
+function applyFilters() {
+  currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
+  currentFilters.district = document.getElementById('districtSelect').value;
+  currentFilters.freeOnly = document.getElementById('freeOnly').checked;
+  currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
+  currentFilters.sort = document.getElementById('sortSelect').value;
+  
+  // Show/hide location input
+  const locationInput = document.getElementById('locationInput');
+  if (currentFilters.sort === 'distance') {
+    locationInput.classList.remove('hidden');
+  } else {
+    locationInput.classList.add('hidden');
+  }
+  
+  filteredActivities = allActivities.filter(activity => {
+    // Category filter
+    if (currentFilters.category !== 'all') {
+      if (currentFilters.category === 'free') {
+        if (!activity.free) return false;
+      } else {
+        const mappedCat = categoryMap[activity.category];
+        if (mappedCat !== currentFilters.category) return false;
+      }
+    }
+    
+    // District filter
+    if (currentFilters.district !== 'all' && activity.district !== currentFilters.district) {
+      return false;
+    }
+    
+    // Date filter
+    if (currentFilters.date !== 'all' && activity.date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const activityDate = new Date(activity.date);
+      activityDate.setHours(0, 0, 0, 0);
+      
+      if (currentFilters.date === 'today') {
+        if (activityDate.getTime() !== today.getTime()) return false;
+      } else if (currentFilters.date === 'week') {
+        const weekFromNow = new Date(today);
+        weekFromNow.setDate(weekFromNow.getDate() + 7);
+        if (activityDate > weekFromNow) return false;
+      } else if (currentFilters.date === 'month') {
+        const monthFromNow = new Date(today);
+        monthFromNow.setMonth(monthFromNow.getMonth() + 1);
+        if (activityDate > monthFromNow) return false;
+      }
+    }
+    
+    // Free filter
+    if (currentFilters.freeOnly && !activity.free) {
+      return false;
+    }
+    
+    // Favorites filter
+    if (currentFilters.favoritesOnly && !favorites.includes(activity.id)) {
+      return false;
+    }
+    
+    // Search filter
+    if (currentFilters.search) {
+      const searchIn = (activity.title + ' ' + activity.description).toLowerCase();
+      if (!searchIn.includes(currentFilters.search)) return false;
+    }
+    
+    return true;
+  });
+  
+  // Calculate distances
+  if (userLocation) {
+    filteredActivities.forEach(activity => {
+      if (activity.lat && activity.lon) {
+        activity.distance = calculateDistance(userLocation.lat, userLocation.lon, activity.lat, activity.lon);
+      } else {
+        activity.distance = null;
+      }
+    });
+    
+    document.getElementById('locationInfo').textContent = `📍 Distancias desde tu ubicación`;
+    document.getElementById('locationInfo').classList.remove('hidden');
+  }
+  
+  // Sort
+  if (currentFilters.sort === 'recent') {
+    filteredActivities.sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date - b.date;
+    });
+  } else if (currentFilters.sort === 'price') {
+    filteredActivities.sort((a, b) => (b.free ? 1 : 0) - (a.free ? 1 : 0));
+  } else if (currentFilters.sort === 'distance') {
+    filteredActivities.sort((a, b) => {
+      if (a.distance === null) return 1;
+      if (b.distance === null) return -1;
+      return a.distance - b.distance;
+    });
+  }
+  
+  currentPage = 0;
+  updateKPIs();
+  renderActivities();
+  renderStats();
+}
+
+// Update KPIs
+function updateKPIs() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const kpiToday = filteredActivities.filter(a => {
+    if (!a.date) return false;
+    const d = new Date(a.date);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() === today.getTime();
+  }).length;
+  
+  const kpiFeatured = filteredActivities.filter(a => a.category === 'Destacada').length;
+  
+  const kpiNear = userLocation ? 
+    filteredActivities.filter(a => a.distance && a.distance < 2).length : 0;
+  
+  document.getElementById('kpiToday').textContent = kpiToday;
+  document.getElementById('kpiFeatured').textContent = kpiFeatured;
+  document.getElementById('kpiNear').textContent = kpiNear;
+  document.getElementById('kpiFavorites').textContent = favorites.length;
+}
+
+// Render activities
+function renderActivities() {
+  const container = document.getElementById('listView');
+  const start = currentPage * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageActivities = filteredActivities.slice(start, end);
+  
+  document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades`;
+  
+  container.innerHTML = pageActivities.map(activity => {
+    const dateStr = activity.date ? 
+      activity.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+    const distanceStr = activity.distance ? 
+      `a ${activity.distance.toFixed(1)} km` : '';
+    const isFav = favorites.includes(activity.id);
+    
+    return `
+      <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
+        <div class="relative h-48 w-full bg-surface-variant">
+          <div class="absolute inset-0 flex items-center justify-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-6xl">image</span>
+          </div>
+          <button onclick="toggleFavorite(event, '${activity.id}')" class="absolute top-3 right-3 bg-surface/80 backdrop-blur-md p-2 rounded-full shadow-lg z-10">
+            <span class="material-symbols-outlined text-[20px] ${isFav ? 'filled text-primary' : 'text-primary'}" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0};">favorite</span>
+          </button>
+          <div class="absolute bottom-3 left-3">
+            <span class="px-2 py-1 bg-primary-container text-on-primary-container text-label-sm font-medium rounded-full">${activity.category}</span>
+          </div>
+        </div>
+        <div class="p-4 space-y-2">
+          <div class="flex justify-between items-start gap-2">
+            <h2 class="font-title-md text-title-md text-on-surface leading-tight flex-1">${activity.title}</h2>
+            <span class="text-primary font-title-md text-title-md whitespace-nowrap">${activity.free ? 'Gratis' : (activity.price || 'Consultar')}</span>
+          </div>
+          <div class="flex items-center gap-1 text-on-surface-variant text-body-md">
+            <span class="material-symbols-outlined text-base">location_on</span>
+            <p class="truncate">${activity.location || 'Madrid'}</p>
+            ${distanceStr ? `<span class="mx-1">•</span><p>${distanceStr}</p>` : ''}
+          </div>
+          ${dateStr ? `
+          <div class="flex items-center gap-1 text-on-surface-variant text-body-md">
+            <span class="material-symbols-outlined text-base">calendar_today</span>
+            <p>${dateStr} ${activity.time ? '• ' + activity.time : ''}</p>
+          </div>
+          ` : ''}
+        </div>
+      </article>
+    `;
+  }).join('');
+  
+  // Update pagination
+  const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
+  document.getElementById('pageInfo').textContent = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+}
+
+// Toggle favorite
+function toggleFavorite(event, id) {
+  event.stopPropagation();
+  
+  const index = favorites.indexOf(id);
+  if (index > -1) {
+    favorites.splice(index, 1);
+  } else {
+    favorites.push(id);
+  }
+  
+  localStorage.setItem('madridFavorites', JSON.stringify(favorites));
+  updateFavCount();
+  renderActivities();
+  updateKPIs();
+}
+
+// Update favorite count
+function updateFavCount() {
+  document.getElementById('favCount').textContent = favorites.length;
+}
+
+// Show detail modal
+function showDetail(id) {
+  const activity = allActivities.find(a => a.id === id);
+  if (!activity) return;
+  
+  const dateStr = activity.date ? 
+    activity.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha no disponible';
+  const isFav = favorites.includes(id);
+  
+  document.getElementById('detailTitle').textContent = activity.title;
+  document.getElementById('detailContent').innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
+        ${activity.free ? '<span class="px-3 py-1 bg-green-100 text-green-800 text-label-lg font-medium rounded-full">Gratis</span>' : ''}
+      </div>
+      
+      <p class="text-body-lg text-on-surface-variant">${activity.description || 'Sin descripción disponible.'}</p>
+      
+      <div class="space-y-3 bg-surface-container-low rounded-lg p-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Fecha</p>
+            <p class="text-body-md font-medium">${dateStr}</p>
+          </div>
+        </div>
+        
+        ${activity.time ? `
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">schedule</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Hora</p>
+            <p class="text-body-md font-medium">${activity.time}</p>
+          </div>
+        </div>
+        ` : ''}
+        
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Lugar</p>
+            <p class="text-body-md font-medium">${activity.location || 'No especificado'}</p>
+          </div>
+        </div>
+        
+        ${activity.district && activity.district !== 'Desconocido' ? `
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">map</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Distrito</p>
+            <p class="text-body-md font-medium">${activity.district}</p>
+          </div>
+        </div>
+        ` : ''}
+        
+        ${activity.street ? `
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">home</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Dirección</p>
+            <p class="text-body-md font-medium">${activity.street}</p>
+          </div>
+        </div>
+        ` : ''}
+        
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">payments</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Precio</p>
+            <p class="text-body-md font-medium">${activity.free ? 'Gratuito' : (activity.price || 'Consultar')}</p>
+          </div>
+        </div>
+        
+        ${activity.audience ? `
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">people</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Público</p>
+            <p class="text-body-md font-medium">${activity.audience}</p>
+          </div>
+        </div>
+        ` : ''}
+        
+        ${activity.distance ? `
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">straighten</span>
+          <div>
+            <p class="text-label-sm text-on-surface-variant">Distancia</p>
+            <p class="text-body-md font-medium">${activity.distance.toFixed(1)} km</p>
+          </div>
+        </div>
+        ` : ''}
+      </div>
+      
+      <div class="flex gap-3">
+        <button onclick="toggleFavorite(event, '${activity.id}'); showDetail('${activity.id}')" class="flex-1 ${isFav ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} py-3 rounded-lg font-label-lg flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
+          ${isFav ? 'En favoritos' : 'Añadir a favoritos'}
+        </button>
+        
+        ${activity.link ? `
+        <a href="${activity.link}" target="_blank" class="flex-1 bg-primary text-on-primary py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">open_in_new</span>
+          Ver más info
+        </a>
+        ` : ''}
+        
+        ${activity.lat && activity.lon ? `
+        <a href="https://www.google.com/maps?q=${activity.lat},${activity.lon}" target="_blank" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">map</span>
+          Google Maps
+        </a>
+        ` : ''}
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+// Close detail modal
+function closeDetail() {
+  document.getElementById('detailModal').classList.add('hidden');
+}
+
+// Set main tab
+function setMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(btn => {
+    if (btn.dataset.tab === tab) {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container');
+      btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+      btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+    }
+  });
+  
+  // Apply preset filters
+  if (tab === 'nearby') {
+    if (currentFilters.sort !== 'distance') {
+      document.getElementById('sortSelect').value = 'distance';
+      document.getElementById('locationInput').classList.remove('hidden');
+      currentFilters.sort = 'distance';
+    }
+  } else if (tab === 'popular') {
+    // Could sort by popularity metric if available
+    document.getElementById('sortSelect').value = 'recent';
+    currentFilters.sort = 'recent';
+  } else if (tab === 'week') {
+    setDateFilter('week');
+    return; // setDateFilter calls applyFilters
+  }
+  
+  applyFilters();
+}
+
+// Set view tab
+function setViewTab(view) {
+  currentView = view;
+  
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    if (btn.dataset.view === view) {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container');
+      btn.classList.remove('text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+      btn.classList.add('text-on-surface-variant');
+    }
+  });
+  
+  document.getElementById('listView').classList.toggle('hidden', view !== 'list');
+  document.getElementById('mapView').classList.toggle('hidden', view !== 'map');
+  document.getElementById('statsView').classList.toggle('hidden', view !== 'stats');
+  document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
+  
+  if (view === 'map') {
+    setTimeout(initMap, 100);
+  }
+}
+
+// Set bottom tab
+function setBottomTab(tab) {
+  document.querySelectorAll('.bottom-tab').forEach(btn => {
+    if (btn.dataset.tab === tab) {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.remove('text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.add('text-on-surface-variant');
+    }
+  });
+  
+  if (tab === 'list') {
+    setViewTab('list');
+    document.getElementById('favoritesOnly').checked = false;
+    applyFilters();
+  } else if (tab === 'map') {
+    setViewTab('map');
+  } else if (tab === 'favorites') {
+    setViewTab('list');
+    document.getElementById('favoritesOnly').checked = true;
+    applyFilters();
+  }
+}
+
+// Initialize map
+function initMap() {
+  if (map) {
+    map.remove();
+  }
+  
+  const center = userLocation ? [userLocation.lat, userLocation.lon] : [40.4168, -3.7038];
+  map = L.map('map').setView(center, 13);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+  
+  // Add user location marker
+  if (userLocation) {
+    L.marker([userLocation.lat, userLocation.lon], {
+      icon: L.divIcon({
+        className: 'bg-red-500 rounded-full w-4 h-4 border-2 border-white shadow-lg',
+        iconSize: [16, 16]
+      })
+    }).addTo(map).bindPopup('Tu ubicación');
+  }
+  
+  // Add activity markers
+  const activitiesWithCoords = filteredActivities.filter(a => a.lat && a.lon);
+  const uniqueLocations = {};
+  
+  activitiesWithCoords.forEach(activity => {
+    const key = `${activity.lat.toFixed(5)},${activity.lon.toFixed(5)}`;
+    if (!uniqueLocations[key]) {
+      uniqueLocations[key] = [];
+    }
+    uniqueLocations[key].push(activity);
+  });
+  
+  Object.values(uniqueLocations).forEach(group => {
+    const activity = group[0];
+    const popupContent = group.length === 1 ? 
+      `<b>${activity.title}</b><br>${activity.category}<br>${activity.location || ''}` :
+      `<b>${group.length} actividades</b><br>${group.map(a => `• ${a.title}`).join('<br>')}`;
+    
+    L.marker([activity.lat, activity.lon]).addTo(map)
+      .bindPopup(popupContent);
+  });
+  
+  document.getElementById('mapCaption').textContent = 
+    `Mostrando ${activitiesWithCoords.length} actividades en ${Object.keys(uniqueLocations).length} ubicaciones`;
+}
+
+// Render statistics
+function renderStats() {
+  // Category chart
+  const catCounts = {};
+  filteredActivities.forEach(a => {
+    catCounts[a.category] = (catCounts[a.category] || 0) + 1;
+  });
+  
+  const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxCat = Math.max(...sortedCats.map(c => c[1]));
+  
+  document.getElementById('categoryChart').innerHTML = sortedCats.map(([cat, count]) => `
+    <div class="flex items-center gap-3">
+      <span class="text-body-md w-24 truncate">${cat}</span>
+      <div class="flex-1 bg-surface-container-low rounded-full h-4 overflow-hidden">
+        <div class="bg-primary h-full rounded-full" style="width: ${(count / maxCat * 100)}%"></div>
+      </div>
+      <span class="text-label-sm w-8 text-right">${count}</span>
+    </div>
+  `).join('');
+  
+  // District chart
+  const distCounts = {};
+  filteredActivities.forEach(a => {
+    if (a.district && a.district !== 'Desconocido') {
+      distCounts[a.district] = (distCounts[a.district] || 0) + 1;
+    }
+  });
+  
+  const sortedDists = Object.entries(distCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxDist = Math.max(...sortedDists.map(d => d[1]), 1);
+  
+  document.getElementById('districtChart').innerHTML = sortedDists.map(([dist, count]) => `
+    <div class="flex items-center gap-3">
+      <span class="text-body-md w-32 truncate">${dist}</span>
+      <div class="flex-1 bg-surface-container-low rounded-full h-4 overflow-hidden">
+        <div class="bg-secondary h-full rounded-full" style="width: ${(count / maxDist * 100)}%"></div>
+      </div>
+      <span class="text-label-sm w-8 text-right">${count}</span>
+    </div>
+  `).join('');
+  
+  // Free chart
+  const freeCount = filteredActivities.filter(a => a.free).length;
+  const paidCount = filteredActivities.length - freeCount;
+  const total = filteredActivities.length || 1;
+  
+  document.getElementById('freeChart').innerHTML = `
+    <div class="bg-green-500" style="width: ${(freeCount / total * 100)}%"></div>
+    <div class="bg-red-500" style="width: ${(paidCount / total * 100)}%"></div>
+  `;
+  
+  document.getElementById('freeLegend').innerHTML = `
+    <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Gratis: ${freeCount}</span>
+    <span class="inline-flex items-center gap-1 ml-3"><span class="w-3 h-3 bg-red-500 rounded-full"></span> De pago: ${paidCount}</span>
+  `;
+}
+
+// Pagination
+function prevPage() {
+  if (currentPage > 0) {
+    currentPage--;
+    renderActivities();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function nextPage() {
+  const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
+  if (currentPage < totalPages - 1) {
+    currentPage++;
+    renderActivities();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Clear filters
+function clearFilters() {
+  currentFilters = {
+    category: 'all',
+    district: 'all',
+    date: 'all',
+    search: '',
+    freeOnly: false,
+    favoritesOnly: false,
+    sort: 'recent'
+  };
+  
+  document.getElementById('searchInput').value = '';
+  document.getElementById('districtSelect').value = 'all';
+  document.getElementById('sortSelect').value = 'recent';
+  document.getElementById('freeOnly').checked = false;
+  document.getElementById('favoritesOnly').checked = false;
+  
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === 'all');
+  });
+  
+  document.querySelectorAll('.date-filter').forEach(btn => {
+    btn.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
+    btn.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+    if (btn.dataset.date === 'all') {
+      btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
+      btn.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+    }
+  });
+  
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
+    p.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+  });
+  
+  document.getElementById('locationInput').classList.add('hidden');
+  
+  applyFilters();
+}
+
+// Close modal on outside click
+document.getElementById('detailModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDetail();
+  }
+});
+
+// Close login modal on Enter key
+document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    checkPassword();
+  }
+});
+</script>
+</body>
+</html>
