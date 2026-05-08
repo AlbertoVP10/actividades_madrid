@@ -183,7 +183,7 @@ body { min-height: max(884px, 100dvh); }
 <div id="filtersPanel" class="hidden bg-surface border-b border-surface-variant/30 px-4 py-4 space-y-4">
   <!-- Search -->
   <div>
-    <label class="text-label-sm text-on-surface-variant mb-1 block">Buscar</label>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">🔎 Buscar</label>
     <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
       <span class="material-symbols-outlined text-on-surface-variant">search</span>
       <input type="text" id="searchInput" placeholder="Título o descripción..." 
@@ -194,17 +194,17 @@ body { min-height: max(884px, 100dvh); }
   
   <!-- Sort -->
   <div>
-    <label class="text-label-sm text-on-surface-variant mb-1 block">Ordenar por</label>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">📊 Ordenar por</label>
     <select id="sortSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
       <option value="recent">Más recientes</option>
-      <option value="price">Más baratas</option>
+      <option value="price">Más baratas (gratis primero)</option>
       <option value="distance">Más cercanas</option>
     </select>
   </div>
   
   <!-- Location (for distance sort) -->
   <div id="locationInput" class="hidden">
-    <label class="text-label-sm text-on-surface-variant mb-1 block">Tu ubicación</label>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">📍 Tu ubicación</label>
     <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
       <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
       <input type="text" id="addressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
@@ -216,7 +216,7 @@ body { min-height: max(884px, 100dvh); }
   
   <!-- Categories -->
   <div>
-    <label class="text-label-sm text-on-surface-variant mb-2 block">Categoría</label>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">🎭 Categoría</label>
     <select id="categorySelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
       <option value="all">Todas</option>
     </select>
@@ -224,33 +224,58 @@ body { min-height: max(884px, 100dvh); }
   
   <!-- Districts -->
   <div>
-    <label class="text-label-sm text-on-surface-variant mb-2 block">Distrito</label>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">📍 Distrito</label>
     <select id="districtSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
       <option value="all">Todos</option>
     </select>
   </div>
   
+  <!-- Audience / Público -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">👥 Público</label>
+    <select id="audienceSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="all">Todos</option>
+      <option value="Niños">Niños</option>
+      <option value="Familias">Familias</option>
+      <option value="Adultos">Adultos</option>
+      <option value="Mayores">Mayores</option>
+      <option value="Jóvenes">Jóvenes</option>
+    </select>
+  </div>
+  
   <!-- Date Filter -->
   <div>
-    <label class="text-label-sm text-on-surface-variant mb-2 block">Fecha</label>
-    <div class="flex flex-wrap gap-2">
-      <button onclick="setDateFilter('all')" class="date-filter active px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="all">Todas</button>
-      <button onclick="setDateFilter('today')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="today">Hoy</button>
-      <button onclick="setDateFilter('week')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="week">Esta semana</button>
-      <button onclick="setDateFilter('month')" class="date-filter px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-label-lg" data-date="month">Este mes</button>
-    </div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">📅 Fecha</label>
+    <select id="dateSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="all">Todas las fechas</option>
+      <option value="today">Hoy</option>
+      <option value="tomorrow">Mañana</option>
+      <option value="week">Próximos 7 días</option>
+      <option value="month">Próximo mes</option>
+    </select>
+  </div>
+  
+  <!-- Time / Horario -->
+  <div>
+    <label class="text-label-sm text-on-surface-variant mb-2 block">🕐 Horario</label>
+    <select id="timeSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="all">Todo el día</option>
+      <option value="morning">Mañana (6:00 - 12:00)</option>
+      <option value="afternoon">Tarde (12:00 - 18:00)</option>
+      <option value="evening">Noche (18:00 - 24:00)</option>
+    </select>
   </div>
   
   <!-- Free Only -->
   <div class="flex items-center gap-2">
     <input type="checkbox" id="freeOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-    <label for="freeOnly" class="text-body-md">Solo gratuitas</label>
+    <label for="freeOnly" class="text-body-md">💰 Solo gratuitas</label>
   </div>
   
   <!-- Favorites Only -->
   <div class="flex items-center gap-2">
     <input type="checkbox" id="favoritesOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-    <label for="favoritesOnly" class="text-body-md">Mis favoritos</label>
+    <label for="favoritesOnly" class="text-body-md">❤️ Mis favoritos</label>
     <span id="favCount" class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-label-sm">0</span>
   </div>
   
@@ -410,7 +435,9 @@ let currentView = 'list';
 let currentFilters = {
   category: 'all',
   district: 'all',
+  audience: 'all',
   date: 'all',
+  time: 'all',
   search: '',
   freeOnly: false,
   favoritesOnly: false,
@@ -572,21 +599,18 @@ function toggleFilters() {
   panel.classList.toggle('hidden');
 }
 
-// Set date filter
-function setDateFilter(date) {
-  currentFilters.date = date;
-  
-  document.querySelectorAll('.date-filter').forEach(btn => {
-    if (btn.dataset.date === date) {
-      btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
-      btn.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
-    } else {
-      btn.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
-      btn.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
+// Extract hour from time string
+function extractHour(timeStr) {
+  if (!timeStr) return null;
+  try {
+    const parts = String(timeStr).split(':');
+    if (parts.length >= 2) {
+      return parseInt(parts[0]);
     }
-  });
-  
-  applyFilters();
+  } catch (e) {
+    return null;
+  }
+  return null;
 }
 
 // Geocode address
@@ -637,10 +661,13 @@ function applyFilters() {
   currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
   currentFilters.category = document.getElementById('categorySelect').value;
   currentFilters.district = document.getElementById('districtSelect').value;
+  currentFilters.audience = document.getElementById('audienceSelect').value;
+  currentFilters.date = document.getElementById('dateSelect').value;
+  currentFilters.time = document.getElementById('timeSelect').value;
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
   currentFilters.sort = document.getElementById('sortSelect').value;
-  
+
   // Show/hide location input
   const locationInput = document.getElementById('locationInput');
   if (currentFilters.sort === 'distance') {
@@ -648,32 +675,42 @@ function applyFilters() {
   } else {
     locationInput.classList.add('hidden');
   }
-  
+
   filteredActivities = allActivities.filter(activity => {
     // Category filter
     if (currentFilters.category !== 'all') {
       if (currentFilters.category === 'free') {
         if (!activity.free) return false;
       } else {
-        const mappedCat = categoryMap[activity.category];
-        if (mappedCat !== currentFilters.category) return false;
+        if (activity.category !== currentFilters.category) return false;
       }
     }
-    
+
     // District filter
     if (currentFilters.district !== 'all' && activity.district !== currentFilters.district) {
       return false;
     }
-    
+
+    // Audience filter
+    if (currentFilters.audience !== 'all' && activity.audience) {
+      if (!activity.audience.toLowerCase().includes(currentFilters.audience.toLowerCase())) {
+        return false;
+      }
+    }
+
     // Date filter
     if (currentFilters.date !== 'all' && activity.date) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const activityDate = new Date(activity.date);
       activityDate.setHours(0, 0, 0, 0);
-      
+
       if (currentFilters.date === 'today') {
         if (activityDate.getTime() !== today.getTime()) return false;
+      } else if (currentFilters.date === 'tomorrow') {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (activityDate.getTime() !== tomorrow.getTime()) return false;
       } else if (currentFilters.date === 'week') {
         const weekFromNow = new Date(today);
         weekFromNow.setDate(weekFromNow.getDate() + 7);
@@ -684,23 +721,33 @@ function applyFilters() {
         if (activityDate > monthFromNow) return false;
       }
     }
-    
+
+    // Time filter
+    if (currentFilters.time !== 'all' && activity.time) {
+      const hour = extractHour(activity.time);
+      if (hour !== null) {
+        if (currentFilters.time === 'morning' && (hour < 6 || hour >= 12)) return false;
+        if (currentFilters.time === 'afternoon' && (hour < 12 || hour >= 18)) return false;
+        if (currentFilters.time === 'evening' && (hour < 18 || hour >= 24)) return false;
+      }
+    }
+
     // Free filter
     if (currentFilters.freeOnly && !activity.free) {
       return false;
     }
-    
+
     // Favorites filter
     if (currentFilters.favoritesOnly && !favorites.includes(activity.id)) {
       return false;
     }
-    
+
     // Search filter
     if (currentFilters.search) {
       const searchIn = (activity.title + ' ' + activity.description).toLowerCase();
       if (!searchIn.includes(currentFilters.search)) return false;
     }
-    
+
     return true;
   });
   
@@ -1196,31 +1243,27 @@ function clearFilters() {
   currentFilters = {
     category: 'all',
     district: 'all',
+    audience: 'all',
     date: 'all',
+    time: 'all',
     search: '',
     freeOnly: false,
     favoritesOnly: false,
     sort: 'recent'
   };
-  
+
   document.getElementById('searchInput').value = '';
   document.getElementById('categorySelect').value = 'all';
   document.getElementById('districtSelect').value = 'all';
+  document.getElementById('audienceSelect').value = 'all';
+  document.getElementById('dateSelect').value = 'all';
+  document.getElementById('timeSelect').value = 'all';
   document.getElementById('sortSelect').value = 'recent';
   document.getElementById('freeOnly').checked = false;
   document.getElementById('favoritesOnly').checked = false;
-  
-  document.querySelectorAll('.date-filter').forEach(btn => {
-    btn.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
-    btn.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
-    if (btn.dataset.date === 'all') {
-      btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
-      btn.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
-    }
-  });
-  
+
   document.getElementById('locationInput').classList.add('hidden');
-  
+
   applyFilters();
 }
 
