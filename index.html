@@ -277,18 +277,7 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </nav>
 
-<!-- Category Pills -->
-<section id="categorySection" class="bg-surface px-4 py-3 border-b border-surface-variant/20">
-  <div class="flex flex-wrap gap-2" id="categoryPills">
-    <button onclick="toggleCategoryPill('free')" class="cat-pill px-3 py-1.5 rounded-lg border border-primary bg-primary-container text-on-primary-container text-label-lg font-medium" data-cat="free">Gratis</button>
-    <button onclick="toggleCategoryPill('cultura')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="cultura">Cultura</button>
-    <button onclick="toggleCategoryPill('gastronomia')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="gastronomia">Gastronomía</button>
-    <button onclick="toggleCategoryPill('arte')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="arte">Arte</button>
-    <button onclick="toggleCategoryPill('musica')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="musica">Música</button>
-    <button onclick="toggleCategoryPill('deportes')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="deportes">Deportes</button>
-    <button onclick="toggleCategoryPill('ferias')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="ferias">Ferias</button>
-  </div>
-</section>
+
 
 <!-- KPI Cards -->
 <section id="kpiSection" class="px-4 py-4">
@@ -603,28 +592,6 @@ function setCategory(cat) {
       btn.classList.remove('active');
     }
   });
-  
-  applyFilters();
-}
-
-// Toggle category pill
-function toggleCategoryPill(cat) {
-  const pill = document.querySelector(`.cat-pill[data-cat="${cat}"]`);
-  const isActive = pill.classList.contains('bg-primary-container');
-  
-  // Reset all pills
-  document.querySelectorAll('.cat-pill').forEach(p => {
-    p.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
-    p.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
-  });
-  
-  if (!isActive) {
-    pill.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
-    pill.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary');
-    currentFilters.category = cat;
-  } else {
-    currentFilters.category = 'all';
-  }
   
   applyFilters();
 }
@@ -1094,14 +1061,12 @@ function showView(view) {
   
   // Get elements by ID for reliable selection
   const tabNav = document.getElementById('tabNav');
-  const categorySection = document.getElementById('categorySection');
   const kpiSection = document.getElementById('kpiSection');
   const resultsBar = document.getElementById('resultsBar');
   
   if (view === 'map') {
     // Hide elements for full-screen map
     if (tabNav) tabNav.classList.add('hidden');
-    if (categorySection) categorySection.classList.add('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
     if (resultsBar) resultsBar.classList.add('hidden');
     document.body.classList.add('overflow-hidden');
@@ -1114,7 +1079,6 @@ function showView(view) {
   } else {
     // Show elements for list/stats view
     if (tabNav) tabNav.classList.remove('hidden');
-    if (categorySection) categorySection.classList.remove('hidden');
     if (kpiSection) kpiSection.classList.remove('hidden');
     if (resultsBar) resultsBar.classList.remove('hidden');
     document.body.classList.remove('overflow-hidden');
