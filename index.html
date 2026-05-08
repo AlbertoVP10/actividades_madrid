@@ -296,14 +296,7 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </section>
 
-<!-- View Tabs -->
-<section class="px-4 pb-2">
-  <div class="flex bg-surface-container-high rounded-lg p-1">
-    <button onclick="setViewTab('list')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium bg-primary-container text-on-primary-container" data-view="list">Lista</button>
-    <button onclick="setViewTab('map')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium text-on-surface-variant" data-view="map">Mapa</button>
-    <button onclick="setViewTab('stats')" class="view-tab flex-1 py-2 rounded-md text-label-lg font-medium text-on-surface-variant" data-view="stats">Estadísticas</button>
-  </div>
-</section>
+
 
 <!-- Loading State -->
 <div id="loadingState" class="flex flex-col items-center justify-center py-12">
@@ -312,7 +305,7 @@ body { min-height: max(884px, 100dvh); }
 </div>
 
 <!-- Content Canvas -->
-<main id="mainContent" class="px-4 pt-4 space-y-4 hidden">
+<main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
   <div class="flex justify-between items-center">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
@@ -325,13 +318,13 @@ body { min-height: max(884px, 100dvh); }
   </div>
   
   <!-- Map View -->
-  <div id="mapView" class="hidden">
+  <div id="mapView" class="hidden pb-24">
     <div id="map"></div>
     <p id="mapCaption" class="text-label-sm text-on-surface-variant mt-2 text-center"></p>
   </div>
   
   <!-- Stats View -->
-  <div id="statsView" class="hidden space-y-6">
+  <div id="statsView" class="hidden space-y-6 pb-24">
     <div>
       <h3 class="font-title-md text-title-md mb-3">Por categoría</h3>
       <div id="categoryChart" class="space-y-2">
@@ -360,7 +353,7 @@ body { min-height: max(884px, 100dvh); }
   </div>
   
   <!-- Pagination -->
-  <div id="pagination" class="flex justify-center items-center gap-2 py-4">
+  <div id="pagination" class="flex justify-center items-center gap-2 py-4 pb-24">
     <button onclick="prevPage()" id="prevBtn" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface disabled:opacity-50" disabled>
       <span class="material-symbols-outlined">chevron_left</span>
     </button>
@@ -387,7 +380,7 @@ body { min-height: max(884px, 100dvh); }
 </div>
 
 <!-- BottomNavBar Section -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface shadow-lg rounded-t-xl">
+<nav class="fixed bottom-0 left-0 w-full z-[100] flex justify-around items-center px-4 py-3 bg-surface shadow-lg rounded-t-xl">
   <button onclick="setBottomTab('map')" class="bottom-tab flex flex-col items-center justify-center px-4 py-1 text-on-surface-variant" data-tab="map">
     <span class="material-symbols-outlined text-2xl">map</span>
     <span class="font-label-sm text-label-sm">Mapa</span>
@@ -401,8 +394,8 @@ body { min-height: max(884px, 100dvh); }
     <span class="font-label-sm text-label-sm">Favoritos</span>
   </button>
   <button onclick="setBottomTab('profile')" class="bottom-tab flex flex-col items-center justify-center px-4 py-1 text-on-surface-variant" data-tab="profile">
-    <span class="material-symbols-outlined text-2xl">person</span>
-    <span class="font-label-sm text-label-sm">Perfil</span>
+    <span class="material-symbols-outlined text-2xl">bar_chart</span>
+    <span class="font-label-sm text-label-sm">Stats</span>
   </button>
 </nav>
 
@@ -830,10 +823,7 @@ function renderActivities() {
     
     return `
       <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
-        <div class="relative h-48 w-full bg-surface-variant">
-          <div class="absolute inset-0 flex items-center justify-center text-on-surface-variant">
-            <span class="material-symbols-outlined text-6xl">image</span>
-          </div>
+        <div class="relative h-32 w-full bg-surface-variant">
           <button onclick="toggleFavorite(event, '${activity.id}')" class="absolute top-3 right-3 bg-surface/80 backdrop-blur-md p-2 rounded-full shadow-lg z-10">
             <span class="material-symbols-outlined text-[20px] ${isFav ? 'filled text-primary' : 'text-primary'}" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0};">favorite</span>
           </button>
@@ -1048,29 +1038,7 @@ function setMainTab(tab) {
   applyFilters();
 }
 
-// Set view tab
-function setViewTab(view) {
-  currentView = view;
-  
-  document.querySelectorAll('.view-tab').forEach(btn => {
-    if (btn.dataset.view === view) {
-      btn.classList.add('bg-primary-container', 'text-on-primary-container');
-      btn.classList.remove('text-on-surface-variant');
-    } else {
-      btn.classList.remove('bg-primary-container', 'text-on-primary-container');
-      btn.classList.add('text-on-surface-variant');
-    }
-  });
-  
-  document.getElementById('listView').classList.toggle('hidden', view !== 'list');
-  document.getElementById('mapView').classList.toggle('hidden', view !== 'map');
-  document.getElementById('statsView').classList.toggle('hidden', view !== 'stats');
-  document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
-  
-  if (view === 'map') {
-    setTimeout(initMap, 100);
-  }
-}
+
 
 // Set bottom tab
 function setBottomTab(tab) {
@@ -1085,15 +1053,46 @@ function setBottomTab(tab) {
   });
   
   if (tab === 'list') {
-    setViewTab('list');
+    showView('list');
     document.getElementById('favoritesOnly').checked = false;
     applyFilters();
   } else if (tab === 'map') {
-    setViewTab('map');
+    showView('map');
   } else if (tab === 'favorites') {
-    setViewTab('list');
+    showView('list');
     document.getElementById('favoritesOnly').checked = true;
     applyFilters();
+  } else if (tab === 'profile') {
+    showView('stats');
+  }
+}
+
+// Show view (helper for bottom tabs)
+function showView(view) {
+  currentView = view;
+  
+  document.getElementById('listView').classList.toggle('hidden', view !== 'list');
+  document.getElementById('mapView').classList.toggle('hidden', view !== 'map');
+  document.getElementById('statsView').classList.toggle('hidden', view !== 'stats');
+  document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
+  
+  // Update list tab button icon/text based on favorites filter
+  const favOnly = document.getElementById('favoritesOnly').checked;
+  const listBtn = document.querySelector('.bottom-tab[data-tab="list"]');
+  if (listBtn && view === 'list') {
+    const icon = listBtn.querySelector('.material-symbols-outlined');
+    const text = listBtn.querySelector('span:last-child');
+    if (favOnly) {
+      icon.textContent = 'favorite';
+      text.textContent = 'Favoritos';
+    } else {
+      icon.textContent = 'list';
+      text.textContent = 'Lista';
+    }
+  }
+  
+  if (view === 'map') {
+    setTimeout(initMap, 100);
   }
 }
 
