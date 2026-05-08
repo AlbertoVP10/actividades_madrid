@@ -282,11 +282,17 @@ body { min-height: max(884px, 100dvh); }
     </div>
   </div>
   
-  <!-- Clear Filters -->
-  <button onclick="clearFilters()" class="w-full bg-surface-container-high text-on-surface py-2 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
-    <span class="material-symbols-outlined">delete</span>
-    Limpiar filtros
-  </button>
+  <!-- Action Buttons -->
+  <div class="flex gap-3">
+    <button onclick="toggleFilters()" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">check</span>
+      Aplicar filtros (<span id="filterResultCount">0</span>)
+    </button>
+    <button onclick="clearFilters()" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">delete</span>
+      Limpiar
+    </button>
+  </div>
 </div>
 
 <!-- Tab Navigation Section -->
@@ -789,6 +795,12 @@ function applyFilters() {
   updateKPIs();
   renderActivities();
   renderStats();
+  
+  // Update filter result count in button
+  const filterCountEl = document.getElementById('filterResultCount');
+  if (filterCountEl) {
+    filterCountEl.textContent = filteredActivities.length;
+  }
 }
 
 // Update KPIs
