@@ -1120,21 +1120,6 @@ function showView(view) {
     document.body.classList.remove('overflow-hidden');
   }
   
-  // Update list tab button icon/text based on favorites filter
-  const favOnly = document.getElementById('favoritesOnly').checked;
-  const listBtn = document.querySelector('.bottom-tab[data-tab="list"]');
-  if (listBtn && view === 'list') {
-    const icon = listBtn.querySelector('.material-symbols-outlined');
-    const text = listBtn.querySelector('span:last-child');
-    if (favOnly) {
-      icon.textContent = 'favorite';
-      text.textContent = 'Favoritos';
-    } else {
-      icon.textContent = 'list';
-      text.textContent = 'Lista';
-    }
-  }
-  
   if (view === 'map') {
     setTimeout(initMap, 100);
   }
