@@ -985,22 +985,20 @@ function showDetail(id) {
       </div>
       
       <div class="flex gap-3 pb-4">
-        <button onclick="toggleFavorite(event, '${activity.id}'); showDetail('${activity.id}')" class="flex-1 ${isFav ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} py-3 rounded-lg font-label-lg flex items-center justify-center gap-2">
+        <button onclick="toggleFavorite(event, '${activity.id}'); showDetail('${activity.id}')" class="${isFav ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
-          ${isFav ? 'En favoritos' : 'Añadir a favoritos'}
         </button>
         
         ${activity.link ? `
-        <a href="${activity.link}" target="_blank" class="flex-1 bg-primary text-on-primary py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
+        <a href="${activity.link}" target="_blank" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
           <span class="material-symbols-outlined">open_in_new</span>
           Ver más info
         </a>
         ` : ''}
         
         ${activity.lat && activity.lon ? `
-        <a href="https://www.google.com/maps?q=${activity.lat},${activity.lon}" target="_blank" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
+        <a href="https://www.google.com/maps?q=${activity.lat},${activity.lon}" target="_blank" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined">map</span>
-          Google Maps
         </a>
         ` : ''}
       </div>
