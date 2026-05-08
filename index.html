@@ -25,16 +25,16 @@ tailwind.config = {
         "secondary-container": "#faa307",
         "on-secondary": "#ffffff",
         "on-secondary-container": "#6a040f",
-        "background": "#f9f9f9",
+        "background": "#ffffff",
         "on-background": "#1a1c1c",
-        "surface": "#f9f9f9",
+        "surface": "#ffffff",
         "on-surface": "#1a1c1c",
-        "surface-variant": "#e2e2e2",
+        "surface-variant": "#f5f5f5",
         "on-surface-variant": "#5b4039",
-        "surface-container": "#eeeeee",
-        "surface-container-low": "#f3f3f3",
-        "surface-container-high": "#e8e8e8",
-        "surface-container-highest": "#e2e2e2",
+        "surface-container": "#ffffff",
+        "surface-container-low": "#ffffff",
+        "surface-container-high": "#fafafa",
+        "surface-container-highest": "#f5f5f5",
         "outline": "#907067",
         "outline-variant": "#e4beb4",
         "error": "#ba1a1a",
@@ -296,22 +296,22 @@ body { min-height: max(884px, 100dvh); }
 <!-- KPI Cards -->
 <section id="kpiSection" class="px-4 py-4">
   <div class="grid grid-cols-4 gap-2">
-    <div class="bg-gradient-to-br from-primary to-primary-light py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div class="bg-gradient-to-br from-[#e85d04] to-[#ff8500] py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">calendar_today</span>
       <div id="kpiToday" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Hoy</div>
     </div>
-    <div class="bg-gradient-to-br from-primary-dark to-primary py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div class="bg-gradient-to-br from-[#d00000] to-[#e85d04] py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">star</span>
       <div id="kpiFeatured" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Destacados</div>
     </div>
-    <div class="bg-gradient-to-br from-secondary to-secondary-container py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div class="bg-gradient-to-br from-[#f48c06] to-[#faa307] py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">location_on</span>
       <div id="kpiNear" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Cerca</div>
     </div>
-    <div class="bg-gradient-to-br from-primary-container to-secondary py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
+    <div class="bg-gradient-to-br from-[#ff6b35] to-[#f48c06] py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center">
       <span class="material-symbols-outlined text-lg">favorite</span>
       <div id="kpiFavorites" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Favoritos</div>
