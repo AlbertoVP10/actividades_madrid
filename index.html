@@ -647,6 +647,13 @@ async function geocodeAddress() {
 }
 
 // Calculate distance
+// Comparar si dos fechas son el mismo día (ignorando hora)
+function isSameDay(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getDate() === date2.getDate();
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -838,11 +845,11 @@ function renderActivities() {
   document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades`;
   
   container.innerHTML = pageActivities.map(activity => {
-    // Construir string de fecha (rango si hay fecha fin diferente)
+    // Construir string de fecha (rango si hay fecha fin diferente - comparando solo día)
     let dateStr = '';
     if (activity.date) {
       const startStr = activity.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-      if (activity.endDate && activity.endDate.getTime() !== activity.date.getTime()) {
+      if (activity.endDate && !isSameDay(activity.date, activity.endDate)) {
         const endStr = activity.endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         dateStr = `${startStr} - ${endStr}`;
       } else {
@@ -917,12 +924,12 @@ function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
   if (!activity) return;
   
-  // Construir string de fecha para el detalle (rango si aplica)
+  // Construir string de fecha para el detalle (rango si aplica - comparando solo día)
   let dateStr = 'Fecha no disponible';
   let dateLabel = 'Fecha';
   if (activity.date) {
     const startStr = activity.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    if (activity.endDate && activity.endDate.getTime() !== activity.date.getTime()) {
+    if (activity.endDate && !isSameDay(activity.date, activity.endDate)) {
       const endStr = activity.endDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       dateStr = `De ${startStr} a ${endStr}`;
       dateLabel = 'Fechas';
