@@ -266,17 +266,20 @@ body { min-height: max(884px, 100dvh); }
     </select>
   </div>
   
-  <!-- Free Only -->
-  <div class="flex items-center gap-2">
-    <input type="checkbox" id="freeOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-    <label for="freeOnly" class="text-body-md">💰 Solo gratuitas</label>
-  </div>
-  
-  <!-- Favorites Only -->
-  <div class="flex items-center gap-2">
-    <input type="checkbox" id="favoritesOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-    <label for="favoritesOnly" class="text-body-md">❤️ Mis favoritos</label>
-    <span id="favCount" class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-label-sm">0</span>
+  <!-- Free and Favorites in parallel -->
+  <div class="flex gap-4">
+    <!-- Free Only -->
+    <div class="flex items-center gap-2 flex-1">
+      <input type="checkbox" id="freeOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
+      <label for="freeOnly" class="text-body-md">💰 Solo gratuitas</label>
+    </div>
+    
+    <!-- Favorites Only -->
+    <div class="flex items-center gap-2 flex-1">
+      <input type="checkbox" id="favoritesOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
+      <label for="favoritesOnly" class="text-body-md">❤️ Mis favoritos</label>
+      <span id="favCount" class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-label-sm">0</span>
+    </div>
   </div>
   
   <!-- Clear Filters -->
