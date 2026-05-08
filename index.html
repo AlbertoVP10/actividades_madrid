@@ -380,9 +380,9 @@ body { min-height: max(884px, 100dvh); }
 </main>
 
 <!-- Activity Detail Modal -->
-<div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center">
-  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center">
+<div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
+  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
+    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
       <h2 id="detailTitle" class="font-title-lg text-title-lg pr-4"></h2>
       <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
@@ -991,7 +991,7 @@ function showDetail(id) {
         ` : ''}
       </div>
       
-      <div class="flex gap-3">
+      <div class="flex gap-3 pb-4">
         <button onclick="toggleFavorite(event, '${activity.id}'); showDetail('${activity.id}')" class="flex-1 ${isFav ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} py-3 rounded-lg font-label-lg flex items-center justify-center gap-2">
           <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
           ${isFav ? 'En favoritos' : 'Añadir a favoritos'}
