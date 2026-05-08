@@ -269,7 +269,7 @@ body { min-height: max(884px, 100dvh); }
 </div>
 
 <!-- Tab Navigation Section -->
-<nav class="bg-surface sticky top-16 z-40 px-4 py-3 border-b border-surface-variant/30 overflow-x-auto">
+<nav id="tabNav" class="bg-surface sticky top-16 z-40 px-4 py-3 border-b border-surface-variant/30 overflow-x-auto">
   <div class="flex gap-3 whitespace-nowrap">
     <button onclick="setMainTab('nearby')" class="main-tab active px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-lg" data-tab="nearby">Cerca de mí</button>
     <button onclick="setMainTab('popular')" class="main-tab px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg" data-tab="popular">Más populares</button>
@@ -278,7 +278,7 @@ body { min-height: max(884px, 100dvh); }
 </nav>
 
 <!-- Category Pills -->
-<section class="bg-surface px-4 py-3 border-b border-surface-variant/20">
+<section id="categorySection" class="bg-surface px-4 py-3 border-b border-surface-variant/20">
   <div class="flex flex-wrap gap-2" id="categoryPills">
     <button onclick="toggleCategoryPill('free')" class="cat-pill px-3 py-1.5 rounded-lg border border-primary bg-primary-container text-on-primary-container text-label-lg font-medium" data-cat="free">Gratis</button>
     <button onclick="toggleCategoryPill('cultura')" class="cat-pill px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface text-label-lg" data-cat="cultura">Cultura</button>
@@ -291,7 +291,7 @@ body { min-height: max(884px, 100dvh); }
 </section>
 
 <!-- KPI Cards -->
-<section class="px-4 py-4">
+<section id="kpiSection" class="px-4 py-4">
   <div class="grid grid-cols-4 gap-2">
     <div class="bg-gradient-to-br from-[#2193b0] to-[#6dd5ed] p-3 rounded-lg text-center text-white">
       <div id="kpiToday" class="text-xl font-bold">0</div>
@@ -323,7 +323,7 @@ body { min-height: max(884px, 100dvh); }
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <div class="flex justify-between items-center">
+  <div id="resultsBar" class="flex justify-between items-center">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
     <p id="locationInfo" class="text-label-sm text-on-surface-variant hidden"></p>
   </div>
@@ -1092,19 +1092,18 @@ function showView(view) {
   document.getElementById('statsView').classList.toggle('hidden', view !== 'stats');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
   
-  // In map view: hide header elements to give full space to map
-  const header = document.querySelector('header');
-  const tabNav = document.querySelector('nav.sticky.top-16');
-  const categoryPills = document.querySelector('#categoryPills').parentElement;
-  const kpiSection = document.querySelector('section:has(#kpiToday)');
-  const resultsCount = document.getElementById('resultsCount').parentElement;
+  // Get elements by ID for reliable selection
+  const tabNav = document.getElementById('tabNav');
+  const categorySection = document.getElementById('categorySection');
+  const kpiSection = document.getElementById('kpiSection');
+  const resultsBar = document.getElementById('resultsBar');
   
   if (view === 'map') {
     // Hide elements for full-screen map
     if (tabNav) tabNav.classList.add('hidden');
-    if (categoryPills) categoryPills.classList.add('hidden');
+    if (categorySection) categorySection.classList.add('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
-    if (resultsCount) resultsCount.classList.add('hidden');
+    if (resultsBar) resultsBar.classList.add('hidden');
     document.body.classList.add('overflow-hidden');
     
     // Adjust map container to start below header
@@ -1115,9 +1114,9 @@ function showView(view) {
   } else {
     // Show elements for list/stats view
     if (tabNav) tabNav.classList.remove('hidden');
-    if (categoryPills) categoryPills.classList.remove('hidden');
+    if (categorySection) categorySection.classList.remove('hidden');
     if (kpiSection) kpiSection.classList.remove('hidden');
-    if (resultsCount) resultsCount.classList.remove('hidden');
+    if (resultsBar) resultsBar.classList.remove('hidden');
     document.body.classList.remove('overflow-hidden');
   }
   
