@@ -147,14 +147,7 @@ body { min-height: max(884px, 100dvh); }
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-.filter-chip {
-  transition: all 0.2s ease;
-}
-.filter-chip.active {
-  background-color: #ff5722;
-  color: white;
-  border-color: #b02f00;
-}
+
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -224,9 +217,9 @@ body { min-height: max(884px, 100dvh); }
   <!-- Categories -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">Categoría</label>
-    <div class="flex flex-wrap gap-2" id="categoryFilters">
-      <button onclick="setCategory('all')" class="filter-chip active px-3 py-1.5 rounded-full border border-outline-variant text-label-lg" data-cat="all">Todas</button>
-    </div>
+    <select id="categorySelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="all">Todas</option>
+    </select>
   </div>
   
   <!-- Districts -->
@@ -551,14 +544,13 @@ function extractDistrict(districtUrl) {
 function populateFilters() {
   // Categories
   const categories = [...new Set(allActivities.map(a => a.category))].sort();
-  const catContainer = document.getElementById('categoryFilters');
+  const categorySelect = document.getElementById('categorySelect');
+  // Keep the "Todas" option and add categories
   categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-chip px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container-low text-label-lg';
-    btn.textContent = cat;
-    btn.onclick = () => setCategory(cat);
-    btn.dataset.cat = cat;
-    catContainer.appendChild(btn);
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
   });
   
   // Districts
@@ -578,22 +570,6 @@ function populateFilters() {
 function toggleFilters() {
   const panel = document.getElementById('filtersPanel');
   panel.classList.toggle('hidden');
-}
-
-// Set category filter
-function setCategory(cat) {
-  currentFilters.category = cat;
-  
-  // Update UI
-  document.querySelectorAll('.filter-chip').forEach(btn => {
-    if (btn.dataset.cat === cat) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-  
-  applyFilters();
 }
 
 // Set date filter
@@ -659,6 +635,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // Apply filters
 function applyFilters() {
   currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
+  currentFilters.category = document.getElementById('categorySelect').value;
   currentFilters.district = document.getElementById('districtSelect').value;
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
@@ -1227,14 +1204,11 @@ function clearFilters() {
   };
   
   document.getElementById('searchInput').value = '';
+  document.getElementById('categorySelect').value = 'all';
   document.getElementById('districtSelect').value = 'all';
   document.getElementById('sortSelect').value = 'recent';
   document.getElementById('freeOnly').checked = false;
   document.getElementById('favoritesOnly').checked = false;
-  
-  document.querySelectorAll('.filter-chip').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.cat === 'all');
-  });
   
   document.querySelectorAll('.date-filter').forEach(btn => {
     btn.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
@@ -1243,11 +1217,6 @@ function clearFilters() {
       btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'border-primary');
       btn.classList.remove('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
     }
-  });
-  
-  document.querySelectorAll('.cat-pill').forEach(p => {
-    p.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
-    p.classList.add('bg-surface-container-low', 'text-on-surface', 'border-outline-variant');
   });
   
   document.getElementById('locationInput').classList.add('hidden');
