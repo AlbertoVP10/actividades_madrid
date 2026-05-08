@@ -114,7 +114,23 @@ tailwind.config = {
 }
 body { font-family: 'Inter', sans-serif; }
 body { min-height: max(884px, 100dvh); }
-#map { height: 400px; width: 100%; border-radius: 12px; }
+#map { height: 100%; width: 100%; border-radius: 0; }
+.map-container { 
+  position: fixed; 
+  top: 16rem; 
+  left: 0; 
+  right: 0; 
+  bottom: 80px; 
+  z-index: 30;
+}
+.map-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: #f9f9f9;
+}
 .activity-card { transition: transform 0.15s ease; }
 .activity-card:active { transform: scale(0.98); }
 .tab-active { background-color: #ff5722; color: white; }
@@ -318,9 +334,8 @@ body { min-height: max(884px, 100dvh); }
   </div>
   
   <!-- Map View -->
-  <div id="mapView" class="hidden pb-24">
+  <div id="mapView" class="hidden map-container">
     <div id="map"></div>
-    <p id="mapCaption" class="text-label-sm text-on-surface-variant mt-2 text-center"></p>
   </div>
   
   <!-- Stats View -->
@@ -1071,10 +1086,40 @@ function setBottomTab(tab) {
 function showView(view) {
   currentView = view;
   
+  // Hide/show main content sections
   document.getElementById('listView').classList.toggle('hidden', view !== 'list');
   document.getElementById('mapView').classList.toggle('hidden', view !== 'map');
   document.getElementById('statsView').classList.toggle('hidden', view !== 'stats');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
+  
+  // In map view: hide header elements to give full space to map
+  const header = document.querySelector('header');
+  const tabNav = document.querySelector('nav.sticky.top-16');
+  const categoryPills = document.querySelector('#categoryPills').parentElement;
+  const kpiSection = document.querySelector('section:has(#kpiToday)');
+  const resultsCount = document.getElementById('resultsCount').parentElement;
+  
+  if (view === 'map') {
+    // Hide elements for full-screen map
+    if (tabNav) tabNav.classList.add('hidden');
+    if (categoryPills) categoryPills.classList.add('hidden');
+    if (kpiSection) kpiSection.classList.add('hidden');
+    if (resultsCount) resultsCount.classList.add('hidden');
+    document.body.classList.add('overflow-hidden');
+    
+    // Adjust map container to start below header
+    const mapContainer = document.getElementById('mapView');
+    if (mapContainer) {
+      mapContainer.style.top = '64px'; // Height of header
+    }
+  } else {
+    // Show elements for list/stats view
+    if (tabNav) tabNav.classList.remove('hidden');
+    if (categoryPills) categoryPills.classList.remove('hidden');
+    if (kpiSection) kpiSection.classList.remove('hidden');
+    if (resultsCount) resultsCount.classList.remove('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
   
   // Update list tab button icon/text based on favorites filter
   const favOnly = document.getElementById('favoritesOnly').checked;
