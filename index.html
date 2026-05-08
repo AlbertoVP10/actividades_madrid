@@ -857,7 +857,7 @@ function renderActivities() {
     const isFav = favorites.includes(activity.id);
     
     return `
-      <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
+      <article class="activity-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-lg shadow-black/10 border border-surface-variant/10 cursor-pointer" onclick="showDetail('${activity.id}')">
         <div class="p-3 space-y-1">
           <div class="flex justify-between items-start gap-2">
             <div class="flex items-center gap-2 flex-1">
