@@ -1019,6 +1019,12 @@ function showDetail(id) {
   `;
   
   document.getElementById('detailModal').classList.remove('hidden');
+  
+  // Reset scroll al inicio del modal
+  const modalContent = document.querySelector('#detailModal > div');
+  if (modalContent) {
+    modalContent.scrollTop = 0;
+  }
 }
 
 // Close detail modal
