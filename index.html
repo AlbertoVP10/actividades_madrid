@@ -1204,11 +1204,12 @@ function setBottomTab(tab) {
     document.getElementById('favoritesOnly').checked = false;
     applyFilters();
   } else if (tab === 'map') {
-    // Clear location filter when going back to map
+    // Clear only location filter when going back to map, keep other filters
     if (currentFilters.search || currentFilters.locationFilter) {
       currentFilters.search = '';
       currentFilters.locationFilter = null;
       document.getElementById('searchInput').value = '';
+      // Re-apply filters without resetting other filter values
       applyFilters();
     }
     showView('map');
