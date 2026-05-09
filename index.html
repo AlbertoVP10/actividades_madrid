@@ -162,23 +162,24 @@ body { min-height: max(884px, 100dvh); }
 <div id="filtersPanel" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
   <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
     <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
-      <h2 class="font-title-lg text-title-lg text-on-surface">Filtros</h2>
+      <div class="flex items-center gap-4">
+        <h2 class="font-title-lg text-title-lg text-on-surface">Filtros</h2>
+        <div class="flex gap-2">
+          <button onclick="toggleFilters()" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-base">check</span>
+            Aplicar (<span id="filterResultCount">0</span>)
+          </button>
+          <button onclick="clearFilters()" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-variant transition-colors flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-base">delete</span>
+            Limpiar
+          </button>
+        </div>
+      </div>
       <button onclick="toggleFilters()" class="p-2 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
     <div class="px-4 py-4 space-y-4">
-      <!-- Action Buttons -->
-      <div class="flex gap-3">
-        <button onclick="toggleFilters()" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined">check</span>
-          Aplicar (<span id="filterResultCount">0</span>)
-        </button>
-        <button onclick="clearFilters()" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined">delete</span>
-          Limpiar
-        </button>
-      </div>
   <!-- Search -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-1 block">🔎 Buscar</label>
