@@ -183,8 +183,20 @@ body { min-height: max(884px, 100dvh); }
       </button>
     </div>
     <div class="px-4 py-4 space-y-4">
-  <!-- Search -->
-  <div>
+  <!-- Sort Section -->
+  <div class="border-b border-surface-variant/30 pb-4">
+    <h3 class="font-title-md text-title-md text-on-surface mb-3">Ordenar</h3>
+    <label class="text-label-sm text-on-surface-variant mb-1 block">📊 Ordenar por</label>
+    <select id="sortSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+      <option value="recent">Más recientes</option>
+      <option value="price">Más baratas (gratis primero)</option>
+      <option value="distance">Más cercanas</option>
+    </select>
+  </div>
+  
+  <!-- Filter Section -->
+  <div class="border-b border-surface-variant/30 pb-4">
+    <h3 class="font-title-md text-title-md text-on-surface mb-3">Filtrar</h3>
     <label class="text-label-sm text-on-surface-variant mb-1 block">🔎 Buscar</label>
     <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
       <span class="material-symbols-outlined text-on-surface-variant">search</span>
@@ -192,16 +204,6 @@ body { min-height: max(884px, 100dvh); }
              class="bg-transparent flex-1 outline-none text-body-md"
              oninput="applyFilters()">
     </div>
-  </div>
-  
-  <!-- Sort -->
-  <div>
-    <label class="text-label-sm text-on-surface-variant mb-1 block">📊 Ordenar por</label>
-    <select id="sortSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="recent">Más recientes</option>
-      <option value="price">Más baratas (gratis primero)</option>
-      <option value="distance">Más cercanas</option>
-    </select>
   </div>
   
   <!-- Location (for distance sort) -->
