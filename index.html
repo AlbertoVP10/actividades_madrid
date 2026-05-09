@@ -291,22 +291,21 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Location Modal (for adding location when none exists) -->
 <div id="locationModal" class="hidden fixed inset-0 bg-black/50 z-[120] flex items-end sm:items-center justify-center">
-  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg p-6 m-4">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="font-title-lg text-title-lg text-on-surface">Añadir ubicación</h2>
-      <button onclick="closeLocationModal()" class="p-2 hover:bg-surface-variant rounded-full">
+  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg p-4 m-4">
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="font-title-md text-title-md text-on-surface">Tu ubicación</h2>
+      <button onclick="closeLocationModal()" class="p-1 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <p class="text-body-md text-on-surface-variant mb-4">Introduce tu dirección para ver actividades cercanas</p>
-    <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-3 mb-3">
-      <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
+    <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2 mb-2">
+      <span class="material-symbols-outlined text-on-surface-variant text-base">location_on</span>
       <input type="text" id="modalAddressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
              class="bg-transparent flex-1 outline-none text-body-md">
     </div>
-    <p id="modalLocationStatus" class="text-label-sm mb-4"></p>
-    <button onclick="geocodeAddressFromModal()" class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-2">
-      <span class="material-symbols-outlined">search</span>
+    <p id="modalLocationStatus" class="text-label-sm mb-2 min-h-[16px]"></p>
+    <button onclick="geocodeAddressFromModal()" class="w-full bg-primary text-on-primary py-2 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-1">
+      <span class="material-symbols-outlined text-base">search</span>
       Buscar
     </button>
   </div>
