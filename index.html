@@ -727,19 +727,23 @@ async function geocodeAddressFromModal() {
         // Center map on new location if in map view
         if (currentBottomTab === 'map' && map) {
           map.setView([userLocation.lat, userLocation.lon], 14);
-          // Update or create user location marker
+          // Remove old user location marker if exists
           if (window.userLocationMarker) {
-            window.userLocationMarker.setLatLng([userLocation.lat, userLocation.lon]);
-          } else {
-            window.userLocationMarker = L.marker([userLocation.lat, userLocation.lon], {
-              icon: L.divIcon({
-                className: 'user-location-marker',
-                html: '<div style="background: #F08080; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
-                iconSize: [22, 22],
-                iconAnchor: [11, 11]
-              })
-            }).addTo(map).bindPopup('Tu ubicación');
+            map.removeLayer(window.userLocationMarker);
           }
+          // Create new user location marker
+          window.userLocationMarker = L.marker([userLocation.lat, userLocation.lon], {
+            icon: L.divIcon({
+              className: 'user-location-marker',
+              html: '<div style="background: #F08080; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11]
+            })
+          }).addTo(map).bindPopup('Tu ubicación').openPopup();
+          // Refresh map markers with new distances
+          setTimeout(() => {
+            updateMapMarkers();
+          }, 100);
         }
       }, 500);
     } else {
@@ -799,7 +803,11 @@ function getCurrentLocationFromModal() {
                 iconSize: [22, 22],
                 iconAnchor: [11, 11]
               })
-            }).addTo(map).bindPopup('Tu ubicación');
+            }).addTo(map).bindPopup('Tu ubicación').openPopup();
+          // Refresh map markers with new distances
+          setTimeout(() => {
+            updateMapMarkers();
+          }, 100);
           }
         }
       }, 500);
