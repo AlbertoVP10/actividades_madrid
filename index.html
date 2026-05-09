@@ -724,6 +724,23 @@ async function geocodeAddressFromModal() {
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
         applyFilters();
+        // Center map on new location if in map view
+        if (currentBottomTab === 'map' && map) {
+          map.setView([userLocation.lat, userLocation.lon], 14);
+          // Update or create user location marker
+          if (window.userLocationMarker) {
+            window.userLocationMarker.setLatLng([userLocation.lat, userLocation.lon]);
+          } else {
+            window.userLocationMarker = L.marker([userLocation.lat, userLocation.lon], {
+              icon: L.divIcon({
+                className: 'user-location-marker',
+                html: '<div style="background: #F08080; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+              })
+            }).addTo(map).bindPopup('Tu ubicación');
+          }
+        }
       }, 500);
     } else {
       status.textContent = '✗ No se encontró la ubicación';
@@ -768,6 +785,23 @@ function getCurrentLocationFromModal() {
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
         applyFilters();
+        // Center map on new location if in map view
+        if (currentBottomTab === 'map' && map) {
+          map.setView([userLocation.lat, userLocation.lon], 14);
+          // Update or create user location marker
+          if (window.userLocationMarker) {
+            window.userLocationMarker.setLatLng([userLocation.lat, userLocation.lon]);
+          } else {
+            window.userLocationMarker = L.marker([userLocation.lat, userLocation.lon], {
+              icon: L.divIcon({
+                className: 'user-location-marker',
+                html: '<div style="background: #F08080; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+              })
+            }).addTo(map).bindPopup('Tu ubicación');
+          }
+        }
       }, 500);
     },
     (error) => {
