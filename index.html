@@ -192,6 +192,18 @@ body { min-height: max(884px, 100dvh); }
       <option value="price">Más baratas (gratis primero)</option>
       <option value="distance">Más cercanas</option>
     </select>
+    
+    <!-- Location (for distance sort) -->
+    <div id="locationInput" class="hidden mt-4">
+      <label class="text-label-sm text-on-surface-variant mb-1 block">📍 Tu ubicación</label>
+      <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
+        <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
+        <input type="text" id="addressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
+               class="bg-transparent flex-1 outline-none text-body-md">
+        <button onclick="geocodeAddress()" class="bg-primary text-on-primary px-3 py-1 rounded text-label-sm">Buscar</button>
+      </div>
+      <p id="locationStatus" class="text-label-sm mt-1"></p>
+    </div>
   </div>
   
   <!-- Filter Section -->
@@ -204,18 +216,6 @@ body { min-height: max(884px, 100dvh); }
              class="bg-transparent flex-1 outline-none text-body-md"
              oninput="applyFilters()">
     </div>
-  </div>
-  
-  <!-- Location (for distance sort) -->
-  <div id="locationInput" class="hidden">
-    <label class="text-label-sm text-on-surface-variant mb-1 block">📍 Tu ubicación</label>
-    <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
-      <span class="material-symbols-outlined text-on-surface-variant">location_on</span>
-      <input type="text" id="addressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
-             class="bg-transparent flex-1 outline-none text-body-md">
-      <button onclick="geocodeAddress()" class="bg-primary text-on-primary px-3 py-1 rounded text-label-sm">Buscar</button>
-    </div>
-    <p id="locationStatus" class="text-label-sm mt-1"></p>
   </div>
   
   <!-- Categories -->
