@@ -287,8 +287,8 @@ body { min-height: max(884px, 100dvh); }
 <!-- Tab Navigation Section -->
 <nav id="tabNav" class="bg-surface sticky top-16 z-40 px-4 py-3 border-b border-surface-variant/30 overflow-x-auto">
   <div class="flex gap-3 whitespace-nowrap">
-    <button onclick="setMainTab('nearby')" class="main-tab active px-3 py-1.5 rounded-full bg-primary-container text-on-primary-container text-xs font-medium" data-tab="nearby">Cerca de mí</button>
-    <button onclick="setMainTab('popular')" class="main-tab px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium" data-tab="popular">Más populares</button>
+    <button onclick="setMainTab('nearby')" class="main-tab px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium" data-tab="nearby">Cerca de mí</button>
+    <button onclick="setMainTab('recent')" class="main-tab active px-3 py-1.5 rounded-full bg-primary-container text-on-primary-container text-xs font-medium" data-tab="recent">Recientes</button>
     <button onclick="setMainTab('week')" class="main-tab px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium" data-tab="week">Esta semana</button>
   </div>
 </nav>
@@ -470,6 +470,8 @@ const categoryMap = {
 async function init() {
   updateFavCount();
   await loadActivities();
+  // Set default tab to 'recent'
+  setMainTab('recent');
 }
 
 // Check password
@@ -802,6 +804,37 @@ function applyFilters() {
   if (filterCountEl) {
     filterCountEl.textContent = filteredActivities.length;
   }
+  
+  // Sync tabs with current filters
+  syncTabsWithFilters();
+}
+
+// Sync main tabs with current filter state
+function syncTabsWithFilters() {
+  const sort = document.getElementById('sortSelect').value;
+  const date = document.getElementById('dateSelect').value;
+  
+  // Determine which tab should be active based on filters
+  let activeTab = 'recent'; // default
+  
+  if (sort === 'distance' && userLocation) {
+    activeTab = 'nearby';
+  } else if (date === 'week' && sort === 'recent') {
+    activeTab = 'week';
+  } else if (sort === 'recent' && date === 'all') {
+    activeTab = 'recent';
+  }
+  
+  // Update tab visuals without triggering applyFilters
+  document.querySelectorAll('.main-tab').forEach(btn => {
+    if (btn.dataset.tab === activeTab) {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container');
+      btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+      btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+    }
+  });
 }
 
 // Update KPIs
@@ -1063,6 +1096,7 @@ function closeDetail() {
 
 // Set main tab
 function setMainTab(tab) {
+  // Update visual state of tabs
   document.querySelectorAll('.main-tab').forEach(btn => {
     if (btn.dataset.tab === tab) {
       btn.classList.add('bg-primary-container', 'text-on-primary-container');
@@ -1073,20 +1107,42 @@ function setMainTab(tab) {
     }
   });
   
-  // Apply preset filters
+  // Apply preset filters based on tab
   if (tab === 'nearby') {
-    if (currentFilters.sort !== 'distance') {
+    // Check if we have user location
+    if (!userLocation) {
+      // Open filters panel to ask for location
+      toggleFilters();
+      // Focus on the sort dropdown and select distance
       document.getElementById('sortSelect').value = 'distance';
       document.getElementById('locationInput').classList.remove('hidden');
-      currentFilters.sort = 'distance';
+      // Show message to user
+      const statusEl = document.getElementById('locationStatus');
+      if (statusEl) {
+        statusEl.textContent = 'Introduce tu dirección para ordenar por distancia';
+        statusEl.className = 'text-label-sm mt-1 text-primary';
+      }
+      return; // Don't apply filters yet, wait for location
     }
-  } else if (tab === 'popular') {
-    // Could sort by popularity metric if available
+    // If we have location, apply distance sort
+    document.getElementById('sortSelect').value = 'distance';
+    document.getElementById('dateSelect').value = 'all';
+    currentFilters.sort = 'distance';
+    currentFilters.date = 'all';
+  } else if (tab === 'recent') {
+    // Sort by recent, clear date filter
     document.getElementById('sortSelect').value = 'recent';
+    document.getElementById('dateSelect').value = 'all';
+    document.getElementById('locationInput').classList.add('hidden');
     currentFilters.sort = 'recent';
+    currentFilters.date = 'all';
   } else if (tab === 'week') {
-    setDateFilter('week');
-    return; // setDateFilter calls applyFilters
+    // Filter next 7 days and sort by recent
+    document.getElementById('sortSelect').value = 'recent';
+    document.getElementById('dateSelect').value = 'week';
+    document.getElementById('locationInput').classList.add('hidden');
+    currentFilters.sort = 'recent';
+    currentFilters.date = 'week';
   }
   
   applyFilters();
@@ -1311,6 +1367,9 @@ function clearFilters() {
   document.getElementById('favoritesOnly').checked = false;
 
   document.getElementById('locationInput').classList.add('hidden');
+  
+  // Reset main tabs to 'recent' as default
+  setMainTab('recent');
 
   applyFilters();
 }
