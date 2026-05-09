@@ -615,6 +615,14 @@ function toggleFilters() {
   
   panel.classList.toggle('hidden');
   
+  // If opening the panel, scroll to top
+  if (wasHidden) {
+    const panelContent = panel.querySelector('div[class*="max-h-"]') || panel.querySelector('div[class*="overflow-y"]');
+    if (panelContent) {
+      panelContent.scrollTop = 0;
+    }
+  }
+  
   // If closing the panel and we were waiting for location (nearby without userLocation)
   if (!wasHidden && panel.classList.contains('hidden')) {
     const openedFromTab = panel.dataset.openedFromTab;
