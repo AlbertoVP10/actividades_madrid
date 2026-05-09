@@ -1217,6 +1217,24 @@ function showView(view) {
   }
 }
 
+// Filter by location and switch to list view
+function filterByLocationAndShowList(locationName) {
+  // Set search filter to the location name
+  document.getElementById('searchInput').value = locationName;
+  currentFilters.search = locationName.toLowerCase();
+  
+  // Apply filters
+  applyFilters();
+  
+  // Switch to list view
+  setBottomTab('list');
+  
+  // Close any open popups
+  if (map) {
+    map.closePopup();
+  }
+}
+
 // Initialize map
 function initMap() {
   if (map) {
@@ -1273,9 +1291,25 @@ function initMap() {
   
   Object.values(uniqueLocations).forEach(group => {
     const activity = group[0];
+    const locationName = activity.location || 'Ubicación';
     const popupContent = group.length === 1 ? 
-      `<b>${activity.title}</b><br>${activity.category}<br>${activity.location || ''}` :
-      `<b>${group.length} actividades</b><br>${group.map(a => `• ${a.title}`).join('<br>')}`;
+      `<div style="min-width: 200px;">
+        <b>${activity.title}</b><br>
+        ${activity.category}<br>
+        ${locationName}<br><br>
+        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+                style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500;">
+          Lista
+        </button>
+      </div>` :
+      `<div style="min-width: 200px;">
+        <b>${group.length} actividades</b><br>
+        ${group.map(a => `• ${a.title}`).join('<br>')}<br><br>
+        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+                style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500;">
+          Lista
+        </button>
+      </div>`;
     
     const markerIcon = group.length === 1 ? customIcon : clusterIcon(group.length);
     
