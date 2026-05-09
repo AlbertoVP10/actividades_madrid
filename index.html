@@ -723,8 +723,8 @@ async function geocodeAddressFromModal() {
         // Apply distance sort
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
-        applyFilters();
-        // Center map on new location if in map view
+        
+        // Update user location marker first if in map view
         if (currentView === 'map' && map) {
           // Remove old user location marker if exists
           if (window.userLocationMarker) {
@@ -739,9 +739,13 @@ async function geocodeAddressFromModal() {
               iconAnchor: [11, 11]
             })
           }).addTo(map).bindPopup('Tu ubicación').openPopup();
-          // Reload all markers with updated distances
-          updateMapMarkers();
-          // Center map on new location
+        }
+        
+        // Apply filters (this will call updateMapMarkers if in map view)
+        applyFilters();
+        
+        // Center map on new location if in map view
+        if (currentView === 'map' && map) {
           map.setView([userLocation.lat, userLocation.lon], 14);
         }
       }, 500);
@@ -787,8 +791,8 @@ function getCurrentLocationFromModal() {
         // Apply distance sort
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
-        applyFilters();
-        // Center map on new location if in map view
+        
+        // Update user location marker first if in map view
         if (currentView === 'map' && map) {
           // Remove old user location marker if exists
           if (window.userLocationMarker) {
@@ -803,9 +807,13 @@ function getCurrentLocationFromModal() {
               iconAnchor: [11, 11]
             })
           }).addTo(map).bindPopup('Tu ubicación').openPopup();
-          // Reload all markers with updated distances
-          updateMapMarkers();
-          // Center map on new location
+        }
+        
+        // Apply filters (this will call updateMapMarkers if in map view)
+        applyFilters();
+        
+        // Center map on new location if in map view
+        if (currentView === 'map' && map) {
           map.setView([userLocation.lat, userLocation.lon], 14);
         }
       }, 500);
@@ -884,8 +892,8 @@ async function geocodeAddress() {
       };
       status.textContent = `✓ Ubicación encontrada`;
       status.className = 'text-label-sm mt-1 text-green-600';
-      applyFilters();
-      // Center map on new location if in map view
+      
+      // Update user location marker first if in map view
       if (currentView === 'map' && map) {
         // Remove old user location marker if exists
         if (window.userLocationMarker) {
@@ -900,7 +908,13 @@ async function geocodeAddress() {
             iconAnchor: [11, 11]
           })
         }).addTo(map).bindPopup('Tu ubicación').openPopup();
-        // Center map on new location
+      }
+      
+      // Apply filters (this will call updateMapMarkers if in map view)
+      applyFilters();
+      
+      // Center map on new location if in map view
+      if (currentView === 'map' && map) {
         map.setView([userLocation.lat, userLocation.lon], 14);
       }
     } else {
