@@ -165,9 +165,12 @@ body { min-height: max(884px, 100dvh); }
       <div class="flex items-center gap-4">
         <h2 class="font-title-lg text-title-lg text-on-surface">Filtros</h2>
         <div class="flex gap-2">
-          <button onclick="toggleFilters()" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-base">check</span>
-            Aplicar (<span id="filterResultCount">0</span>)
+          <button onclick="toggleFilters()" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-container hover:text-on-primary-container transition-colors flex flex-col items-center justify-center leading-tight">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">check</span>
+              Aplicar
+            </span>
+            <span class="text-xs opacity-90">(<span id="filterResultCount">0</span>)</span>
           </button>
           <button onclick="clearFilters()" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-variant transition-colors flex items-center justify-center gap-1">
             <span class="material-symbols-outlined text-base">delete</span>
