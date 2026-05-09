@@ -1293,7 +1293,7 @@ function initMap() {
     const activity = group[0];
     const locationName = activity.location || 'Ubicación';
     const popupContent = group.length === 1 ? 
-      `<div style="min-width: 200px;">
+      `<div style="min-width: 200px; max-width: 300px;">
         <b>${activity.title}</b><br>
         ${activity.category}<br>
         ${locationName}<br><br>
@@ -1302,11 +1302,13 @@ function initMap() {
           Lista
         </button>
       </div>` :
-      `<div style="min-width: 200px;">
-        <b>${group.length} actividades</b><br>
-        ${group.map(a => `• ${a.title}`).join('<br>')}<br><br>
+      `<div style="min-width: 200px; max-width: 300px; max-height: 300px; display: flex; flex-direction: column;">
+        <b>${group.length} actividades</b>
+        <div style="overflow-y: auto; flex: 1; margin: 8px 0; padding-right: 8px;">
+          ${group.map(a => `• ${a.title}`).join('<br>')}
+        </div>
         <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
-                style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; margin-top: 8px; flex-shrink: 0;">
           Lista
         </button>
       </div>`;
