@@ -1000,7 +1000,7 @@ function showDetail(id) {
     <div class="space-y-4">
       <div class="flex items-center gap-2">
         <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
-        ${activity.free ? '<span class="px-3 py-1 bg-green-100 text-green-800 text-label-lg font-medium rounded-full">Gratis</span>' : ''}
+        ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
       </div>
       
       <p class="text-body-lg text-on-surface-variant">${activity.description || 'Sin descripción disponible.'}</p>
