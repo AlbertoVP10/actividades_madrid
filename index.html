@@ -335,7 +335,7 @@ body { min-height: max(884px, 100dvh); }
       <div id="kpiFeatured" class="text-xl font-bold">0</div>
       <div class="text-xs opacity-90">Destacados</div>
     </div>
-    <div id="kpiNearContainer" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center cursor-pointer" onclick="openLocationModal()">
+    <div id="kpiNearContainer" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="py-2 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center" onclick="if(!userLocation) openLocationModal()">
       <span class="material-symbols-outlined text-lg">location_on</span>
       <div id="kpiNear" class="text-xl font-bold">0</div>
       <div id="kpiNearLabel" class="text-xs opacity-90">Cerca</div>
