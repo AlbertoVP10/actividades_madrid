@@ -1231,18 +1231,42 @@ function filterByLocationAndShowList(locationName) {
     return a.date - b.date;
   });
   
-  // Update UI
-  currentPage = 0;
-  document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades en ${locationName}`;
-  renderActivities();
-  
-  // Switch to list view
-  setBottomTab('list');
-  
-  // Close any open popups
+  // Close any open popups first
   if (map) {
     map.closePopup();
   }
+  
+  // Switch to list view manually (without calling applyFilters)
+  currentView = 'list';
+  document.getElementById('listView').classList.remove('hidden');
+  document.getElementById('mapView').classList.add('hidden');
+  document.getElementById('statsView').classList.add('hidden');
+  document.getElementById('pagination').classList.remove('hidden');
+  
+  // Show tab nav, kpi section and results bar
+  const tabNav = document.getElementById('tabNav');
+  const kpiSection = document.getElementById('kpiSection');
+  const resultsBar = document.getElementById('resultsBar');
+  if (tabNav) tabNav.classList.remove('hidden');
+  if (kpiSection) kpiSection.classList.remove('hidden');
+  if (resultsBar) resultsBar.classList.remove('hidden');
+  document.body.classList.remove('overflow-hidden');
+  
+  // Update bottom tab visuals
+  document.querySelectorAll('.bottom-tab').forEach(btn => {
+    if (btn.dataset.tab === 'list') {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.remove('text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.add('text-on-surface-variant');
+    }
+  });
+  
+  // Update UI with filtered results
+  currentPage = 0;
+  document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades en ${locationName}`;
+  renderActivities();
 }
 
 // Initialize map
