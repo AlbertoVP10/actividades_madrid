@@ -744,9 +744,11 @@ async function geocodeAddressFromModal() {
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
         
-        // Center map on new location if in map view
+        // Center map on new location if in map view (con pequeño delay para asegurar que los marcadores se renderizaron)
         if (currentView === 'map' && map) {
-          map.setView([userLocation.lat, userLocation.lon], 14);
+          setTimeout(() => {
+            map.setView([userLocation.lat, userLocation.lon], 14);
+          }, 100);
         }
       }, 500);
     } else {
@@ -812,9 +814,11 @@ function getCurrentLocationFromModal() {
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
         
-        // Center map on new location if in map view
+        // Center map on new location if in map view (con pequeño delay para asegurar que los marcadores se renderizaron)
         if (currentView === 'map' && map) {
-          map.setView([userLocation.lat, userLocation.lon], 14);
+          setTimeout(() => {
+            map.setView([userLocation.lat, userLocation.lon], 14);
+          }, 100);
         }
       }, 500);
     },
@@ -913,9 +917,11 @@ async function geocodeAddress() {
       // Apply filters (this will call updateMapMarkers if in map view)
       applyFilters();
       
-      // Center map on new location if in map view
+      // Center map on new location if in map view (con pequeño delay para asegurar que los marcadores se renderizaron)
       if (currentView === 'map' && map) {
-        map.setView([userLocation.lat, userLocation.lon], 14);
+        setTimeout(() => {
+          map.setView([userLocation.lat, userLocation.lon], 14);
+        }, 100);
       }
     } else {
       status.textContent = '✗ No se encontró la ubicación';
