@@ -744,14 +744,9 @@ async function geocodeAddressFromModal() {
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
         
-        // Center map on new location if in map view
+        // Center map on new location if in map view (instantáneo)
         if (currentView === 'map' && map) {
-          // Forzar invalidateSize antes de centrar para asegurar que el mapa está listo
-          map.invalidateSize();
-          // Usar flyTo para animación suave al nuevo centro
-          map.flyTo([userLocation.lat, userLocation.lon], 14, {
-            duration: 0.5
-          });
+          map.setView([userLocation.lat, userLocation.lon], 14);
         }
       }, 500);
     } else {
@@ -817,14 +812,9 @@ function getCurrentLocationFromModal() {
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
         
-        // Center map on new location if in map view
+        // Center map on new location if in map view (instantáneo)
         if (currentView === 'map' && map) {
-          // Forzar invalidateSize antes de centrar para asegurar que el mapa está listo
-          map.invalidateSize();
-          // Usar flyTo para animación suave al nuevo centro
-          map.flyTo([userLocation.lat, userLocation.lon], 14, {
-            duration: 0.5
-          });
+          map.setView([userLocation.lat, userLocation.lon], 14);
         }
       }, 500);
     },
@@ -923,14 +913,9 @@ async function geocodeAddress() {
       // Apply filters (this will call updateMapMarkers if in map view)
       applyFilters();
       
-      // Center map on new location if in map view
+      // Center map on new location if in map view (instantáneo)
       if (currentView === 'map' && map) {
-        // Forzar invalidateSize antes de centrar para asegurar que el mapa está listo
-        map.invalidateSize();
-        // Usar flyTo para animación suave al nuevo centro
-        map.flyTo([userLocation.lat, userLocation.lon], 14, {
-          duration: 0.5
-        });
+        map.setView([userLocation.lat, userLocation.lon], 14);
       }
     } else {
       status.textContent = '✗ No se encontró la ubicación';
