@@ -1267,6 +1267,7 @@ function filterByLocationAndShowList(locationName) {
   currentPage = 0;
   document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades en ${locationName}`;
   renderActivities();
+  updateKPIs();
 }
 
 // Initialize map
