@@ -1219,12 +1219,22 @@ function showView(view) {
 
 // Filter by location and switch to list view
 function filterByLocationAndShowList(locationName) {
-  // Set search filter to the location name
-  document.getElementById('searchInput').value = locationName;
-  currentFilters.search = locationName.toLowerCase();
+  // Filter activities by location directly
+  filteredActivities = allActivities.filter(activity => {
+    return activity.location && activity.location.toLowerCase().includes(locationName.toLowerCase());
+  });
   
-  // Apply filters
-  applyFilters();
+  // Sort by date (recent first)
+  filteredActivities.sort((a, b) => {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return a.date - b.date;
+  });
+  
+  // Update UI
+  currentPage = 0;
+  document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades en ${locationName}`;
+  renderActivities();
   
   // Switch to list view
   setBottomTab('list');
