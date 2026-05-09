@@ -601,7 +601,26 @@ function populateFilters() {
 // Toggle filters panel
 function toggleFilters() {
   const panel = document.getElementById('filtersPanel');
+  const wasHidden = panel.classList.contains('hidden');
+  
+  // If opening the panel, store the current tab
+  if (wasHidden) {
+    panel.dataset.openedFromTab = document.querySelector('.main-tab.bg-primary-container')?.dataset.tab || 'recent';
+  }
+  
   panel.classList.toggle('hidden');
+  
+  // If closing the panel and we were waiting for location (nearby without userLocation)
+  if (!wasHidden && panel.classList.contains('hidden')) {
+    const openedFromTab = panel.dataset.openedFromTab;
+    if (openedFromTab === 'nearby' && !userLocation) {
+      // User closed filters without setting location, revert to 'recent'
+      setTimeout(() => {
+        setMainTab('recent');
+        applyFilters();
+      }, 0);
+    }
+  }
 }
 
 // Extract hour from time string
@@ -1111,8 +1130,21 @@ function setMainTab(tab) {
   if (tab === 'nearby') {
     // Check if we have user location
     if (!userLocation) {
+      // Mark 'nearby' visually but store that we're waiting for location
+      document.querySelectorAll('.main-tab').forEach(btn => {
+        if (btn.dataset.tab === 'nearby') {
+          btn.classList.add('bg-primary-container', 'text-on-primary-container');
+          btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+        } else {
+          btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+          btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+        }
+      });
+      // Store that we came from 'nearby' tab
+      document.getElementById('filtersPanel').dataset.openedFromTab = 'nearby';
       // Open filters panel to ask for location
-      toggleFilters();
+      const panel = document.getElementById('filtersPanel');
+      panel.classList.remove('hidden');
       // Focus on the sort dropdown and select distance
       document.getElementById('sortSelect').value = 'distance';
       document.getElementById('locationInput').classList.remove('hidden');
