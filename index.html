@@ -1168,8 +1168,9 @@ function setBottomTab(tab) {
     applyFilters();
   } else if (tab === 'map') {
     // Clear location filter when going back to map
-    if (currentFilters.search) {
+    if (currentFilters.search || currentFilters.locationFilter) {
       currentFilters.search = '';
+      currentFilters.locationFilter = null;
       document.getElementById('searchInput').value = '';
       applyFilters();
     }
@@ -1225,6 +1226,10 @@ function showView(view) {
 
 // Filter by location and switch to list view
 function filterByLocationAndShowList(locationName) {
+  // Save location filter state
+  currentFilters.search = locationName.toLowerCase();
+  currentFilters.locationFilter = locationName; // Special flag for location filter
+  
   // Filter activities by location directly
   filteredActivities = allActivities.filter(activity => {
     return activity.location && activity.location.toLowerCase().includes(locationName.toLowerCase());
