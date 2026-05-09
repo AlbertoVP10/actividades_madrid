@@ -1234,8 +1234,10 @@ function initMap() {
   if (userLocation) {
     L.marker([userLocation.lat, userLocation.lon], {
       icon: L.divIcon({
-        className: 'bg-red-500 rounded-full w-4 h-4 border-2 border-white shadow-lg',
-        iconSize: [16, 16]
+        className: 'user-location-marker',
+        html: `<div style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%); width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
       })
     }).addTo(map).bindPopup('Tu ubicación');
   }
@@ -1252,13 +1254,32 @@ function initMap() {
     uniqueLocations[key].push(activity);
   });
   
+  // Custom marker icon with palette colors
+  const customIcon = L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); width: 20px; height: 20px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 20],
+    popupAnchor: [0, -20]
+  });
+  
+  // Cluster marker icon for multiple activities
+  const clusterIcon = (count) => L.divIcon({
+    className: 'custom-cluster',
+    html: `<div style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%); width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${count}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+  
   Object.values(uniqueLocations).forEach(group => {
     const activity = group[0];
     const popupContent = group.length === 1 ? 
       `<b>${activity.title}</b><br>${activity.category}<br>${activity.location || ''}` :
       `<b>${group.length} actividades</b><br>${group.map(a => `• ${a.title}`).join('<br>')}`;
     
-    L.marker([activity.lat, activity.lon]).addTo(map)
+    const markerIcon = group.length === 1 ? customIcon : clusterIcon(group.length);
+    
+    L.marker([activity.lat, activity.lon], { icon: markerIcon }).addTo(map)
       .bindPopup(popupContent);
   });
   
