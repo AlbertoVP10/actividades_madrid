@@ -18,7 +18,39 @@ Dashboard interactivo para consultar actividades culturales en Madrid.
 - La app se actualiza automáticamente al hacer push a main
 - Los datos se cargan en tiempo real desde la API del Ayuntamiento de Madrid
 
-## 📁 Estructura del proyecto
+## � Android App Transition
+
+The web app has been transitioned to a Capacitor-wrapped Android application for Google Play distribution.
+
+### Key Features
+- Hybrid Android app using Capacitor WebView wrapper
+- Package ID: `com.myapp.id`
+- Bundled local assets for improved offline performance
+- Mobile-optimized UI with responsive design fixes
+- Full Android permissions for location and internet access
+
+### Getting Started with Android Development
+See [Android Quickstart Guide](specs/001-android-app-roadmap/quickstart.md) for detailed setup instructions, including Capacitor installation, Android Studio configuration, and Google Play deployment steps.
+
+### Build Commands
+```bash
+# Install dependencies
+npm install
+
+# Add Android platform
+npx cap add android
+
+# Sync web assets
+npx cap sync android
+
+# Open in Android Studio
+npx cap open android
+
+# Build for production
+npx cap build android --prod
+```
+
+## �📁 Estructura del proyecto
 
 ```
 actividades_madrid/

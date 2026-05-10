@@ -1,0 +1,28 @@
+{
+  "name": "actividades_madrid---spekit",
+  "version": "1.0.0",
+  "description": "Dashboard interactivo para consultar actividades culturales en Madrid.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlbertoVP10/actividades_madrid.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlbertoVP10/actividades_madrid/issues"
+  },
+  "homepage": "https://github.com/AlbertoVP10/actividades_madrid#readme",
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.3",
+    "@capacitor/core": "^8.3.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.3"
+  }
+}
