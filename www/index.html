@@ -194,18 +194,18 @@ body { min-height: max(884px, 100dvh); }
 .filter-chip {
   flex-shrink: 0;
   animation: chipAppear 0.2s ease;
-  padding: 0.25rem 0.75rem; /* py-1 px-3 for better proportions */
-  border-radius: 9999px; /* rounded-full like the example image */
-  font-size: 0.875rem; /* text-sm equivalent */
-  line-height: 1.25rem;
-  min-height: 2rem; /* Compact height matching KPI style */
+  padding: 0.25rem 0.5rem; /* py-1 px-2 to match KPIs exactly */
+  border-radius: 0.5rem; /* rounded-lg to match KPIs */
+  font-size: 0.75rem; /* text-xs to match KPI label size */
+  line-height: 1rem;
+  min-height: auto;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   white-space: nowrap;
 }
 .filter-chip .material-symbols-outlined {
-  font-size: 1rem; /* text-sm */
+  font-size: 0.875rem; /* text-sm */
 }
 @keyframes chipAppear {
   from {
