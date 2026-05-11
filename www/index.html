@@ -574,6 +574,53 @@ let currentFilters = {
   sort: 'recent'
 };
 
+// Get valid favorites (that exist in allActivities and haven't expired)
+function getValidFavorites() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return favorites.filter(id => {
+    const activity = allActivities.find(a => a.id === id);
+    if (!activity) return false;
+    
+    // Check if activity has expired
+    if (activity.date) {
+      const activityDate = new Date(activity.date);
+      activityDate.setHours(0, 0, 0, 0);
+      if (activityDate < today) return false;
+    }
+    
+    return true;
+  });
+}
+
+// Get expired favorites (for display purposes)
+function getExpiredFavorites() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return favorites.filter(id => {
+    const activity = allActivities.find(a => a.id === id);
+    if (!activity) return true; // Consider non-existent as expired
+    
+    if (activity.date) {
+      const activityDate = new Date(activity.date);
+      activityDate.setHours(0, 0, 0, 0);
+      return activityDate < today;
+    }
+    
+    return false;
+  });
+}
+
+// Update favorites count badge and KPI
+function updateFavCount() {
+  const validFavs = getValidFavorites();
+  document.getElementById('favCount').textContent = validFavs.length;
+  document.getElementById('kpiFavorites').textContent = validFavs.length;
+  updateKPIFavoritesStyle();
+}
+
 // Category mapping
 const categoryMap = {
   'Cine': 'cultura',
@@ -1027,7 +1074,10 @@ function updateKPIFavoritesStyle() {
   const count = document.getElementById('kpiFavorites');
   const label = document.getElementById('kpiFavoritesLabel');
   
-  if (favorites.length === 0) {
+  // Use valid favorites count (only non-expired activities)
+  const validFavs = getValidFavorites();
+  
+  if (validFavs.length === 0) {
     // Empty state: subtle style with outlined heart
     container.style.background = 'linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%)';
     container.style.border = '2px solid #D06060';
@@ -1233,9 +1283,12 @@ function applyFilters() {
       return false;
     }
 
-    // Favorites filter
-    if (currentFilters.favoritesOnly && !favorites.includes(activity.id)) {
-      return false;
+    // Favorites filter - only show valid (non-expired) favorites
+    if (currentFilters.favoritesOnly) {
+      const validFavs = getValidFavorites();
+      if (!validFavs.includes(activity.id)) {
+        return false;
+      }
     }
 
     // Search filter
@@ -1345,7 +1398,9 @@ function updateKPIs() {
   
   document.getElementById('kpiToday').textContent = kpiToday;
   document.getElementById('kpiFeatured').textContent = kpiFeatured;
-  document.getElementById('kpiFavorites').textContent = favorites.length;
+  // Use valid favorites count (only non-expired activities)
+  const validFavs = getValidFavorites();
+  document.getElementById('kpiFavorites').textContent = validFavs.length;
   
   // Update KPI Favorites visual state
   updateKPIFavoritesStyle();
@@ -1454,11 +1509,6 @@ function toggleFavorite(event, id) {
   updateFavCount();
   renderActivities();
   updateKPIs();
-}
-
-// Update favorite count
-function updateFavCount() {
-  document.getElementById('favCount').textContent = favorites.length;
 }
 
 // Show detail modal
