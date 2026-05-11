@@ -376,8 +376,13 @@ body { min-height: max(884px, 100dvh); }
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <div id="resultsBar" class="flex justify-between items-center">
+  <div id="resultsBar" class="flex justify-between items-center gap-4">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
+    <div id="smallPagination" class="flex items-center gap-2 text-label-sm text-on-surface-variant">
+      <button onclick="prevPage()" id="smallPrevBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&lt;</button>
+      <span id="smallPageInfo" class="text-label-sm">1 / 1</span>
+      <button onclick="nextPage()" id="smallNextBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&gt;</button>
+    </div>
     <p id="locationInfo" class="text-label-sm text-on-surface-variant hidden"></p>
   </div>
   
@@ -1220,9 +1225,15 @@ function renderActivities() {
   
   // Update pagination
   const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
-  document.getElementById('pageInfo').textContent = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
-  document.getElementById('prevBtn').disabled = currentPage === 0;
-  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  const pageInfoText = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
+  document.getElementById('pageInfo').textContent = pageInfoText;
+  document.getElementById('smallPageInfo').textContent = pageInfoText;
+  const prevDisabled = currentPage === 0;
+  const nextDisabled = currentPage >= totalPages - 1;
+  document.getElementById('prevBtn').disabled = prevDisabled;
+  document.getElementById('nextBtn').disabled = nextDisabled;
+  document.getElementById('smallPrevBtn').disabled = prevDisabled;
+  document.getElementById('smallNextBtn').disabled = nextDisabled;
 }
 
 // Toggle favorite
