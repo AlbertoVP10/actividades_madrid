@@ -201,6 +201,92 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </div>
 
+<!-- Consent Banner Modal -->
+<div id="consentModal" class="hidden fixed inset-0 bg-black/60 z-[105] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+  <div class="bg-surface-container-lowest rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-surface-container-lowest p-4 border-b border-outline-variant z-10">
+      <h2 id="consentTitle" class="font-headline-md text-headline-md text-on-surface">Gestión de Privacidad</h2>
+      <p class="text-body-md text-on-surface-variant mt-1">Utilizamos cookies y datos para mejorar tu experiencia.</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="p-4 space-y-4">
+      <!-- Description -->
+      <p class="text-body-md text-on-surface-variant">
+        Esta aplicación utiliza tecnologías para recopilar información que nos ayuda a optimizar tu experiencia. 
+        Puedes aceptar todas las cookies, rechazarlas o configurar tus preferencias individualmente.
+      </p>
+      
+      <!-- Privacy Policy Link -->
+      <a href="#" onclick="showPrivacyPolicy(); return false;" class="text-primary hover:text-primary-dark underline text-body-md">
+        Ver Política de Privacidad completa
+      </a>
+      
+      <!-- Expandable Settings -->
+      <div id="consentSettings" class="hidden space-y-3 pt-2">
+        <div class="border-t border-outline-variant pt-3">
+          <h3 class="font-title-md text-title-md text-on-surface mb-3">Preferencias detalladas</h3>
+          
+          <!-- Technical (Required) -->
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Técnicas (Necesarias)</p>
+              <p class="text-label-sm text-on-surface-variant">Esenciales para el funcionamiento</p>
+            </div>
+            <div class="relative inline-flex items-center">
+              <input type="checkbox" checked disabled class="w-11 h-6 bg-primary rounded-full appearance-none cursor-not-allowed opacity-70">
+              <span class="absolute right-1 w-4 h-4 bg-white rounded-full"></span>
+            </div>
+          </div>
+          
+          <!-- Analytics -->
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Analíticas</p>
+              <p class="text-label-sm text-on-surface-variant">Nos ayudan a mejorar la app</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="consentAnalytics" class="sr-only peer">
+              <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          
+          <!-- Marketing -->
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Marketing</p>
+              <p class="text-label-sm text-on-surface-variant">Personalización de contenido</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="consentMarketing" class="sr-only peer">
+              <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="sticky bottom-0 bg-surface-container-lowest p-4 border-t border-outline-variant space-y-2">
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="acceptAllConsent()" class="bg-primary text-on-primary py-3 px-4 rounded-lg font-label-lg hover:bg-primary-dark transition-colors">
+          Aceptar todo
+        </button>
+        <button onclick="rejectAllConsent()" class="bg-surface-container-high text-on-surface py-3 px-4 rounded-lg font-label-lg hover:bg-surface-variant transition-colors">
+          Rechazar todo
+        </button>
+      </div>
+      <button onclick="toggleConsentSettings()" class="w-full bg-surface-container text-on-surface py-2 px-4 rounded-lg font-label-md hover:bg-surface-container-high transition-colors" id="consentConfigureBtn">
+        Configurar preferencias
+      </button>
+      <button onclick="saveCustomConsent()" class="w-full bg-primary text-on-primary py-2 px-4 rounded-lg font-label-md hover:bg-primary-dark transition-colors hidden" id="consentSaveBtn">
+        Guardar preferencias
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TopAppBar Section -->
 <header class="bg-background flex justify-between items-center w-full px-4 h-16 sticky top-0 z-50">
   <div class="flex items-center">
@@ -697,6 +783,97 @@ let currentFilters = {
 // Active KPI filter state
 let activeKPIFilter = null; // 'today', 'featured', 'near', 'favorites', or null
 
+// Consent state
+let consentState = JSON.parse(localStorage.getItem('madridConsent') || 'null');
+
+// Show consent modal if not already accepted
+function showConsentModal() {
+  if (!consentState) {
+    document.getElementById('consentModal').classList.remove('hidden');
+  }
+}
+
+// Hide consent modal
+function hideConsentModal() {
+  document.getElementById('consentModal').classList.add('hidden');
+}
+
+// Toggle consent settings visibility
+function toggleConsentSettings() {
+  const settings = document.getElementById('consentSettings');
+  const configureBtn = document.getElementById('consentConfigureBtn');
+  const saveBtn = document.getElementById('consentSaveBtn');
+  
+  settings.classList.toggle('hidden');
+  
+  if (settings.classList.contains('hidden')) {
+    configureBtn.classList.remove('hidden');
+    saveBtn.classList.add('hidden');
+  } else {
+    configureBtn.classList.add('hidden');
+    saveBtn.classList.remove('hidden');
+  }
+}
+
+// Accept all consent
+function acceptAllConsent() {
+  consentState = {
+    technical: true,
+    analytics: true,
+    marketing: true,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('madridConsent', JSON.stringify(consentState));
+  hideConsentModal();
+  // Initialize analytics if needed
+  initAnalytics();
+}
+
+// Reject all consent (except technical)
+function rejectAllConsent() {
+  consentState = {
+    technical: true,
+    analytics: false,
+    marketing: false,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('madridConsent', JSON.stringify(consentState));
+  hideConsentModal();
+}
+
+// Save custom consent settings
+function saveCustomConsent() {
+  const analytics = document.getElementById('consentAnalytics').checked;
+  const marketing = document.getElementById('consentMarketing').checked;
+  
+  consentState = {
+    technical: true,
+    analytics: analytics,
+    marketing: marketing,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('madridConsent', JSON.stringify(consentState));
+  hideConsentModal();
+  
+  // Initialize analytics if accepted
+  if (analytics) {
+    initAnalytics();
+  }
+}
+
+// Initialize analytics (placeholder)
+function initAnalytics() {
+  if (consentState && consentState.analytics) {
+    console.log('Analytics initialized');
+    // Here you would initialize your analytics provider (Google Analytics, etc.)
+  }
+}
+
+// Show privacy policy (placeholder)
+function showPrivacyPolicy() {
+  alert('Política de Privacidad:\n\nEsta aplicación recopila datos de uso para mejorar la experiencia del usuario.\n\nLos datos de ubicación son opcionales y solo se utilizan para mostrar actividades cercanas.\n\nLos favoritos se almacenan localmente en tu dispositivo.\n\nPara más información, contacta con nosotros.');
+}
+
 // Get valid favorites (that exist in allActivities and haven't expired)
 function getValidFavorites() {
   const today = new Date();
@@ -780,6 +957,8 @@ function checkPassword() {
   if (pwd === 'abc123') {
     document.getElementById('loginModal').classList.add('hidden');
     init();
+    // Show consent modal after successful login
+    showConsentModal();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
   }
