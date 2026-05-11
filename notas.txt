@@ -1,0 +1,83 @@
+Hechos:
+	- Actualmente, con una actividad abierta (la ventana flotante), si quiero abrir la siguiente tengo que cerrarla y abrir la siguiente.
+		Me gustaría que hubiese, dentro de la ventana flotante un botón de "<" o "ant." y otro de ">" o "sig." que hiciese que cambiase la ventana flotante a la siguiente actividad. 
+		Si no hubiese más actividades en la lista, no debe mostrarse el botón "sig.". 
+		Si no hubiese actividades anteriores en la lista, no debe mostrarse el botón "ant."
+		Al pulsar a e ir a la actividad anterior o siguiente "ant." o "sig.", si se cambia de página de la lista, la lista se deberá actualizar a la página en la que este la actividad para guardar coherencia.
+	- Mismos iconos en el top de la lista de actividades
+	- En la sección de filtros, quiero que se implemente la multiselección en distrito, publico, categoría, y horario
+		Al implementar multiselección, los filtros deben seguir funcionando. 
+		Si no se selecciona ninguno o se seleccionan todos, no se debe aplicar ese filtro.
+		La opción todos no debe aparecer en la selección, pero si mostrarlo en el selector si se han seleccionado todos o ninguno.
+	- Destacar botón "Añadir"
+		Como usuario,quiero que el botón de "Añadir" tenga un fondo blanco y borde contrastado,para identificarlo rápidamente como la acción principal (KPI) frente al resto de indicadores.
+		Criterios de Aceptación:
+			Estilo: Fondo blanco sólido con borde de color (basado en la paleta actual).
+			Iconografía: Mantener el icono de ubicación original.
+			Jerarquía: Debe resaltar visualmente sobre los botones con fondo de color.
+			
+	- Visibilidad de Favoritos
+		Como usuario, quiero que el botón de "Favoritos" tenga un diseño más vibrante cuando contenga elementos, para localizar rápidamente mis contenidos guardados.
+		Criterios de Aceptación
+			Estado Vacío: Si el contador es 0, el icono de corazón debe tener un borde más grueso o un color gris oscuro para no desaparecer.
+			Estado Activo: Al tener al menos 1 favorito, el fondo del botón debe cambiar a un color destacado (ej. Rojo o Rosa intenso) y el icono debe pasar a ser "relleno" en lugar de lineal.
+			Legibilidad: El número del contador debe aumentar su peso de fuente (Bold).
+		Propuesta Visual Sugerida
+		Para que "apenas se ve" deje de ser un problema, te sugiero aplicar el concepto de "Empty State Activo":
+			Icono: Cambiar el corazón de línea fina por uno con un trazo de 2px.
+			Color de fuente: Cambiar el blanco del "0" y "Favoritos" por el mismo tono rojizo del borde del botón anterior, creando un contraste sobre el fondo claro.
+
+	- Limpieza de Favoritos Expirados
+		Como usuario de la app,Quiero que mi contador de favoritos solo sume las actividades que aún están vigentes,Para no ver un número de favoritos que no se corresponde con lo que realmente puedo hacer.
+		Criterios de Aceptación:
+			Si una actividad marcada como favorita expira o se elimina, debe dejar de sumar en el contador automáticamente.
+			Al entrar en la sección de favoritos, las actividades no vigentes no deben aparecer o deben marcarse como "Finalizadas".
+			El contador debe actualizarse en tiempo real (o al abrir la app).
+
+	- Nueva Sección de Información
+		Como usuario de la app,Quiero tener un botón de información claroPara poder donar, seguir a la app en redes sociales, descargarla en otras tiendas o dejar mis sugerencias en un solo lugar.	
+		Criterios de Aceptación:
+			Icono Info: Añadir un icono de información (ej. una "i") en la pantalla principal.
+			Donaciones: Incluir un botón o enlace de "Donar" dentro de la sección.
+			Redes y Tienda: Mostrar iconos clicables de Instagram y Google Play.
+			Sugerencias: Añadir un campo de texto o botón para enviar sugerencias.
+
+	- Filtrado de resultados mediante botones de métricas (KPIs)
+		Como usuario que busca información específica,Quiero poder hacer clic en las tarjetas de KPI (como "Más cercanos", "Hoy" o "Esta semana")Para filtrar rápidamente el listado de resultados sin tener que usar menús desplegables complejos.
+		Criterios de Aceptación (Lo que debe cumplir para estar lista)Interactividad: 	
+			Las tarjetas de KPI deben ser visualmente clicables (cambio de cursor, efecto hover o sombra).
+			Estado Activo: Al seleccionar un KPI, la tarjeta debe cambiar de estilo (ej. borde de color o fondo distinto) para indicar que el filtro está activo.
+			Lógica de Filtrado: 
+				Al pulsar "Hoy": El listado debe aplicar el filtro de fecha Hoy.
+				Al pulsar "Esta semana": El listado debe mostrar elementos dentro de los últimos 7 días o de la semana natural en curso.
+				Al pulsar "Más cercanos": El listado debe ordenarse por proximidad geográfica (requiere permisos de ubicación).
+			Exclusividad/Combinación: (Define aquí si son excluyentes). Ejemplo: Al seleccionar un KPI, se desactiva el anterior (filtro único).
+			Opción de Deshacer: Si hago clic de nuevo en el KPI activo, el filtro se debe limpiar y mostrar todos los resultados originales.
+			Sincronización: El recuento numérico del KPI debe coincidir con el número de elementos que aparecen en la lista tras filtrar.
+		Notas técnicas / UX sugeridas:
+			Feedback visual: Añade una pequeña animación de carga (skeleton o spinner) si la base de datos tarda en responder al filtro.
+			Accesibilidad: Asegúrate de que los botones tengan etiquetas aria-label para que los lectores de pantalla entiendan qué filtra cada botón.
+
+	- Banner de Consentimiento (Cookies/Privacidad)
+		Como usuario nuevo de la app,Quiero ver un aviso de gestión de consentimientos al entrar,Para decidir qué datos comparto y cumplir con la normativa legal de privacidad.
+		Criterios de Aceptación (Visual y Funcional):
+			Aparición: El banner o modal debe aparecer automáticamente al abrir la app (si no se ha aceptado antes).
+			Opciones claras: Debe incluir tres botones visibles: "Aceptar todo", "Rechazar todo" y "Configurar" (o "Personalizar").
+			Capas de información: Al dar a "Configurar", se debe desplegar una lista de categorías (ej. Cookies técnicas, Analíticas, Marketing) con interruptores (switches) para cada una.
+			Bloqueo: El usuario no debe poder interactuar con el resto de la web/app hasta que tome una decisión en el banner.
+			Enlace legal: Debe incluir un link directo a la "Política de Privacidad".	
+			
+Obligatorios:
+
+
+
+Opcional:
+	- Lista de filtros aplicados?
+	- imágenes o iconos en items...
+	- Filtro fecha máxima y mínima 
+	- Color por categoría?
+	- títulos a tipo oración
+	
+	
+	
+	
