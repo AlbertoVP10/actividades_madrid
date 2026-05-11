@@ -7,8 +7,8 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="css/leaflet.css" />
+<script src="js/leaflet.js"></script>
 <script id="tailwind-config">
 tailwind.config = {
   darkMode: "class",
@@ -93,11 +93,11 @@ tailwind.config = {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 body { font-family: 'Inter', sans-serif; }
-body { min-height: max(884px, 100dvh); }
+body { min-height: 100dvh; } /* Mobile-friendly full viewport height */
 #map { height: 100%; width: 100%; border-radius: 0; }
 .map-container { 
   position: fixed; 
-  top: 16rem; 
+  top: 10rem; /* Adjusted for mobile header spacing */
   left: 0; 
   right: 0; 
   bottom: 80px; 
@@ -126,6 +126,38 @@ body { min-height: max(884px, 100dvh); }
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Multi-select dropdown styles */
+.multi-select-container .hidden {
+  display: none;
+}
+#categoryDropdown,
+#districtDropdown,
+#audienceDropdown,
+#timeDropdown {
+  scrollbar-width: thin;
+  scrollbar-color: #F08080 #f3f3f3;
+}
+#categoryDropdown::-webkit-scrollbar,
+#districtDropdown::-webkit-scrollbar,
+#audienceDropdown::-webkit-scrollbar,
+#timeDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+#categoryDropdown::-webkit-scrollbar-track,
+#districtDropdown::-webkit-scrollbar-track,
+#audienceDropdown::-webkit-scrollbar-track,
+#timeDropdown::-webkit-scrollbar-track {
+  background: #f3f3f3;
+  border-radius: 3px;
+}
+#categoryDropdown::-webkit-scrollbar-thumb,
+#districtDropdown::-webkit-scrollbar-thumb,
+#audienceDropdown::-webkit-scrollbar-thumb,
+#timeDropdown::-webkit-scrollbar-thumb {
+  background: #F08080;
+  border-radius: 3px;
 }
 
 </style>
@@ -226,30 +258,62 @@ body { min-height: max(884px, 100dvh); }
   <!-- Categories -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">🎭 Categoría</label>
-    <select id="categorySelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todas</option>
-    </select>
+    <div class="multi-select-container relative" id="categoryMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('category')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="categorySelectLabel">Todas</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="categoryDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <!-- Options populated by JS -->
+      </div>
+    </div>
   </div>
   
   <!-- Districts -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">📍 Distrito</label>
-    <select id="districtSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todos</option>
-    </select>
+    <div class="multi-select-container relative" id="districtMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('district')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="districtSelectLabel">Todos</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="districtDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <!-- Options populated by JS -->
+      </div>
+    </div>
   </div>
   
   <!-- Audience / Público -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">👥 Público</label>
-    <select id="audienceSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todos</option>
-      <option value="Niños">Niños</option>
-      <option value="Familias">Familias</option>
-      <option value="Adultos">Adultos</option>
-      <option value="Mayores">Mayores</option>
-      <option value="Jóvenes">Jóvenes</option>
-    </select>
+    <div class="multi-select-container relative" id="audienceMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('audience')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="audienceSelectLabel">Todos</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="audienceDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Niños" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Niños</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Familias" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Familias</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Adultos" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Adultos</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Mayores" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Mayores</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Jóvenes" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Jóvenes</span>
+        </label>
+      </div>
+    </div>
   </div>
   
   <!-- Date Filter -->
@@ -267,12 +331,26 @@ body { min-height: max(884px, 100dvh); }
   <!-- Time / Horario -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">🕐 Horario</label>
-    <select id="timeSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todo el día</option>
-      <option value="morning">Mañana (6:00 - 12:00)</option>
-      <option value="afternoon">Tarde (12:00 - 18:00)</option>
-      <option value="evening">Noche (18:00 - 24:00)</option>
-    </select>
+    <div class="multi-select-container relative" id="timeMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('time')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="timeSelectLabel">Todo el día</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="morning" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Mañana (6:00 - 12:00)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="afternoon" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Tarde (12:00 - 18:00)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="evening" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Noche (18:00 - 24:00)</span>
+        </label>
+      </div>
+    </div>
   </div>
   
   <!-- Free and Favorites in parallel -->
@@ -376,14 +454,9 @@ body { min-height: max(884px, 100dvh); }
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <div id="resultsBar" class="flex justify-between items-center gap-4">
+  <div id="resultsBar" class="flex justify-between items-center">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
-    <p id="locationInfo" class="flex items-center gap-1 text-label-sm text-on-surface-variant hidden"></p>
-    <div id="smallPagination" class="flex items-center gap-2 text-label-sm text-on-surface-variant">
-      <button onclick="prevPage()" id="smallPrevBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&lt;</button>
-      <span id="smallPageInfo" class="text-label-sm">1 / 1</span>
-      <button onclick="nextPage()" id="smallNextBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&gt;</button>
-    </div>
+    <p id="locationInfo" class="text-label-sm text-on-surface-variant hidden"></p>
   </div>
   
   <!-- List View -->
@@ -440,9 +513,9 @@ body { min-height: max(884px, 100dvh); }
 <!-- Activity Detail Modal -->
 <div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
   <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
-    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
-      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
-      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-self-end">
+    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
+      <h2 id="detailTitle" class="font-title-lg text-title-lg pr-4"></h2>
+      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -476,14 +549,13 @@ body { min-height: max(884px, 100dvh); }
 // Global state
 let allActivities = [];
 let filteredActivities = [];
-let favorites = JSON.parse(localStorage.getItem('madridFavorites') || '[]');
+let favorites = JSON.parse(localStorage.getItem('madridFavorites') || '[]'); // Persistent favorites using localStorage, compatible with Android WebView
 let currentPage = 0;
 let itemsPerPage = 10;
 let userLocation = null;
 let map = null;
 let markers = [];
 let currentView = 'list';
-let currentDetailId = null;
 let currentFilters = {
   category: 'all',
   district: 'all',
@@ -624,29 +696,97 @@ function extractDistrict(districtUrl) {
   return districtMap[name] || name;
 }
 
+// Multi-select state
+const multiSelectState = {
+  category: [],
+  district: [],
+  audience: [],
+  time: []
+};
+
+// Toggle multi-select dropdown
+function toggleMultiSelect(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const isHidden = dropdown.classList.contains('hidden');
+  
+  // Close all other dropdowns
+  ['category', 'district', 'audience', 'time'].forEach(t => {
+    document.getElementById(t + 'Dropdown').classList.add('hidden');
+  });
+  
+  // Toggle current
+  if (isHidden) {
+    dropdown.classList.remove('hidden');
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select-container')) {
+    ['category', 'district', 'audience', 'time'].forEach(type => {
+      document.getElementById(type + 'Dropdown').classList.add('hidden');
+    });
+  }
+});
+
+// Update multi-select state and label
+function updateMultiSelect(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+  const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+  
+  multiSelectState[type] = selected;
+  
+  // Update label
+  const label = document.getElementById(type + 'SelectLabel');
+  const allOptions = Array.from(checkboxes).map(cb => cb.value);
+  
+  if (selected.length === 0 || selected.length === allOptions.length) {
+    // Show default label
+    const defaults = {
+      category: 'Todas',
+      district: 'Todos',
+      audience: 'Todos',
+      time: 'Todo el día'
+    };
+    label.textContent = defaults[type];
+  } else if (selected.length === 1) {
+    label.textContent = selected[0];
+  } else {
+    label.textContent = `${selected.length} seleccionados`;
+  }
+  
+  applyFilters();
+}
+
 // Populate filter options
 function populateFilters() {
   // Categories
   const categories = [...new Set(allActivities.map(a => a.category))].sort();
-  const categorySelect = document.getElementById('categorySelect');
-  // Keep the "Todas" option and add categories
+  const categoryDropdown = document.getElementById('categoryDropdown');
   categories.forEach(cat => {
-    const option = document.createElement('option');
-    option.value = cat;
-    option.textContent = cat;
-    categorySelect.appendChild(option);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" value="${cat}" onchange="updateMultiSelect('category')" class="accent-primary">
+      <span>${cat}</span>
+    `;
+    categoryDropdown.appendChild(label);
   });
   
   // Districts
   const districts = [...new Set(allActivities.map(a => a.district))]
     .filter(d => d && d !== 'Desconocido')
     .sort();
-  const districtSelect = document.getElementById('districtSelect');
+  const districtDropdown = document.getElementById('districtDropdown');
   districts.forEach(d => {
-    const option = document.createElement('option');
-    option.value = d;
-    option.textContent = d;
-    districtSelect.appendChild(option);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" value="${d}" onchange="updateMultiSelect('district')" class="accent-primary">
+      <span>${d}</span>
+    `;
+    districtDropdown.appendChild(label);
   });
 }
 
@@ -955,11 +1095,12 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // Apply filters
 function applyFilters() {
   currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
-  currentFilters.category = document.getElementById('categorySelect').value;
-  currentFilters.district = document.getElementById('districtSelect').value;
-  currentFilters.audience = document.getElementById('audienceSelect').value;
+  // Multi-select filters - use multiSelectState
+  currentFilters.category = multiSelectState.category;
+  currentFilters.district = multiSelectState.district;
+  currentFilters.audience = multiSelectState.audience;
+  currentFilters.time = multiSelectState.time;
   currentFilters.date = document.getElementById('dateSelect').value;
-  currentFilters.time = document.getElementById('timeSelect').value;
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
   currentFilters.sort = document.getElementById('sortSelect').value;
@@ -972,26 +1113,36 @@ function applyFilters() {
     locationInput.classList.add('hidden');
   }
 
+  // Get all available options for each multi-select to check if all/none selected
+  const allCategories = [...new Set(allActivities.map(a => a.category))];
+  const allDistricts = [...new Set(allActivities.map(a => a.district))].filter(d => d && d !== 'Desconocido');
+  const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
+  const allTimes = ['morning', 'afternoon', 'evening'];
+
   filteredActivities = allActivities.filter(activity => {
-    // Category filter
-    if (currentFilters.category !== 'all') {
-      if (currentFilters.category === 'free') {
-        if (!activity.free) return false;
-      } else {
-        if (activity.category !== currentFilters.category) return false;
-      }
+    // Category filter - multi-select
+    // Skip if no selection or all selected
+    const categorySelected = currentFilters.category.length > 0 && currentFilters.category.length < allCategories.length;
+    if (categorySelected) {
+      if (!currentFilters.category.includes(activity.category)) return false;
     }
 
-    // District filter
-    if (currentFilters.district !== 'all' && activity.district !== currentFilters.district) {
-      return false;
+    // District filter - multi-select
+    const districtSelected = currentFilters.district.length > 0 && currentFilters.district.length < allDistricts.length;
+    if (districtSelected) {
+      if (!currentFilters.district.includes(activity.district)) return false;
     }
 
-    // Audience filter
-    if (currentFilters.audience !== 'all' && activity.audience) {
-      if (!activity.audience.toLowerCase().includes(currentFilters.audience.toLowerCase())) {
-        return false;
-      }
+    // Audience filter - multi-select
+    const audienceSelected = currentFilters.audience.length > 0 && currentFilters.audience.length < allAudiences.length;
+    if (audienceSelected && activity.audience) {
+      const activityAudiences = activity.audience.split(',').map(a => a.trim());
+      const hasMatch = activityAudiences.some(a => 
+        currentFilters.audience.some(selected => 
+          a.toLowerCase().includes(selected.toLowerCase())
+        )
+      );
+      if (!hasMatch) return false;
     }
 
     // Date filter
@@ -1018,13 +1169,16 @@ function applyFilters() {
       }
     }
 
-    // Time filter
-    if (currentFilters.time !== 'all' && activity.time) {
+    // Time filter - multi-select
+    const timeSelected = currentFilters.time.length > 0 && currentFilters.time.length < allTimes.length;
+    if (timeSelected && activity.time) {
       const hour = extractHour(activity.time);
       if (hour !== null) {
-        if (currentFilters.time === 'morning' && (hour < 6 || hour >= 12)) return false;
-        if (currentFilters.time === 'afternoon' && (hour < 12 || hour >= 18)) return false;
-        if (currentFilters.time === 'evening' && (hour < 18 || hour >= 24)) return false;
+        let matchesTime = false;
+        if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
+        if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
+        if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+        if (!matchesTime) return false;
       }
     }
 
@@ -1057,7 +1211,7 @@ function applyFilters() {
       }
     });
     
-    document.getElementById('locationInfo').innerHTML = `<span class="material-symbols-outlined text-sm">straighten</span> km`;
+    document.getElementById('locationInfo').textContent = `📍 Distancias desde tu ubicación`;
     document.getElementById('locationInfo').classList.remove('hidden');
   }
   
@@ -1225,15 +1379,9 @@ function renderActivities() {
   
   // Update pagination
   const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
-  const pageInfoText = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
-  document.getElementById('pageInfo').textContent = pageInfoText;
-  document.getElementById('smallPageInfo').textContent = pageInfoText;
-  const prevDisabled = currentPage === 0;
-  const nextDisabled = currentPage >= totalPages - 1;
-  document.getElementById('prevBtn').disabled = prevDisabled;
-  document.getElementById('nextBtn').disabled = nextDisabled;
-  document.getElementById('smallPrevBtn').disabled = prevDisabled;
-  document.getElementById('smallNextBtn').disabled = nextDisabled;
+  document.getElementById('pageInfo').textContent = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
 }
 
 // Toggle favorite
@@ -1263,8 +1411,6 @@ function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
   if (!activity) return;
   
-  currentDetailId = id;
-  
   // Construir string de fecha para el detalle (rango si aplica - comparando solo día)
   let dateStr = 'Fecha no disponible';
   let dateLabel = 'Fecha';
@@ -1280,23 +1426,12 @@ function showDetail(id) {
   }
   const isFav = favorites.includes(id);
   
-  const currentIndex = filteredActivities.findIndex(a => a.id === id);
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < filteredActivities.length - 1;
-
   document.getElementById('detailTitle').textContent = activity.title;
-  
   document.getElementById('detailContent').innerHTML = `
     <div class="space-y-4">
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex items-start gap-2">
-          <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
-          ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
-        </div>
-        <div class="flex items-start gap-2">
-          ${hasPrev ? `<button onclick="showPreviousDetail()" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&lt;</button>` : `<button disabled style="visibility: hidden;" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&lt;</button>`}
-          ${hasNext ? `<button onclick="showNextDetail()" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&gt;</button>` : `<button disabled style="visibility: hidden;" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&gt;</button>`}
-        </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
+        ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
       </div>
       
       <p class="text-body-lg text-on-surface-variant">${activity.description || 'Sin descripción disponible.'}</p>
@@ -1410,39 +1545,6 @@ function showDetail(id) {
 // Close detail modal
 function closeDetail() {
   document.getElementById('detailModal').classList.add('hidden');
-  currentDetailId = null;
-}
-
-// Navigate to previous activity
-function showPreviousDetail() {
-  if (!currentDetailId) return;
-  const currentIndex = filteredActivities.findIndex(a => a.id === currentDetailId);
-  if (currentIndex > 0) {
-    const newIndex = currentIndex - 1;
-    const newActivity = filteredActivities[newIndex];
-    const newPage = Math.floor(newIndex / itemsPerPage);
-    if (newPage !== currentPage) {
-      currentPage = newPage;
-      renderActivities();
-    }
-    showDetail(newActivity.id);
-  }
-}
-
-// Navigate to next activity
-function showNextDetail() {
-  if (!currentDetailId) return;
-  const currentIndex = filteredActivities.findIndex(a => a.id === currentDetailId);
-  if (currentIndex < filteredActivities.length - 1) {
-    const newIndex = currentIndex + 1;
-    const newActivity = filteredActivities[newIndex];
-    const newPage = Math.floor(newIndex / itemsPerPage);
-    if (newPage !== currentPage) {
-      currentPage = newPage;
-      renderActivities();
-    }
-    showDetail(newActivity.id);
-  }
 }
 
 // Set main tab
@@ -1462,8 +1564,30 @@ function setMainTab(tab) {
   if (tab === 'nearby') {
     // Check if we have user location
     if (!userLocation) {
-      // Open the same location modal used by the "Añadir" button
-      openLocationModal();
+      // Mark 'nearby' visually but store that we're waiting for location
+      document.querySelectorAll('.main-tab').forEach(btn => {
+        if (btn.dataset.tab === 'nearby') {
+          btn.classList.add('bg-primary-container', 'text-on-primary-container');
+          btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+        } else {
+          btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+          btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+        }
+      });
+      // Store that we came from 'nearby' tab
+      document.getElementById('filtersPanel').dataset.openedFromTab = 'nearby';
+      // Open filters panel to ask for location
+      const panel = document.getElementById('filtersPanel');
+      panel.classList.remove('hidden');
+      // Focus on the sort dropdown and select distance
+      document.getElementById('sortSelect').value = 'distance';
+      document.getElementById('locationInput').classList.remove('hidden');
+      // Show message to user
+      const statusEl = document.getElementById('locationStatus');
+      if (statusEl) {
+        statusEl.textContent = 'Introduce tu dirección para ordenar por distancia';
+        statusEl.className = 'text-label-sm mt-1 text-primary';
+      }
       return; // Don't apply filters yet, wait for location
     }
     // If we have location, apply distance sort
