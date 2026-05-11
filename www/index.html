@@ -2576,12 +2576,15 @@ function showView(view) {
 function filterByLocationAndShowList(locationName) {
   // Set location filter (preserving other existing filters)
   currentFilters.location = locationName;
-  
+
   // Close any open popups first
   if (map) {
     map.closePopup();
   }
-  
+
+  // Switch to list view
+  showView('list');
+
   // Use applyFilters to respect all existing filters
   applyFilters();
 }
