@@ -2119,6 +2119,7 @@ function removeFilterChip(type, value) {
       break;
     case 'sort':
       currentFilters.sort = 'recent';
+      currentFilters.nearOnly = false;
       document.getElementById('sortSelect').value = 'recent';
       document.getElementById('locationInput').classList.add('hidden');
       if (activeKPIFilter === 'near') {
