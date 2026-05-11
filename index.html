@@ -1462,30 +1462,8 @@ function setMainTab(tab) {
   if (tab === 'nearby') {
     // Check if we have user location
     if (!userLocation) {
-      // Mark 'nearby' visually but store that we're waiting for location
-      document.querySelectorAll('.main-tab').forEach(btn => {
-        if (btn.dataset.tab === 'nearby') {
-          btn.classList.add('bg-primary-container', 'text-on-primary-container');
-          btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
-        } else {
-          btn.classList.remove('bg-primary-container', 'text-on-primary-container');
-          btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
-        }
-      });
-      // Store that we came from 'nearby' tab
-      document.getElementById('filtersPanel').dataset.openedFromTab = 'nearby';
-      // Open filters panel to ask for location
-      const panel = document.getElementById('filtersPanel');
-      panel.classList.remove('hidden');
-      // Focus on the sort dropdown and select distance
-      document.getElementById('sortSelect').value = 'distance';
-      document.getElementById('locationInput').classList.remove('hidden');
-      // Show message to user
-      const statusEl = document.getElementById('locationStatus');
-      if (statusEl) {
-        statusEl.textContent = 'Introduce tu dirección para ordenar por distancia';
-        statusEl.className = 'text-label-sm mt-1 text-primary';
-      }
+      // Open the same location modal used by the "Añadir" button
+      openLocationModal();
       return; // Don't apply filters yet, wait for location
     }
     // If we have location, apply distance sort
