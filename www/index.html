@@ -1286,9 +1286,12 @@ async function geocodeAddressFromModal() {
       // Close modal after a short delay
       setTimeout(() => {
         closeLocationModal();
-        // Apply distance sort
+        // Apply distance sort and near filter
+        activeKPIFilter = 'near';
+        updateKPICardStyles();
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
+        currentFilters.nearOnly = true;
         
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
@@ -1354,9 +1357,12 @@ function getCurrentLocationFromModal() {
       // Close modal after a short delay
       setTimeout(() => {
         closeLocationModal();
-        // Apply distance sort
+        // Apply distance sort and near filter
+        activeKPIFilter = 'near';
+        updateKPICardStyles();
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
+        currentFilters.nearOnly = true;
         
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
