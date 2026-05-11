@@ -1949,8 +1949,21 @@ function updateKPIs() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Determine base activities based on active filters
+  let baseActivities = allActivities;
+
+  // If Near filter is active, base everything on near activities
+  if (currentFilters.nearOnly && userLocation) {
+    baseActivities = allActivities.filter(a => a.distance && a.distance < 2);
+  }
+  // If Favorites filter is active, base everything on favorite activities
+  else if (currentFilters.favoritesOnly) {
+    const validFavs = getValidFavorites();
+    baseActivities = allActivities.filter(a => validFavs.includes(a.id));
+  }
+
   // Count for "Today" KPI
-  const kpiToday = allActivities.filter(a => {
+  const kpiToday = baseActivities.filter(a => {
     if (!a.date) return false;
     const d = new Date(a.date);
     d.setHours(0, 0, 0, 0);
@@ -1960,39 +1973,20 @@ function updateKPIs() {
   // Count for "This Week" KPI (next 7 days)
   const weekFromNow = new Date(today);
   weekFromNow.setDate(weekFromNow.getDate() + 7);
-  const kpiWeek = allActivities.filter(a => {
+  const kpiWeek = baseActivities.filter(a => {
     if (!a.date) return false;
     const d = new Date(a.date);
     d.setHours(0, 0, 0, 0);
     return d >= today && d <= weekFromNow;
   }).length;
 
-  // Determine base activities for Near and Favorites KPIs
-  // If a date filter is active, calculate on filtered activities
-  let baseActivitiesForNearAndFavs = allActivities;
-  if (currentFilters.date === 'today') {
-    baseActivitiesForNearAndFavs = allActivities.filter(a => {
-      if (!a.date) return false;
-      const d = new Date(a.date);
-      d.setHours(0, 0, 0, 0);
-      return d.getTime() === today.getTime();
-    });
-  } else if (currentFilters.date === 'week') {
-    baseActivitiesForNearAndFavs = allActivities.filter(a => {
-      if (!a.date) return false;
-      const d = new Date(a.date);
-      d.setHours(0, 0, 0, 0);
-      return d >= today && d <= weekFromNow;
-    });
-  }
-
-  // Count for "Near" KPI (respecting date filter)
+  // Count for "Near" KPI
   const kpiNear = userLocation ?
-    baseActivitiesForNearAndFavs.filter(a => a.distance && a.distance < 2).length : 0;
+    baseActivities.filter(a => a.distance && a.distance < 2).length : 0;
 
-  // Count for "Favorites" KPI (respecting date filter)
+  // Count for "Favorites" KPI
   const validFavs = getValidFavorites();
-  const kpiFavorites = baseActivitiesForNearAndFavs.filter(a => validFavs.includes(a.id)).length;
+  const kpiFavorites = baseActivities.filter(a => validFavs.includes(a.id)).length;
 
   document.getElementById('kpiToday').textContent = kpiToday;
   document.getElementById('kpiWeek').textContent = kpiWeek;
