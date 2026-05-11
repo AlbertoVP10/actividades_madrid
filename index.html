@@ -991,16 +991,26 @@ function updateKPINearButton() {
   const kpiNearContainer = document.getElementById('kpiNearContainer');
   
   if (!userLocation) {
-    // Show button to add location
+    // Show button to add location - White background with contrast border
     kpiNear.textContent = '+';
     kpiNearLabel.textContent = 'Añadir';
     kpiNearContainer.style.cursor = 'pointer';
+    kpiNearContainer.style.background = '#ffffff';
+    kpiNearContainer.style.border = '2px solid #F08080';
+    kpiNearContainer.style.color = '#F08080';
+    kpiNearContainer.classList.remove('text-white');
+    kpiNearContainer.classList.add('text-primary');
   } else {
-    // Show count
+    // Show count - Original gradient style
     const count = filteredActivities.filter(a => a.distance && a.distance < 2).length;
     kpiNear.textContent = count;
     kpiNearLabel.textContent = 'Cerca';
     kpiNearContainer.style.cursor = 'default';
+    kpiNearContainer.style.background = 'linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%)';
+    kpiNearContainer.style.border = 'none';
+    kpiNearContainer.style.color = '';
+    kpiNearContainer.classList.remove('text-primary');
+    kpiNearContainer.classList.add('text-white');
   }
 }
 
