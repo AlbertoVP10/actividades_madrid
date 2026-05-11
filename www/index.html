@@ -181,6 +181,31 @@ body { min-height: max(884px, 100dvh); }
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* Hide scrollbar for active filter chips */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Active filter chip styles */
+.filter-chip {
+  flex-shrink: 0;
+  animation: chipAppear 0.2s ease;
+}
+@keyframes chipAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -660,7 +685,23 @@ body { min-height: max(884px, 100dvh); }
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <div id="resultsBar" class="flex justify-between items-center gap-4">
+  <!-- Active Filters Bar -->
+  <div id="activeFiltersBar" class="hidden px-4 py-2 bg-surface-container-low border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+      <!-- Clear All Button (Sticky) -->
+      <button onclick="clearFilters()" class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-error-container text-on-error-container rounded-full text-label-md font-medium hover:bg-error hover:text-on-error transition-colors">
+        <span class="material-symbols-outlined text-sm">close</span>
+        Limpiar
+      </button>
+      
+      <!-- Active Filter Chips (Scrollable) -->
+      <div id="activeFilterChips" class="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <!-- Chips will be inserted here dynamically -->
+      </div>
+    </div>
+  </div>
+  
+  <div id="resultsBar" class="flex justify-between items-center gap-4 px-4 py-2">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
     <p id="locationInfo" class="flex items-center gap-1 text-label-sm text-on-surface-variant hidden"></p>
     <div id="smallPagination" class="flex items-center gap-2 text-label-sm text-on-surface-variant">
@@ -1831,6 +1872,9 @@ function applyFilters() {
   // Sync KPI state with current filters
   syncKPIStateWithFilters();
   
+  // Update active filter chips
+  updateActiveFilterChips();
+  
   // Update map markers if in map view
   if (currentView === 'map' && map) {
     updateMapMarkers();
@@ -1903,6 +1947,176 @@ function updateKPIs() {
   
   // Update KPI Near button state
   updateKPINearButton();
+}
+
+// Update active filter chips display
+function updateActiveFilterChips() {
+  const chipsContainer = document.getElementById('activeFilterChips');
+  const filtersBar = document.getElementById('activeFiltersBar');
+  
+  if (!chipsContainer || !filtersBar) return;
+  
+  const chips = [];
+  
+  // Check for active filters and create chips
+  
+  // Date filters
+  if (currentFilters.date === 'today') {
+    chips.push({ label: 'Hoy', type: 'date', value: 'today' });
+  } else if (currentFilters.date === 'week') {
+    chips.push({ label: 'Esta semana', type: 'date', value: 'week' });
+  } else if (currentFilters.date === 'tomorrow') {
+    chips.push({ label: 'Mañana', type: 'date', value: 'tomorrow' });
+  } else if (currentFilters.date === 'month') {
+    chips.push({ label: 'Este mes', type: 'date', value: 'month' });
+  }
+  
+  // Category filters
+  if (multiSelectState.category.length > 0) {
+    multiSelectState.category.forEach(cat => {
+      chips.push({ label: cat, type: 'category', value: cat });
+    });
+  }
+  
+  // District filters
+  if (multiSelectState.district.length > 0) {
+    multiSelectState.district.forEach(dist => {
+      chips.push({ label: dist, type: 'district', value: dist });
+    });
+  }
+  
+  // Audience filters
+  if (multiSelectState.audience.length > 0) {
+    multiSelectState.audience.forEach(aud => {
+      chips.push({ label: aud, type: 'audience', value: aud });
+    });
+  }
+  
+  // Time filters
+  if (multiSelectState.time.length > 0) {
+    const timeLabels = {
+      'morning': 'Mañana',
+      'afternoon': 'Tarde',
+      'evening': 'Noche'
+    };
+    multiSelectState.time.forEach(time => {
+      chips.push({ label: timeLabels[time] || time, type: 'time', value: time });
+    });
+  }
+  
+  // Free only
+  if (currentFilters.freeOnly) {
+    chips.push({ label: 'Gratis', type: 'free', value: true });
+  }
+  
+  // Favorites only
+  if (currentFilters.favoritesOnly) {
+    chips.push({ label: 'Favoritos', type: 'favorites', value: true });
+  }
+  
+  // Sort by distance (Cerca de mí)
+  if (currentFilters.sort === 'distance' && userLocation) {
+    chips.push({ label: 'Cerca de mí', type: 'sort', value: 'distance' });
+  }
+  
+  // Search text
+  if (currentFilters.search) {
+    chips.push({ label: `Buscar: "${currentFilters.search}"`, type: 'search', value: currentFilters.search });
+  }
+  
+  // Show/hide the filters bar
+  if (chips.length > 0) {
+    filtersBar.classList.remove('hidden');
+  } else {
+    filtersBar.classList.add('hidden');
+  }
+  
+  // Render chips
+  chipsContainer.innerHTML = chips.map(chip => `
+    <button onclick="removeFilterChip('${chip.type}', '${chip.value}')" 
+            class="filter-chip flex items-center gap-1 px-3 py-1.5 bg-primary-container text-on-primary-container rounded-full text-label-md hover:bg-primary hover:text-on-primary transition-colors">
+      <span>${chip.label}</span>
+      <span class="material-symbols-outlined text-sm">close</span>
+    </button>
+  `).join('');
+}
+
+// Remove individual filter from chip
+function removeFilterChip(type, value) {
+  switch (type) {
+    case 'date':
+      currentFilters.date = 'all';
+      document.getElementById('dateSelect').value = 'all';
+      // Also clear KPI if it was set
+      if (activeKPIFilter === 'today' || activeKPIFilter === 'week') {
+        activeKPIFilter = null;
+        updateKPICardStyles();
+      }
+      break;
+    case 'category':
+      const catIndex = multiSelectState.category.indexOf(value);
+      if (catIndex > -1) {
+        multiSelectState.category.splice(catIndex, 1);
+        const catCheckbox = document.querySelector(`#categoryDropdown input[value="${value}"]`);
+        if (catCheckbox) catCheckbox.checked = false;
+        updateMultiSelect('category');
+      }
+      break;
+    case 'district':
+      const distIndex = multiSelectState.district.indexOf(value);
+      if (distIndex > -1) {
+        multiSelectState.district.splice(distIndex, 1);
+        const distCheckbox = document.querySelector(`#districtDropdown input[value="${value}"]`);
+        if (distCheckbox) distCheckbox.checked = false;
+        updateMultiSelect('district');
+      }
+      break;
+    case 'audience':
+      const audIndex = multiSelectState.audience.indexOf(value);
+      if (audIndex > -1) {
+        multiSelectState.audience.splice(audIndex, 1);
+        const audCheckbox = document.querySelector(`#audienceDropdown input[value="${value}"]`);
+        if (audCheckbox) audCheckbox.checked = false;
+        updateMultiSelect('audience');
+      }
+      break;
+    case 'time':
+      const timeIndex = multiSelectState.time.indexOf(value);
+      if (timeIndex > -1) {
+        multiSelectState.time.splice(timeIndex, 1);
+        const timeCheckbox = document.querySelector(`#timeDropdown input[value="${value}"]`);
+        if (timeCheckbox) timeCheckbox.checked = false;
+        updateMultiSelect('time');
+      }
+      break;
+    case 'free':
+      currentFilters.freeOnly = false;
+      document.getElementById('freeOnly').checked = false;
+      break;
+    case 'favorites':
+      currentFilters.favoritesOnly = false;
+      document.getElementById('favoritesOnly').checked = false;
+      if (activeKPIFilter === 'favorites') {
+        activeKPIFilter = null;
+        updateKPICardStyles();
+      }
+      break;
+    case 'sort':
+      currentFilters.sort = 'recent';
+      document.getElementById('sortSelect').value = 'recent';
+      document.getElementById('locationInput').classList.add('hidden');
+      if (activeKPIFilter === 'near') {
+        activeKPIFilter = null;
+        updateKPICardStyles();
+      }
+      break;
+    case 'search':
+      currentFilters.search = '';
+      document.getElementById('searchInput').value = '';
+      break;
+  }
+  
+  applyFilters();
 }
 
 // Format price display
