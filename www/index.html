@@ -827,6 +827,7 @@ let currentFilters = {
   nearOnly: false,
   location: null,
   locationCoords: null,
+  locationKey: null,
   sort: 'recent'
 };
 
@@ -1856,17 +1857,11 @@ function applyFilters() {
       if (!searchIn.includes(currentFilters.search)) return false;
     }
 
-    // Location filter (from map popup) - filter by exact coordinates within 100m radius
-    if (currentFilters.locationCoords) {
+    // Location filter (from map popup) - filter by exact location key
+    if (currentFilters.locationKey) {
       if (!activity.lat || !activity.lon) return false;
-      const dist = calculateDistance(
-        currentFilters.locationCoords.lat,
-        currentFilters.locationCoords.lon,
-        activity.lat,
-        activity.lon
-      );
-      // Filter activities within 100 meters of the selected location
-      if (dist > 0.1) return false;
+      const activityKey = `${activity.lat.toFixed(5)},${activity.lon.toFixed(5)}`;
+      if (activityKey !== currentFilters.locationKey) return false;
     }
 
     return true;
@@ -2065,8 +2060,8 @@ function updateActiveFilterChips() {
   }
 
   // Location filter (from map)
-  if (currentFilters.locationCoords) {
-    chips.push({ label: '📍Ubicación', type: 'location', value: 'coords' });
+  if (currentFilters.locationKey) {
+    chips.push({ label: '📍Ubicación', type: 'location', value: 'key' });
   }
 
   // Show/hide the filters bar
@@ -2161,7 +2156,7 @@ function removeFilterChip(type, value) {
       document.getElementById('searchInput').value = '';
       break;
     case 'location':
-      currentFilters.locationCoords = null;
+      currentFilters.locationKey = null;
       break;
   }
 
@@ -2581,8 +2576,11 @@ function showView(view) {
 
 // Filter by location and switch to list view
 function filterByLocationAndShowList(lat, lon) {
-  // Set location coordinates filter (preserving other existing filters)
-  currentFilters.locationCoords = { lat: parseFloat(lat), lon: parseFloat(lon) };
+  // Create the same key used for grouping in the map
+  const key = `${parseFloat(lat).toFixed(5)},${parseFloat(lon).toFixed(5)}`;
+  
+  // Set location key filter (preserving other existing filters)
+  currentFilters.locationKey = key;
 
   // Close any open popups first
   if (map) {
@@ -2874,6 +2872,7 @@ function clearFilters() {
     nearOnly: false,
     location: null,
     locationCoords: null,
+    locationKey: null,
     sort: 'recent'
   };
 
