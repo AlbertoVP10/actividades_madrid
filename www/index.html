@@ -160,6 +160,27 @@ body { min-height: max(884px, 100dvh); }
   border-radius: 3px;
 }
 
+/* KPI Card styles */
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease;
+}
+.kpi-card.active::after {
+  border-color: #ffffff;
+}
+.kpi-card.active {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -519,22 +540,22 @@ body { min-height: max(884px, 100dvh); }
 <!-- KPI Cards -->
 <section id="kpiSection" class="px-4 py-2">
   <div class="grid grid-cols-4 gap-2">
-    <div style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight">
+    <div id="kpiTodayContainer" onclick="toggleKPIFilter('today')" style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades de hoy">
       <span class="material-symbols-outlined text-lg">calendar_today</span>
       <div id="kpiToday" class="text-xl font-bold leading-none my-0.5">0</div>
       <div class="text-xs opacity-90 leading-none">Hoy</div>
     </div>
-    <div style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight">
+    <div id="kpiFeaturedContainer" onclick="toggleKPIFilter('featured')" style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades destacadas">
       <span class="material-symbols-outlined text-lg">star</span>
       <div id="kpiFeatured" class="text-xl font-bold leading-none my-0.5">0</div>
       <div class="text-xs opacity-90 leading-none">Destacados</div>
     </div>
-    <div id="kpiNearContainer" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight" onclick="if(!userLocation) openLocationModal()">
+    <div id="kpiNearContainer" onclick="handleKPIProximity()" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades cercanas">
       <span class="material-symbols-outlined text-lg">location_on</span>
       <div id="kpiNear" class="text-xl font-bold leading-none my-0.5">0</div>
       <div id="kpiNearLabel" class="text-xs opacity-90 leading-none">Cerca</div>
     </div>
-    <div id="kpiFavoritesContainer" style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight transition-all duration-300">
+    <div id="kpiFavoritesContainer" onclick="toggleKPIFilter('favorites')" style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades favoritas">
       <span id="kpiFavoritesIcon" class="material-symbols-outlined text-lg">favorite</span>
       <div id="kpiFavorites" class="text-xl font-bold leading-none my-0.5">0</div>
       <div id="kpiFavoritesLabel" class="text-xs opacity-90 leading-none">Favoritos</div>
@@ -672,6 +693,9 @@ let currentFilters = {
   favoritesOnly: false,
   sort: 'recent'
 };
+
+// Active KPI filter state
+let activeKPIFilter = null; // 'today', 'featured', 'near', 'favorites', or null
 
 // Get valid favorites (that exist in allActivities and haven't expired)
 function getValidFavorites() {
@@ -1163,7 +1187,6 @@ function updateKPINearButton() {
     // Show button to add location - White background with contrast border
     kpiNear.textContent = '+';
     kpiNearLabel.textContent = 'Añadir';
-    kpiNearContainer.style.cursor = 'pointer';
     kpiNearContainer.style.background = '#ffffff';
     kpiNearContainer.style.border = '2px solid #F08080';
     kpiNearContainer.style.color = '#F08080';
@@ -1174,7 +1197,6 @@ function updateKPINearButton() {
     const count = filteredActivities.filter(a => a.distance && a.distance < 2).length;
     kpiNear.textContent = count;
     kpiNearLabel.textContent = 'Cerca';
-    kpiNearContainer.style.cursor = 'default';
     kpiNearContainer.style.background = 'linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%)';
     kpiNearContainer.style.border = 'none';
     kpiNearContainer.style.color = '';
@@ -1214,6 +1236,102 @@ function updateKPIFavoritesStyle() {
     count.classList.add('font-black');
     label.style.opacity = '1';
   }
+}
+
+// Toggle KPI filter
+function toggleKPIFilter(type) {
+  // If clicking the same filter, deactivate it
+  if (activeKPIFilter === type) {
+    activeKPIFilter = null;
+    clearKPIFilter();
+    return;
+  }
+  
+  // Set new active filter
+  activeKPIFilter = type;
+  
+  // Update visual state of KPI cards
+  updateKPICardStyles();
+  
+  // Apply the filter
+  applyKPIFilter(type);
+}
+
+// Handle KPI proximity click (special case)
+function handleKPIProximity() {
+  if (!userLocation) {
+    openLocationModal();
+    return;
+  }
+  toggleKPIFilter('near');
+}
+
+// Update KPI card visual styles based on active state
+function updateKPICardStyles() {
+  const kpiIds = ['kpiTodayContainer', 'kpiFeaturedContainer', 'kpiNearContainer', 'kpiFavoritesContainer'];
+  
+  kpiIds.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.classList.remove('active');
+    }
+  });
+  
+  if (activeKPIFilter) {
+    const activeId = {
+      'today': 'kpiTodayContainer',
+      'featured': 'kpiFeaturedContainer',
+      'near': 'kpiNearContainer',
+      'favorites': 'kpiFavoritesContainer'
+    }[activeKPIFilter];
+    
+    if (activeId) {
+      const activeElement = document.getElementById(activeId);
+      if (activeElement) {
+        activeElement.classList.add('active');
+      }
+    }
+  }
+}
+
+// Apply KPI filter
+function applyKPIFilter(type) {
+  // Reset all filters first
+  clearFilters();
+  
+  switch (type) {
+    case 'today':
+      currentFilters.date = 'today';
+      break;
+    case 'featured':
+      currentFilters.category = 'Destacada';
+      break;
+    case 'near':
+      if (userLocation) {
+        currentFilters.sort = 'distance';
+        document.getElementById('sortSelect').value = 'distance';
+        document.getElementById('locationInput').classList.remove('hidden');
+      }
+      break;
+    case 'favorites':
+      currentFilters.favoritesOnly = true;
+      break;
+  }
+  
+  // Show list view and apply filters
+  showView('list');
+  applyFilters();
+  
+  // Scroll to results
+  document.getElementById('resultsBar').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Clear KPI filter
+function clearKPIFilter() {
+  activeKPIFilter = null;
+  updateKPICardStyles();
+  clearFilters();
+  applyFilters();
 }
 
 // Extract hour from time string
@@ -2233,6 +2351,10 @@ function nextPage() {
 
 // Clear filters
 function clearFilters() {
+  // Reset KPI filter
+  activeKPIFilter = null;
+  updateKPICardStyles();
+  
   // Reset multi-select state
   multiSelectState.category = [];
   multiSelectState.district = [];
