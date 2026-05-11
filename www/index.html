@@ -2582,8 +2582,8 @@ function filterByLocationAndShowList(locationName) {
     map.closePopup();
   }
 
-  // Switch to list view
-  showView('list');
+  // Switch to list view and update bottom tab
+  setBottomTab('list');
 
   // Use applyFilters to respect all existing filters
   applyFilters();
