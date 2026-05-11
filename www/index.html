@@ -545,10 +545,10 @@ body { min-height: max(884px, 100dvh); }
       <div id="kpiToday" class="text-xl font-bold leading-none my-0.5">0</div>
       <div class="text-xs opacity-90 leading-none">Hoy</div>
     </div>
-    <div id="kpiFeaturedContainer" onclick="toggleKPIFilter('featured')" style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades destacadas">
-      <span class="material-symbols-outlined text-lg">star</span>
-      <div id="kpiFeatured" class="text-xl font-bold leading-none my-0.5">0</div>
-      <div class="text-xs opacity-90 leading-none">Destacados</div>
+    <div id="kpiWeekContainer" onclick="toggleKPIFilter('week')" style="background: linear-gradient(135deg, #D06060 0%, #F08080 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades de esta semana">
+      <span class="material-symbols-outlined text-lg">date_range</span>
+      <div id="kpiWeek" class="text-xl font-bold leading-none my-0.5">0</div>
+      <div class="text-xs opacity-90 leading-none">Esta semana</div>
     </div>
     <div id="kpiNearContainer" onclick="handleKPIProximity()" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%);" class="kpi-card py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight cursor-pointer hover:shadow-lg transition-all duration-200" role="button" aria-label="Filtrar actividades cercanas">
       <span class="material-symbols-outlined text-lg">location_on</span>
@@ -1268,7 +1268,7 @@ function handleKPIProximity() {
 
 // Update KPI card visual styles based on active state
 function updateKPICardStyles() {
-  const kpiIds = ['kpiTodayContainer', 'kpiFeaturedContainer', 'kpiNearContainer', 'kpiFavoritesContainer'];
+  const kpiIds = ['kpiTodayContainer', 'kpiWeekContainer', 'kpiNearContainer', 'kpiFavoritesContainer'];
   
   kpiIds.forEach(id => {
     const element = document.getElementById(id);
@@ -1280,7 +1280,7 @@ function updateKPICardStyles() {
   if (activeKPIFilter) {
     const activeId = {
       'today': 'kpiTodayContainer',
-      'featured': 'kpiFeaturedContainer',
+      'week': 'kpiWeekContainer',
       'near': 'kpiNearContainer',
       'favorites': 'kpiFavoritesContainer'
     }[activeKPIFilter];
@@ -1294,17 +1294,27 @@ function updateKPICardStyles() {
   }
 }
 
-// Apply KPI filter
+// Apply KPI filter (adds to existing filters, doesn't replace them)
 function applyKPIFilter(type) {
-  // Reset all filters first
-  clearFilters();
-  
   switch (type) {
     case 'today':
       currentFilters.date = 'today';
+      document.getElementById('dateSelect').value = 'today';
+      break;
+    case 'week':
+      currentFilters.date = 'week';
+      document.getElementById('dateSelect').value = 'week';
       break;
     case 'featured':
-      currentFilters.category = 'Destacada';
+      // For featured, we use multi-select category
+      if (!multiSelectState.category.includes('Destacada')) {
+        multiSelectState.category.push('Destacada');
+        // Update the checkbox in dropdown
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        const checkbox = categoryDropdown.querySelector('input[value="Destacada"]');
+        if (checkbox) checkbox.checked = true;
+        updateMultiSelect('category');
+      }
       break;
     case 'near':
       if (userLocation) {
@@ -1315,6 +1325,7 @@ function applyKPIFilter(type) {
       break;
     case 'favorites':
       currentFilters.favoritesOnly = true;
+      document.getElementById('favoritesOnly').checked = true;
       break;
   }
   
@@ -1326,11 +1337,38 @@ function applyKPIFilter(type) {
   document.getElementById('resultsBar').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Clear KPI filter
+// Clear KPI filter (removes only the KPI filter, keeps other filters)
 function clearKPIFilter() {
+  switch (activeKPIFilter) {
+    case 'today':
+    case 'week':
+      currentFilters.date = 'all';
+      document.getElementById('dateSelect').value = 'all';
+      break;
+    case 'featured':
+      // Remove Destacada from multi-select
+      const index = multiSelectState.category.indexOf('Destacada');
+      if (index > -1) {
+        multiSelectState.category.splice(index, 1);
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        const checkbox = categoryDropdown.querySelector('input[value="Destacada"]');
+        if (checkbox) checkbox.checked = false;
+        updateMultiSelect('category');
+      }
+      break;
+    case 'near':
+      currentFilters.sort = 'recent';
+      document.getElementById('sortSelect').value = 'recent';
+      document.getElementById('locationInput').classList.add('hidden');
+      break;
+    case 'favorites':
+      currentFilters.favoritesOnly = false;
+      document.getElementById('favoritesOnly').checked = false;
+      break;
+  }
+  
   activeKPIFilter = null;
   updateKPICardStyles();
-  clearFilters();
   applyFilters();
 }
 
@@ -1618,20 +1656,30 @@ function updateKPIs() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  const kpiToday = filteredActivities.filter(a => {
+  // Count for "Today" KPI
+  const kpiToday = allActivities.filter(a => {
     if (!a.date) return false;
     const d = new Date(a.date);
     d.setHours(0, 0, 0, 0);
     return d.getTime() === today.getTime();
   }).length;
   
-  const kpiFeatured = filteredActivities.filter(a => a.category === 'Destacada').length;
+  // Count for "This Week" KPI (next 7 days)
+  const weekFromNow = new Date(today);
+  weekFromNow.setDate(weekFromNow.getDate() + 7);
+  const kpiWeek = allActivities.filter(a => {
+    if (!a.date) return false;
+    const d = new Date(a.date);
+    d.setHours(0, 0, 0, 0);
+    return d >= today && d <= weekFromNow;
+  }).length;
   
+  // Count for "Near" KPI
   const kpiNear = userLocation ? 
-    filteredActivities.filter(a => a.distance && a.distance < 2).length : 0;
+    allActivities.filter(a => a.distance && a.distance < 2).length : 0;
   
   document.getElementById('kpiToday').textContent = kpiToday;
-  document.getElementById('kpiFeatured').textContent = kpiFeatured;
+  document.getElementById('kpiWeek').textContent = kpiWeek;
   // Use valid favorites count (only non-expired activities)
   const validFavs = getValidFavorites();
   document.getElementById('kpiFavorites').textContent = validFavs.length;
