@@ -1948,7 +1948,7 @@ function syncTabsWithFilters() {
 function updateKPIs() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   // Count for "Today" KPI
   const kpiToday = allActivities.filter(a => {
     if (!a.date) return false;
@@ -1956,7 +1956,7 @@ function updateKPIs() {
     d.setHours(0, 0, 0, 0);
     return d.getTime() === today.getTime();
   }).length;
-  
+
   // Count for "This Week" KPI (next 7 days)
   const weekFromNow = new Date(today);
   weekFromNow.setDate(weekFromNow.getDate() + 7);
@@ -1966,20 +1966,42 @@ function updateKPIs() {
     d.setHours(0, 0, 0, 0);
     return d >= today && d <= weekFromNow;
   }).length;
-  
-  // Count for "Near" KPI
-  const kpiNear = userLocation ? 
-    allActivities.filter(a => a.distance && a.distance < 2).length : 0;
-  
+
+  // Determine base activities for Near and Favorites KPIs
+  // If a date filter is active, calculate on filtered activities
+  let baseActivitiesForNearAndFavs = allActivities;
+  if (currentFilters.date === 'today') {
+    baseActivitiesForNearAndFavs = allActivities.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === today.getTime();
+    });
+  } else if (currentFilters.date === 'week') {
+    baseActivitiesForNearAndFavs = allActivities.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      d.setHours(0, 0, 0, 0);
+      return d >= today && d <= weekFromNow;
+    });
+  }
+
+  // Count for "Near" KPI (respecting date filter)
+  const kpiNear = userLocation ?
+    baseActivitiesForNearAndFavs.filter(a => a.distance && a.distance < 2).length : 0;
+
+  // Count for "Favorites" KPI (respecting date filter)
+  const validFavs = getValidFavorites();
+  const kpiFavorites = baseActivitiesForNearAndFavs.filter(a => validFavs.includes(a.id)).length;
+
   document.getElementById('kpiToday').textContent = kpiToday;
   document.getElementById('kpiWeek').textContent = kpiWeek;
-  // Use valid favorites count (only non-expired activities)
-  const validFavs = getValidFavorites();
-  document.getElementById('kpiFavorites').textContent = validFavs.length;
-  
+  document.getElementById('kpiNear').textContent = kpiNear;
+  document.getElementById('kpiFavorites').textContent = kpiFavorites;
+
   // Update KPI Favorites visual state
   updateKPIFavoritesStyle();
-  
+
   // Update KPI Near button state
   updateKPINearButton();
 }
