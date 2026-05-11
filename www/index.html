@@ -1754,6 +1754,17 @@ function applyFilters() {
   const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
   const allTimes = ['morning', 'afternoon', 'evening'];
 
+  // Calculate distances first if user location is available (needed for near filter)
+  if (userLocation) {
+    allActivities.forEach(activity => {
+      if (activity.lat && activity.lon) {
+        activity.distance = calculateDistance(userLocation.lat, userLocation.lon, activity.lat, activity.lon);
+      } else {
+        activity.distance = null;
+      }
+    });
+  }
+
   filteredActivities = allActivities.filter(activity => {
     // Category filter - multi-select
     // Skip if no selection or all selected
@@ -1846,16 +1857,8 @@ function applyFilters() {
     return true;
   });
   
-  // Calculate distances
+  // Show location info
   if (userLocation) {
-    filteredActivities.forEach(activity => {
-      if (activity.lat && activity.lon) {
-        activity.distance = calculateDistance(userLocation.lat, userLocation.lon, activity.lat, activity.lon);
-      } else {
-        activity.distance = null;
-      }
-    });
-    
     document.getElementById('locationInfo').innerHTML = `<span class="material-symbols-outlined text-sm">straighten</span> km`;
     document.getElementById('locationInfo').classList.remove('hidden');
   }
