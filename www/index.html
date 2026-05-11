@@ -1961,6 +1961,26 @@ function updateKPIs() {
     const validFavs = getValidFavorites();
     baseActivities = allActivities.filter(a => validFavs.includes(a.id));
   }
+  // If Today filter is active, base everything on today's activities
+  else if (currentFilters.date === 'today') {
+    baseActivities = allActivities.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === today.getTime();
+    });
+  }
+  // If Week filter is active, base everything on this week's activities
+  else if (currentFilters.date === 'week') {
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+    baseActivities = allActivities.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      d.setHours(0, 0, 0, 0);
+      return d >= today && d <= weekFromNow;
+    });
+  }
 
   // Count for "Today" KPI
   const kpiToday = baseActivities.filter(a => {
