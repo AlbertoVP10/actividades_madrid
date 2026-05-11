@@ -435,10 +435,10 @@ body { min-height: 100dvh; } /* Mobile-friendly full viewport height */
       <div id="kpiNear" class="text-xl font-bold leading-none my-0.5">0</div>
       <div id="kpiNearLabel" class="text-xs opacity-90 leading-none">Cerca</div>
     </div>
-    <div style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight">
-      <span class="material-symbols-outlined text-lg">favorite</span>
+    <div id="kpiFavoritesContainer" style="background: linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%);" class="py-1 px-2 rounded-lg text-center text-white flex flex-col justify-center items-center leading-tight transition-all duration-300">
+      <span id="kpiFavoritesIcon" class="material-symbols-outlined text-lg">favorite</span>
       <div id="kpiFavorites" class="text-xl font-bold leading-none my-0.5">0</div>
-      <div class="text-xs opacity-90 leading-none">Favoritos</div>
+      <div id="kpiFavoritesLabel" class="text-xs opacity-90 leading-none">Favoritos</div>
     </div>
   </div>
 </section>
@@ -1014,6 +1014,36 @@ function updateKPINearButton() {
   }
 }
 
+// Update KPI Favorites visual style based on count
+function updateKPIFavoritesStyle() {
+  const container = document.getElementById('kpiFavoritesContainer');
+  const icon = document.getElementById('kpiFavoritesIcon');
+  const count = document.getElementById('kpiFavorites');
+  const label = document.getElementById('kpiFavoritesLabel');
+  
+  if (favorites.length === 0) {
+    // Empty state: subtle style with outlined heart
+    container.style.background = 'linear-gradient(135deg, #FBC4AB 0%, #FFDAB9 100%)';
+    container.style.border = '2px solid #D06060';
+    icon.textContent = 'favorite';
+    icon.classList.remove('filled');
+    icon.style.fontVariationSettings = "'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24";
+    count.classList.remove('font-black');
+    count.classList.add('font-bold');
+    label.style.opacity = '0.9';
+  } else {
+    // Active state: vibrant red/pink with filled heart
+    container.style.background = 'linear-gradient(135deg, #E53935 0%, #FF5252 100%)';
+    container.style.border = 'none';
+    icon.textContent = 'favorite';
+    icon.classList.add('filled');
+    icon.style.fontVariationSettings = "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24";
+    count.classList.remove('font-bold');
+    count.classList.add('font-black');
+    label.style.opacity = '1';
+  }
+}
+
 // Extract hour from time string
 function extractHour(timeStr) {
   if (!timeStr) return null;
@@ -1310,6 +1340,9 @@ function updateKPIs() {
   document.getElementById('kpiToday').textContent = kpiToday;
   document.getElementById('kpiFeatured').textContent = kpiFeatured;
   document.getElementById('kpiFavorites').textContent = favorites.length;
+  
+  // Update KPI Favorites visual state
+  updateKPIFavoritesStyle();
   
   // Update KPI Near button state
   updateKPINearButton();
