@@ -826,6 +826,7 @@ let currentFilters = {
   favoritesOnly: false,
   nearOnly: false,
   location: null,
+  locationCoords: null,
   sort: 'recent'
 };
 
@@ -1855,11 +1856,17 @@ function applyFilters() {
       if (!searchIn.includes(currentFilters.search)) return false;
     }
 
-    // Location filter (from map popup)
-    if (currentFilters.location) {
-      if (!activity.location || !activity.location.toLowerCase().includes(currentFilters.location.toLowerCase())) {
-        return false;
-      }
+    // Location filter (from map popup) - filter by exact coordinates within 100m radius
+    if (currentFilters.locationCoords) {
+      if (!activity.lat || !activity.lon) return false;
+      const dist = calculateDistance(
+        currentFilters.locationCoords.lat,
+        currentFilters.locationCoords.lon,
+        activity.lat,
+        activity.lon
+      );
+      // Filter activities within 100 meters of the selected location
+      if (dist > 0.1) return false;
     }
 
     return true;
@@ -2058,8 +2065,8 @@ function updateActiveFilterChips() {
   }
 
   // Location filter (from map)
-  if (currentFilters.location) {
-    chips.push({ label: `📍 ${currentFilters.location}`, type: 'location', value: currentFilters.location });
+  if (currentFilters.locationCoords) {
+    chips.push({ label: '📍Ubicación', type: 'location', value: 'coords' });
   }
 
   // Show/hide the filters bar
@@ -2154,7 +2161,7 @@ function removeFilterChip(type, value) {
       document.getElementById('searchInput').value = '';
       break;
     case 'location':
-      currentFilters.location = null;
+      currentFilters.locationCoords = null;
       break;
   }
 
@@ -2573,9 +2580,9 @@ function showView(view) {
 }
 
 // Filter by location and switch to list view
-function filterByLocationAndShowList(locationName) {
-  // Set location filter (preserving other existing filters)
-  currentFilters.location = locationName;
+function filterByLocationAndShowList(lat, lon) {
+  // Set location coordinates filter (preserving other existing filters)
+  currentFilters.locationCoords = { lat: parseFloat(lat), lon: parseFloat(lon) };
 
   // Close any open popups first
   if (map) {
@@ -2646,12 +2653,12 @@ function initMap() {
   Object.values(uniqueLocations).forEach(group => {
     const activity = group[0];
     const locationName = activity.location || 'Ubicación';
-    const popupContent = group.length === 1 ? 
+    const popupContent = group.length === 1 ?
       `<div style="min-width: 200px; max-width: 300px;">
         <b>${activity.title}</b><br>
         ${activity.category}<br>
         ${locationName}<br><br>
-        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+        <button onclick="filterByLocationAndShowList(${activity.lat}, ${activity.lon})"
                 style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500;">
           Lista
         </button>
@@ -2661,19 +2668,19 @@ function initMap() {
         <div style="overflow-y: auto; flex: 1; margin: 8px 0; padding-right: 8px;">
           ${group.map(a => `• ${a.title}`).join('<br>')}
         </div>
-        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+        <button onclick="filterByLocationAndShowList(${activity.lat}, ${activity.lon})"
                 style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; margin-top: 8px; flex-shrink: 0;">
           Lista
         </button>
       </div>`;
-    
+
     const markerIcon = group.length === 1 ? customIcon : clusterIcon(group.length);
-    
+
     L.marker([activity.lat, activity.lon], { icon: markerIcon }).addTo(map)
       .bindPopup(popupContent);
   });
-  
-  document.getElementById('mapCaption').textContent = 
+
+  document.getElementById('mapCaption').textContent =
     `Mostrando ${activitiesWithCoords.length} actividades en ${Object.keys(uniqueLocations).length} ubicaciones`;
 }
 
@@ -2720,12 +2727,12 @@ function updateMapMarkers() {
   Object.values(uniqueLocations).forEach(group => {
     const activity = group[0];
     const locationName = activity.location || 'Ubicación';
-    const popupContent = group.length === 1 ? 
+    const popupContent = group.length === 1 ?
       `<div style="min-width: 200px; max-width: 300px;">
         <b>${activity.title}</b><br>
         ${activity.category}<br>
         ${locationName}<br><br>
-        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+        <button onclick="filterByLocationAndShowList(${activity.lat}, ${activity.lon})"
                 style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500;">
           Lista
         </button>
@@ -2735,19 +2742,19 @@ function updateMapMarkers() {
         <div style="overflow-y: auto; flex: 1; margin: 8px 0; padding-right: 8px;">
           ${group.map(a => `• ${a.title}`).join('<br>')}
         </div>
-        <button onclick="filterByLocationAndShowList('${locationName.replace(/'/g, "\\'")}')" 
+        <button onclick="filterByLocationAndShowList(${activity.lat}, ${activity.lon})"
                 style="background: linear-gradient(135deg, #F08080 0%, #F4978E 100%); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; margin-top: 8px; flex-shrink: 0;">
           Lista
         </button>
       </div>`;
-    
+
     const markerIcon = group.length === 1 ? customIcon : clusterIcon(group.length);
-    
+
     L.marker([activity.lat, activity.lon], { icon: markerIcon }).addTo(map)
       .bindPopup(popupContent);
   });
-  
-  document.getElementById('mapCaption').textContent = 
+
+  document.getElementById('mapCaption').textContent =
     `Mostrando ${activitiesWithCoords.length} actividades en ${Object.keys(uniqueLocations).length} ubicaciones`;
 }
 
@@ -2866,6 +2873,7 @@ function clearFilters() {
     favoritesOnly: false,
     nearOnly: false,
     location: null,
+    locationCoords: null,
     sort: 'recent'
   };
 
