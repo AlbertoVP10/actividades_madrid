@@ -831,8 +831,8 @@ let currentFilters = {
   sort: 'recent'
 };
 
-// Active KPI filter state
-let activeKPIFilter = null; // 'today', 'featured', 'near', 'favorites', or null
+// Active KPI filter state (array to allow multiple filters)
+let activeKPIFilters = []; // Can contain: 'today', 'week', 'near', 'favorites'
 
 // Consent state
 let consentState = JSON.parse(localStorage.getItem('madridConsent') || 'null');
@@ -1290,12 +1290,14 @@ async function geocodeAddressFromModal() {
       setTimeout(() => {
         closeLocationModal();
         // Apply distance sort and near filter
-        activeKPIFilter = 'near';
+        if (!activeKPIFilters.includes('near')) {
+          activeKPIFilters.push('near');
+        }
         updateKPICardStyles();
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
         currentFilters.nearOnly = true;
-        
+
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
           // Remove old user location marker if exists
@@ -1312,10 +1314,10 @@ async function geocodeAddressFromModal() {
             })
           }).addTo(map).bindPopup('Tu ubicación').openPopup();
         }
-        
+
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
-        
+
         // Center map on new location if in map view (instantáneo)
         if (currentView === 'map' && map) {
           map.setView([userLocation.lat, userLocation.lon], 14);
@@ -1361,12 +1363,14 @@ function getCurrentLocationFromModal() {
       setTimeout(() => {
         closeLocationModal();
         // Apply distance sort and near filter
-        activeKPIFilter = 'near';
+        if (!activeKPIFilters.includes('near')) {
+          activeKPIFilters.push('near');
+        }
         updateKPICardStyles();
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
         currentFilters.nearOnly = true;
-        
+
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
           // Remove old user location marker if exists
@@ -1383,10 +1387,10 @@ function getCurrentLocationFromModal() {
             })
           }).addTo(map).bindPopup('Tu ubicación').openPopup();
         }
-        
+
         // Apply filters (this will call updateMapMarkers if in map view)
         applyFilters();
-        
+
         // Center map on new location if in map view (instantáneo)
         if (currentView === 'map' && map) {
           map.setView([userLocation.lat, userLocation.lon], 14);
@@ -1476,23 +1480,37 @@ function updateKPIFavoritesStyle() {
 
 // Toggle KPI filter
 function toggleKPIFilter(type) {
-  // If clicking the same filter, deactivate it
-  if (activeKPIFilter === type) {
-    clearKPIFilter();
+  // Check if filter is already active
+  const index = activeKPIFilters.indexOf(type);
+
+  if (index > -1) {
+    // Filter is active, remove it
+    activeKPIFilters.splice(index, 1);
+    clearKPIFilter(type);
     return;
   }
-  
-  // If there's a different active filter, clear it first
-  if (activeKPIFilter) {
-    clearKPIFilter();
+
+  // Special case: 'today' and 'week' are mutually exclusive
+  if (type === 'today') {
+    const weekIndex = activeKPIFilters.indexOf('week');
+    if (weekIndex > -1) {
+      activeKPIFilters.splice(weekIndex, 1);
+      clearKPIFilter('week');
+    }
+  } else if (type === 'week') {
+    const todayIndex = activeKPIFilters.indexOf('today');
+    if (todayIndex > -1) {
+      activeKPIFilters.splice(todayIndex, 1);
+      clearKPIFilter('today');
+    }
   }
-  
-  // Set new active filter
-  activeKPIFilter = type;
-  
+
+  // Add new filter
+  activeKPIFilters.push(type);
+
   // Update visual state of KPI cards
   updateKPICardStyles();
-  
+
   // Apply the filter
   applyKPIFilter(type);
 }
@@ -1509,29 +1527,32 @@ function handleKPIProximity() {
 // Update KPI card visual styles based on active state
 function updateKPICardStyles() {
   const kpiIds = ['kpiTodayContainer', 'kpiWeekContainer', 'kpiNearContainer', 'kpiFavoritesContainer'];
-  
+
+  // Remove active class from all
   kpiIds.forEach(id => {
     const element = document.getElementById(id);
     if (element) {
       element.classList.remove('active');
     }
   });
-  
-  if (activeKPIFilter) {
-    const activeId = {
-      'today': 'kpiTodayContainer',
-      'week': 'kpiWeekContainer',
-      'near': 'kpiNearContainer',
-      'favorites': 'kpiFavoritesContainer'
-    }[activeKPIFilter];
-    
+
+  // Add active class to all active filters
+  const idMap = {
+    'today': 'kpiTodayContainer',
+    'week': 'kpiWeekContainer',
+    'near': 'kpiNearContainer',
+    'favorites': 'kpiFavoritesContainer'
+  };
+
+  activeKPIFilters.forEach(filter => {
+    const activeId = idMap[filter];
     if (activeId) {
       const activeElement = document.getElementById(activeId);
       if (activeElement) {
         activeElement.classList.add('active');
       }
     }
-  }
+  });
 }
 
 // Apply KPI filter (adds to existing filters, doesn't replace them)
@@ -1575,11 +1596,19 @@ function applyKPIFilter(type) {
   applyFilters();
 }
 
-// Clear KPI filter (removes only the KPI filter, keeps other filters)
-function clearKPIFilter() {
-  const filterToClear = activeKPIFilter;
-  activeKPIFilter = null;
-  
+// Clear KPI filter (removes only the specified KPI filter, keeps other filters)
+function clearKPIFilter(filterToClear) {
+  // If no specific filter provided, clear all (backward compatibility)
+  if (!filterToClear && activeKPIFilters.length > 0) {
+    filterToClear = activeKPIFilters[0];
+  }
+
+  // Remove from active filters array
+  const index = activeKPIFilters.indexOf(filterToClear);
+  if (index > -1) {
+    activeKPIFilters.splice(index, 1);
+  }
+
   switch (filterToClear) {
     case 'today':
     case 'week':
@@ -1588,9 +1617,9 @@ function clearKPIFilter() {
       break;
     case 'featured':
       // Remove Destacada from multi-select
-      const index = multiSelectState.category.indexOf('Destacada');
-      if (index > -1) {
-        multiSelectState.category.splice(index, 1);
+      const catIndex = multiSelectState.category.indexOf('Destacada');
+      if (catIndex > -1) {
+        multiSelectState.category.splice(catIndex, 1);
         const categoryDropdown = document.getElementById('categoryDropdown');
         const checkbox = categoryDropdown.querySelector('input[value="Destacada"]');
         if (checkbox) checkbox.checked = false;
@@ -1608,36 +1637,39 @@ function clearKPIFilter() {
       document.getElementById('favoritesOnly').checked = false;
       break;
   }
-  
+
   updateKPICardStyles();
   applyFilters();
 }
 
 // Sync KPI state with current filters (call when filters change manually)
 function syncKPIStateWithFilters() {
-  // Check which KPI filter matches current filters
-  let matchedKPI = null;
-  
+  // Build array of matched KPIs based on current filters
+  const matchedKPIs = [];
+
   // Check for 'today' filter
   if (currentFilters.date === 'today') {
-    matchedKPI = 'today';
+    matchedKPIs.push('today');
   }
   // Check for 'week' filter
   else if (currentFilters.date === 'week') {
-    matchedKPI = 'week';
+    matchedKPIs.push('week');
   }
-  // Check for 'favorites' filter
-  else if (currentFilters.favoritesOnly) {
-    matchedKPI = 'favorites';
+
+  // Check for 'favorites' filter (can combine with date)
+  if (currentFilters.favoritesOnly) {
+    matchedKPIs.push('favorites');
   }
-  // Check for 'near' filter (distance sort)
-  else if (currentFilters.sort === 'distance' && userLocation) {
-    matchedKPI = 'near';
+
+  // Check for 'near' filter (can combine with others)
+  if (currentFilters.sort === 'distance' && userLocation) {
+    matchedKPIs.push('near');
   }
-  
-  // Update active KPI if changed
-  if (activeKPIFilter !== matchedKPI) {
-    activeKPIFilter = matchedKPI;
+
+  // Update active KPIs if changed
+  const hasChanged = JSON.stringify(activeKPIFilters.sort()) !== JSON.stringify(matchedKPIs.sort());
+  if (hasChanged) {
+    activeKPIFilters = matchedKPIs;
     updateKPICardStyles();
   }
 }
@@ -1949,32 +1981,35 @@ function updateKPIs() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Determine base activities based on active filters
+  // Determine base activities based on active filters (cumulative)
   let baseActivities = allActivities;
 
-  // If Near filter is active, base everything on near activities
+  // Apply Near filter if active
   if (currentFilters.nearOnly && userLocation) {
-    baseActivities = allActivities.filter(a => a.distance && a.distance < 2);
+    baseActivities = baseActivities.filter(a => a.distance && a.distance < 2);
   }
-  // If Favorites filter is active, base everything on favorite activities
-  else if (currentFilters.favoritesOnly) {
+
+  // Apply Favorites filter if active
+  if (currentFilters.favoritesOnly) {
     const validFavs = getValidFavorites();
-    baseActivities = allActivities.filter(a => validFavs.includes(a.id));
+    baseActivities = baseActivities.filter(a => validFavs.includes(a.id));
   }
-  // If Today filter is active, base everything on today's activities
-  else if (currentFilters.date === 'today') {
-    baseActivities = allActivities.filter(a => {
+
+  // Apply Today filter if active
+  if (currentFilters.date === 'today') {
+    baseActivities = baseActivities.filter(a => {
       if (!a.date) return false;
       const d = new Date(a.date);
       d.setHours(0, 0, 0, 0);
       return d.getTime() === today.getTime();
     });
   }
-  // If Week filter is active, base everything on this week's activities
-  else if (currentFilters.date === 'week') {
+
+  // Apply Week filter if active
+  if (currentFilters.date === 'week') {
     const weekFromNow = new Date(today);
     weekFromNow.setDate(weekFromNow.getDate() + 7);
-    baseActivities = allActivities.filter(a => {
+    baseActivities = baseActivities.filter(a => {
       if (!a.date) return false;
       const d = new Date(a.date);
       d.setHours(0, 0, 0, 0);
@@ -2124,8 +2159,15 @@ function removeFilterChip(type, value) {
       currentFilters.date = 'all';
       document.getElementById('dateSelect').value = 'all';
       // Also clear KPI if it was set
-      if (activeKPIFilter === 'today' || activeKPIFilter === 'week') {
-        activeKPIFilter = null;
+      const todayIndex = activeKPIFilters.indexOf('today');
+      const weekIndex = activeKPIFilters.indexOf('week');
+      if (todayIndex > -1) {
+        activeKPIFilters.splice(todayIndex, 1);
+      }
+      if (weekIndex > -1) {
+        activeKPIFilters.splice(weekIndex, 1);
+      }
+      if (todayIndex > -1 || weekIndex > -1) {
         updateKPICardStyles();
       }
       break;
@@ -2172,8 +2214,9 @@ function removeFilterChip(type, value) {
     case 'favorites':
       currentFilters.favoritesOnly = false;
       document.getElementById('favoritesOnly').checked = false;
-      if (activeKPIFilter === 'favorites') {
-        activeKPIFilter = null;
+      const favIndex = activeKPIFilters.indexOf('favorites');
+      if (favIndex > -1) {
+        activeKPIFilters.splice(favIndex, 1);
         updateKPICardStyles();
       }
       break;
@@ -2182,8 +2225,9 @@ function removeFilterChip(type, value) {
       currentFilters.nearOnly = false;
       document.getElementById('sortSelect').value = 'recent';
       document.getElementById('locationInput').classList.add('hidden');
-      if (activeKPIFilter === 'near') {
-        activeKPIFilter = null;
+      const nearIndex = activeKPIFilters.indexOf('near');
+      if (nearIndex > -1) {
+        activeKPIFilters.splice(nearIndex, 1);
         updateKPICardStyles();
       }
       break;
@@ -2868,8 +2912,8 @@ function nextPage() {
 
 // Clear filters
 function clearFilters() {
-  // Reset KPI filter
-  activeKPIFilter = null;
+  // Reset KPI filters
+  activeKPIFilters = [];
   updateKPICardStyles();
   
   // Reset multi-select state
