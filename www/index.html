@@ -190,10 +190,22 @@ body { min-height: max(884px, 100dvh); }
   display: none;
 }
 
-/* Active filter chip styles */
+/* Active filter chip styles - Same size as KPI buttons */
 .filter-chip {
   flex-shrink: 0;
   animation: chipAppear 0.2s ease;
+  padding: 0.25rem 0.75rem; /* py-1 px-3 for better proportions */
+  border-radius: 9999px; /* rounded-full like the example image */
+  font-size: 0.875rem; /* text-sm equivalent */
+  line-height: 1.25rem;
+  min-height: 2rem; /* Compact height matching KPI style */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+.filter-chip .material-symbols-outlined {
+  font-size: 1rem; /* text-sm */
 }
 @keyframes chipAppear {
   from {
@@ -689,9 +701,9 @@ body { min-height: max(884px, 100dvh); }
   <div id="activeFiltersBar" class="hidden px-4 py-2 bg-surface-container-low border-b border-outline-variant">
     <div class="flex items-center gap-2">
       <!-- Clear All Button (Sticky) -->
-      <button onclick="clearFilters()" class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-error-container text-on-error-container rounded-full text-label-md font-medium hover:bg-error hover:text-on-error transition-colors">
-        <span class="material-symbols-outlined text-sm">close</span>
-        Limpiar
+      <button onclick="clearFilters()" class="filter-chip flex-shrink-0 bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-colors">
+        <span class="material-symbols-outlined">close</span>
+        <span class="text-label-md">Limpiar</span>
       </button>
       
       <!-- Active Filter Chips (Scrollable) -->
@@ -2034,9 +2046,9 @@ function updateActiveFilterChips() {
   // Render chips
   chipsContainer.innerHTML = chips.map(chip => `
     <button onclick="removeFilterChip('${chip.type}', '${chip.value}')" 
-            class="filter-chip flex items-center gap-1 px-3 py-1.5 bg-primary-container text-on-primary-container rounded-full text-label-md hover:bg-primary hover:text-on-primary transition-colors">
-      <span>${chip.label}</span>
-      <span class="material-symbols-outlined text-sm">close</span>
+            class="filter-chip bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors">
+      <span class="text-label-md">${chip.label}</span>
+      <span class="material-symbols-outlined">close</span>
     </button>
   `).join('');
 }
