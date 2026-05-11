@@ -1283,8 +1283,8 @@ function showDetail(id) {
           ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
         </div>
         <div class="flex items-start gap-2">
-          ${hasPrev ? `<button onclick="showPreviousDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-center items-center text-gray-500"><span class="material-symbols-outlined">chevron_left</span></button>` : `<button disabled style="visibility: hidden;" class="p-2 rounded-full"><span class="material-symbols-outlined">chevron_left</span></button>`}
-          ${hasNext ? `<button onclick="showNextDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-center items-center text-gray-500"><span class="material-symbols-outlined">chevron_right</span></button>` : `<button disabled style="visibility: hidden;" class="p-2 rounded-full"><span class="material-symbols-outlined">chevron_right</span></button>`}
+          ${hasPrev ? `<button onclick="showPreviousDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-center items-start text-gray-500"><span class="material-symbols-outlined">chevron_left</span></button>` : `<button disabled style="visibility: hidden;" class="p-2 rounded-full"><span class="material-symbols-outlined">chevron_left</span></button>`}
+          ${hasNext ? `<button onclick="showNextDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-center items-start text-gray-500"><span class="material-symbols-outlined">chevron_right</span></button>` : `<button disabled style="visibility: hidden;" class="p-2 rounded-full"><span class="material-symbols-outlined">chevron_right</span></button>`}
         </div>
       </div>
       
