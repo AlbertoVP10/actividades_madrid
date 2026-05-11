@@ -128,6 +128,38 @@ body { min-height: 100dvh; } /* Mobile-friendly full viewport height */
   100% { transform: rotate(360deg); }
 }
 
+/* Multi-select dropdown styles */
+.multi-select-container .hidden {
+  display: none;
+}
+#categoryDropdown,
+#districtDropdown,
+#audienceDropdown,
+#timeDropdown {
+  scrollbar-width: thin;
+  scrollbar-color: #F08080 #f3f3f3;
+}
+#categoryDropdown::-webkit-scrollbar,
+#districtDropdown::-webkit-scrollbar,
+#audienceDropdown::-webkit-scrollbar,
+#timeDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+#categoryDropdown::-webkit-scrollbar-track,
+#districtDropdown::-webkit-scrollbar-track,
+#audienceDropdown::-webkit-scrollbar-track,
+#timeDropdown::-webkit-scrollbar-track {
+  background: #f3f3f3;
+  border-radius: 3px;
+}
+#categoryDropdown::-webkit-scrollbar-thumb,
+#districtDropdown::-webkit-scrollbar-thumb,
+#audienceDropdown::-webkit-scrollbar-thumb,
+#timeDropdown::-webkit-scrollbar-thumb {
+  background: #F08080;
+  border-radius: 3px;
+}
+
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -226,30 +258,62 @@ body { min-height: 100dvh; } /* Mobile-friendly full viewport height */
   <!-- Categories -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">🎭 Categoría</label>
-    <select id="categorySelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todas</option>
-    </select>
+    <div class="multi-select-container relative" id="categoryMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('category')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="categorySelectLabel">Todas</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="categoryDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <!-- Options populated by JS -->
+      </div>
+    </div>
   </div>
   
   <!-- Districts -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">📍 Distrito</label>
-    <select id="districtSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todos</option>
-    </select>
+    <div class="multi-select-container relative" id="districtMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('district')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="districtSelectLabel">Todos</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="districtDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <!-- Options populated by JS -->
+      </div>
+    </div>
   </div>
   
   <!-- Audience / Público -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">👥 Público</label>
-    <select id="audienceSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todos</option>
-      <option value="Niños">Niños</option>
-      <option value="Familias">Familias</option>
-      <option value="Adultos">Adultos</option>
-      <option value="Mayores">Mayores</option>
-      <option value="Jóvenes">Jóvenes</option>
-    </select>
+    <div class="multi-select-container relative" id="audienceMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('audience')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="audienceSelectLabel">Todos</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="audienceDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Niños" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Niños</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Familias" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Familias</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Adultos" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Adultos</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Mayores" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Mayores</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="Jóvenes" onchange="updateMultiSelect('audience')" class="accent-primary">
+          <span>Jóvenes</span>
+        </label>
+      </div>
+    </div>
   </div>
   
   <!-- Date Filter -->
@@ -267,12 +331,26 @@ body { min-height: 100dvh; } /* Mobile-friendly full viewport height */
   <!-- Time / Horario -->
   <div>
     <label class="text-label-sm text-on-surface-variant mb-2 block">🕐 Horario</label>
-    <select id="timeSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-      <option value="all">Todo el día</option>
-      <option value="morning">Mañana (6:00 - 12:00)</option>
-      <option value="afternoon">Tarde (12:00 - 18:00)</option>
-      <option value="evening">Noche (18:00 - 24:00)</option>
-    </select>
+    <div class="multi-select-container relative" id="timeMultiSelect">
+      <button type="button" onclick="toggleMultiSelect('time')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+        <span id="timeSelectLabel">Todo el día</span>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </button>
+      <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="morning" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Mañana (6:00 - 12:00)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="afternoon" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Tarde (12:00 - 18:00)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
+          <input type="checkbox" value="evening" onchange="updateMultiSelect('time')" class="accent-primary">
+          <span>Noche (18:00 - 24:00)</span>
+        </label>
+      </div>
+    </div>
   </div>
   
   <!-- Free and Favorites in parallel -->
@@ -618,29 +696,97 @@ function extractDistrict(districtUrl) {
   return districtMap[name] || name;
 }
 
+// Multi-select state
+const multiSelectState = {
+  category: [],
+  district: [],
+  audience: [],
+  time: []
+};
+
+// Toggle multi-select dropdown
+function toggleMultiSelect(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const isHidden = dropdown.classList.contains('hidden');
+  
+  // Close all other dropdowns
+  ['category', 'district', 'audience', 'time'].forEach(t => {
+    document.getElementById(t + 'Dropdown').classList.add('hidden');
+  });
+  
+  // Toggle current
+  if (isHidden) {
+    dropdown.classList.remove('hidden');
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select-container')) {
+    ['category', 'district', 'audience', 'time'].forEach(type => {
+      document.getElementById(type + 'Dropdown').classList.add('hidden');
+    });
+  }
+});
+
+// Update multi-select state and label
+function updateMultiSelect(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+  const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+  
+  multiSelectState[type] = selected;
+  
+  // Update label
+  const label = document.getElementById(type + 'SelectLabel');
+  const allOptions = Array.from(checkboxes).map(cb => cb.value);
+  
+  if (selected.length === 0 || selected.length === allOptions.length) {
+    // Show default label
+    const defaults = {
+      category: 'Todas',
+      district: 'Todos',
+      audience: 'Todos',
+      time: 'Todo el día'
+    };
+    label.textContent = defaults[type];
+  } else if (selected.length === 1) {
+    label.textContent = selected[0];
+  } else {
+    label.textContent = `${selected.length} seleccionados`;
+  }
+  
+  applyFilters();
+}
+
 // Populate filter options
 function populateFilters() {
   // Categories
   const categories = [...new Set(allActivities.map(a => a.category))].sort();
-  const categorySelect = document.getElementById('categorySelect');
-  // Keep the "Todas" option and add categories
+  const categoryDropdown = document.getElementById('categoryDropdown');
   categories.forEach(cat => {
-    const option = document.createElement('option');
-    option.value = cat;
-    option.textContent = cat;
-    categorySelect.appendChild(option);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" value="${cat}" onchange="updateMultiSelect('category')" class="accent-primary">
+      <span>${cat}</span>
+    `;
+    categoryDropdown.appendChild(label);
   });
   
   // Districts
   const districts = [...new Set(allActivities.map(a => a.district))]
     .filter(d => d && d !== 'Desconocido')
     .sort();
-  const districtSelect = document.getElementById('districtSelect');
+  const districtDropdown = document.getElementById('districtDropdown');
   districts.forEach(d => {
-    const option = document.createElement('option');
-    option.value = d;
-    option.textContent = d;
-    districtSelect.appendChild(option);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" value="${d}" onchange="updateMultiSelect('district')" class="accent-primary">
+      <span>${d}</span>
+    `;
+    districtDropdown.appendChild(label);
   });
 }
 
@@ -949,11 +1095,12 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // Apply filters
 function applyFilters() {
   currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
-  currentFilters.category = document.getElementById('categorySelect').value;
-  currentFilters.district = document.getElementById('districtSelect').value;
-  currentFilters.audience = document.getElementById('audienceSelect').value;
+  // Multi-select filters - use multiSelectState
+  currentFilters.category = multiSelectState.category;
+  currentFilters.district = multiSelectState.district;
+  currentFilters.audience = multiSelectState.audience;
+  currentFilters.time = multiSelectState.time;
   currentFilters.date = document.getElementById('dateSelect').value;
-  currentFilters.time = document.getElementById('timeSelect').value;
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
   currentFilters.sort = document.getElementById('sortSelect').value;
@@ -966,26 +1113,36 @@ function applyFilters() {
     locationInput.classList.add('hidden');
   }
 
+  // Get all available options for each multi-select to check if all/none selected
+  const allCategories = [...new Set(allActivities.map(a => a.category))];
+  const allDistricts = [...new Set(allActivities.map(a => a.district))].filter(d => d && d !== 'Desconocido');
+  const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
+  const allTimes = ['morning', 'afternoon', 'evening'];
+
   filteredActivities = allActivities.filter(activity => {
-    // Category filter
-    if (currentFilters.category !== 'all') {
-      if (currentFilters.category === 'free') {
-        if (!activity.free) return false;
-      } else {
-        if (activity.category !== currentFilters.category) return false;
-      }
+    // Category filter - multi-select
+    // Skip if no selection or all selected
+    const categorySelected = currentFilters.category.length > 0 && currentFilters.category.length < allCategories.length;
+    if (categorySelected) {
+      if (!currentFilters.category.includes(activity.category)) return false;
     }
 
-    // District filter
-    if (currentFilters.district !== 'all' && activity.district !== currentFilters.district) {
-      return false;
+    // District filter - multi-select
+    const districtSelected = currentFilters.district.length > 0 && currentFilters.district.length < allDistricts.length;
+    if (districtSelected) {
+      if (!currentFilters.district.includes(activity.district)) return false;
     }
 
-    // Audience filter
-    if (currentFilters.audience !== 'all' && activity.audience) {
-      if (!activity.audience.toLowerCase().includes(currentFilters.audience.toLowerCase())) {
-        return false;
-      }
+    // Audience filter - multi-select
+    const audienceSelected = currentFilters.audience.length > 0 && currentFilters.audience.length < allAudiences.length;
+    if (audienceSelected && activity.audience) {
+      const activityAudiences = activity.audience.split(',').map(a => a.trim());
+      const hasMatch = activityAudiences.some(a => 
+        currentFilters.audience.some(selected => 
+          a.toLowerCase().includes(selected.toLowerCase())
+        )
+      );
+      if (!hasMatch) return false;
     }
 
     // Date filter
@@ -1012,13 +1169,16 @@ function applyFilters() {
       }
     }
 
-    // Time filter
-    if (currentFilters.time !== 'all' && activity.time) {
+    // Time filter - multi-select
+    const timeSelected = currentFilters.time.length > 0 && currentFilters.time.length < allTimes.length;
+    if (timeSelected && activity.time) {
       const hour = extractHour(activity.time);
       if (hour !== null) {
-        if (currentFilters.time === 'morning' && (hour < 6 || hour >= 12)) return false;
-        if (currentFilters.time === 'afternoon' && (hour < 12 || hour >= 18)) return false;
-        if (currentFilters.time === 'evening' && (hour < 18 || hour >= 24)) return false;
+        let matchesTime = false;
+        if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
+        if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
+        if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+        if (!matchesTime) return false;
       }
     }
 
