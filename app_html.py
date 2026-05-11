@@ -53,7 +53,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Leer el archivo HTML
-html_file = os.path.join(os.path.dirname(__file__), 'index.html')
+html_file = os.path.join(os.path.dirname(__file__), 'www/index.html')
 
 if os.path.exists(html_file):
     with open(html_file, 'r', encoding='utf-8') as f:
