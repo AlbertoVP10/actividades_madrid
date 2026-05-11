@@ -825,6 +825,7 @@ let currentFilters = {
   freeOnly: false,
   favoritesOnly: false,
   nearOnly: false,
+  location: null,
   sort: 'recent'
 };
 
@@ -1854,6 +1855,13 @@ function applyFilters() {
       if (!searchIn.includes(currentFilters.search)) return false;
     }
 
+    // Location filter (from map popup)
+    if (currentFilters.location) {
+      if (!activity.location || !activity.location.toLowerCase().includes(currentFilters.location.toLowerCase())) {
+        return false;
+      }
+    }
+
     return true;
   });
   
@@ -2048,7 +2056,12 @@ function updateActiveFilterChips() {
   if (currentFilters.search) {
     chips.push({ label: `Buscar: "${currentFilters.search}"`, type: 'search', value: currentFilters.search });
   }
-  
+
+  // Location filter (from map)
+  if (currentFilters.location) {
+    chips.push({ label: `📍 ${currentFilters.location}`, type: 'location', value: currentFilters.location });
+  }
+
   // Show/hide the filters bar
   if (chips.length > 0) {
     filtersBar.classList.remove('hidden');
@@ -2140,8 +2153,11 @@ function removeFilterChip(type, value) {
       currentFilters.search = '';
       document.getElementById('searchInput').value = '';
       break;
+    case 'location':
+      currentFilters.location = null;
+      break;
   }
-  
+
   applyFilters();
 }
 
@@ -2558,59 +2574,16 @@ function showView(view) {
 
 // Filter by location and switch to list view
 function filterByLocationAndShowList(locationName) {
-  // Save location filter state
-  currentFilters.search = locationName.toLowerCase();
-  currentFilters.locationFilter = locationName; // Special flag for location filter
-  
-  // Filter activities by location directly
-  filteredActivities = allActivities.filter(activity => {
-    return activity.location && activity.location.toLowerCase().includes(locationName.toLowerCase());
-  });
-  
-  // Sort by date (recent first)
-  filteredActivities.sort((a, b) => {
-    if (!a.date) return 1;
-    if (!b.date) return -1;
-    return a.date - b.date;
-  });
+  // Set location filter (preserving other existing filters)
+  currentFilters.location = locationName;
   
   // Close any open popups first
   if (map) {
     map.closePopup();
   }
   
-  // Switch to list view manually (without calling applyFilters)
-  currentView = 'list';
-  document.getElementById('listView').classList.remove('hidden');
-  document.getElementById('mapView').classList.add('hidden');
-  document.getElementById('statsView').classList.add('hidden');
-  document.getElementById('pagination').classList.remove('hidden');
-  
-  // Show tab nav, kpi section and results bar
-  const tabNav = document.getElementById('tabNav');
-  const kpiSection = document.getElementById('kpiSection');
-  const resultsBar = document.getElementById('resultsBar');
-  if (tabNav) tabNav.classList.remove('hidden');
-  if (kpiSection) kpiSection.classList.remove('hidden');
-  if (resultsBar) resultsBar.classList.remove('hidden');
-  document.body.classList.remove('overflow-hidden');
-  
-  // Update bottom tab visuals
-  document.querySelectorAll('.bottom-tab').forEach(btn => {
-    if (btn.dataset.tab === 'list') {
-      btn.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
-      btn.classList.remove('text-on-surface-variant');
-    } else {
-      btn.classList.remove('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
-      btn.classList.add('text-on-surface-variant');
-    }
-  });
-  
-  // Update UI with filtered results
-  currentPage = 0;
-  document.getElementById('resultsCount').textContent = `${filteredActivities.length} actividades en ${locationName}`;
-  renderActivities();
-  updateKPIs();
+  // Use applyFilters to respect all existing filters
+  applyFilters();
 }
 
 // Initialize map
@@ -2889,6 +2862,7 @@ function clearFilters() {
     freeOnly: false,
     favoritesOnly: false,
     nearOnly: false,
+    location: null,
     sort: 'recent'
   };
 
