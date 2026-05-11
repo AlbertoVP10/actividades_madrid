@@ -1375,6 +1375,35 @@ function clearKPIFilter() {
   applyFilters();
 }
 
+// Sync KPI state with current filters (call when filters change manually)
+function syncKPIStateWithFilters() {
+  // Check which KPI filter matches current filters
+  let matchedKPI = null;
+  
+  // Check for 'today' filter
+  if (currentFilters.date === 'today') {
+    matchedKPI = 'today';
+  }
+  // Check for 'week' filter
+  else if (currentFilters.date === 'week') {
+    matchedKPI = 'week';
+  }
+  // Check for 'favorites' filter
+  else if (currentFilters.favoritesOnly) {
+    matchedKPI = 'favorites';
+  }
+  // Check for 'near' filter (distance sort)
+  else if (currentFilters.sort === 'distance' && userLocation) {
+    matchedKPI = 'near';
+  }
+  
+  // Update active KPI if changed
+  if (activeKPIFilter !== matchedKPI) {
+    activeKPIFilter = matchedKPI;
+    updateKPICardStyles();
+  }
+}
+
 // Extract hour from time string
 function extractHour(timeStr) {
   if (!timeStr) return null;
@@ -1619,6 +1648,9 @@ function applyFilters() {
   
   // Sync tabs with current filters
   syncTabsWithFilters();
+  
+  // Sync KPI state with current filters
+  syncKPIStateWithFilters();
   
   // Update map markers if in map view
   if (currentView === 'map' && map) {
