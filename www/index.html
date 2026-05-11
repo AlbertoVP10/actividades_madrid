@@ -2024,12 +2024,34 @@ function nextPage() {
 
 // Clear filters
 function clearFilters() {
+  // Reset multi-select state
+  multiSelectState.category = [];
+  multiSelectState.district = [];
+  multiSelectState.audience = [];
+  multiSelectState.time = [];
+
+  // Uncheck all multi-select checkboxes
+  ['category', 'district', 'audience', 'time'].forEach(type => {
+    const dropdown = document.getElementById(type + 'Dropdown');
+    const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
+    
+    // Reset labels
+    const defaults = {
+      category: 'Todas',
+      district: 'Todos',
+      audience: 'Todos',
+      time: 'Todo el día'
+    };
+    document.getElementById(type + 'SelectLabel').textContent = defaults[type];
+  });
+
   currentFilters = {
-    category: 'all',
-    district: 'all',
-    audience: 'all',
+    category: [],
+    district: [],
+    audience: [],
     date: 'all',
-    time: 'all',
+    time: [],
     search: '',
     freeOnly: false,
     favoritesOnly: false,
@@ -2037,11 +2059,7 @@ function clearFilters() {
   };
 
   document.getElementById('searchInput').value = '';
-  document.getElementById('categorySelect').value = 'all';
-  document.getElementById('districtSelect').value = 'all';
-  document.getElementById('audienceSelect').value = 'all';
   document.getElementById('dateSelect').value = 'all';
-  document.getElementById('timeSelect').value = 'all';
   document.getElementById('sortSelect').value = 'recent';
   document.getElementById('freeOnly').checked = false;
   document.getElementById('favoritesOnly').checked = false;
