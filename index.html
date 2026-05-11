@@ -376,9 +376,14 @@ body { min-height: max(884px, 100dvh); }
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <div id="resultsBar" class="flex justify-between items-center">
+  <div id="resultsBar" class="flex justify-between items-center gap-4">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
-    <p id="locationInfo" class="text-label-sm text-on-surface-variant hidden"></p>
+    <p id="locationInfo" class="flex items-center gap-1 text-label-sm text-on-surface-variant hidden"></p>
+    <div id="smallPagination" class="flex items-center gap-2 text-label-sm text-on-surface-variant">
+      <button onclick="prevPage()" id="smallPrevBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&lt;</button>
+      <span id="smallPageInfo" class="text-label-sm">1 / 1</span>
+      <button onclick="nextPage()" id="smallNextBtn" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface disabled:opacity-50" disabled>&gt;</button>
+    </div>
   </div>
   
   <!-- List View -->
@@ -435,9 +440,9 @@ body { min-height: max(884px, 100dvh); }
 <!-- Activity Detail Modal -->
 <div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
   <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
-    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
-      <h2 id="detailTitle" class="font-title-lg text-title-lg pr-4"></h2>
-      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full">
+    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
+      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
+      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-self-end">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -478,6 +483,7 @@ let userLocation = null;
 let map = null;
 let markers = [];
 let currentView = 'list';
+let currentDetailId = null;
 let currentFilters = {
   category: 'all',
   district: 'all',
@@ -1051,7 +1057,7 @@ function applyFilters() {
       }
     });
     
-    document.getElementById('locationInfo').textContent = `📍 Distancias desde tu ubicación`;
+    document.getElementById('locationInfo').innerHTML = `<span class="material-symbols-outlined text-sm">straighten</span> km`;
     document.getElementById('locationInfo').classList.remove('hidden');
   }
   
@@ -1219,9 +1225,15 @@ function renderActivities() {
   
   // Update pagination
   const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
-  document.getElementById('pageInfo').textContent = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
-  document.getElementById('prevBtn').disabled = currentPage === 0;
-  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  const pageInfoText = `${currentPage + 1} / ${Math.max(1, totalPages)}`;
+  document.getElementById('pageInfo').textContent = pageInfoText;
+  document.getElementById('smallPageInfo').textContent = pageInfoText;
+  const prevDisabled = currentPage === 0;
+  const nextDisabled = currentPage >= totalPages - 1;
+  document.getElementById('prevBtn').disabled = prevDisabled;
+  document.getElementById('nextBtn').disabled = nextDisabled;
+  document.getElementById('smallPrevBtn').disabled = prevDisabled;
+  document.getElementById('smallNextBtn').disabled = nextDisabled;
 }
 
 // Toggle favorite
@@ -1251,6 +1263,8 @@ function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
   if (!activity) return;
   
+  currentDetailId = id;
+  
   // Construir string de fecha para el detalle (rango si aplica - comparando solo día)
   let dateStr = 'Fecha no disponible';
   let dateLabel = 'Fecha';
@@ -1266,12 +1280,23 @@ function showDetail(id) {
   }
   const isFav = favorites.includes(id);
   
+  const currentIndex = filteredActivities.findIndex(a => a.id === id);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < filteredActivities.length - 1;
+
   document.getElementById('detailTitle').textContent = activity.title;
+  
   document.getElementById('detailContent').innerHTML = `
     <div class="space-y-4">
-      <div class="flex items-center gap-2">
-        <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
-        ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-start gap-2">
+          <span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-lg font-medium rounded-full">${activity.category}</span>
+          ${activity.free ? '<span class="px-3 py-1 text-label-lg font-medium rounded-full" style="background: linear-gradient(135deg, #F8AD9D 0%, #FBC4AB 100%); color: #5a2525;">Gratis</span>' : ''}
+        </div>
+        <div class="flex items-start gap-2">
+          ${hasPrev ? `<button onclick="showPreviousDetail()" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&lt;</button>` : `<button disabled style="visibility: hidden;" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&lt;</button>`}
+          ${hasNext ? `<button onclick="showNextDetail()" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&gt;</button>` : `<button disabled style="visibility: hidden;" class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface text-label-lg font-medium">&gt;</button>`}
+        </div>
       </div>
       
       <p class="text-body-lg text-on-surface-variant">${activity.description || 'Sin descripción disponible.'}</p>
@@ -1385,6 +1410,39 @@ function showDetail(id) {
 // Close detail modal
 function closeDetail() {
   document.getElementById('detailModal').classList.add('hidden');
+  currentDetailId = null;
+}
+
+// Navigate to previous activity
+function showPreviousDetail() {
+  if (!currentDetailId) return;
+  const currentIndex = filteredActivities.findIndex(a => a.id === currentDetailId);
+  if (currentIndex > 0) {
+    const newIndex = currentIndex - 1;
+    const newActivity = filteredActivities[newIndex];
+    const newPage = Math.floor(newIndex / itemsPerPage);
+    if (newPage !== currentPage) {
+      currentPage = newPage;
+      renderActivities();
+    }
+    showDetail(newActivity.id);
+  }
+}
+
+// Navigate to next activity
+function showNextDetail() {
+  if (!currentDetailId) return;
+  const currentIndex = filteredActivities.findIndex(a => a.id === currentDetailId);
+  if (currentIndex < filteredActivities.length - 1) {
+    const newIndex = currentIndex + 1;
+    const newActivity = filteredActivities[newIndex];
+    const newPage = Math.floor(newIndex / itemsPerPage);
+    if (newPage !== currentPage) {
+      currentPage = newPage;
+      renderActivities();
+    }
+    showDetail(newActivity.id);
+  }
 }
 
 // Set main tab
@@ -1404,30 +1462,8 @@ function setMainTab(tab) {
   if (tab === 'nearby') {
     // Check if we have user location
     if (!userLocation) {
-      // Mark 'nearby' visually but store that we're waiting for location
-      document.querySelectorAll('.main-tab').forEach(btn => {
-        if (btn.dataset.tab === 'nearby') {
-          btn.classList.add('bg-primary-container', 'text-on-primary-container');
-          btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
-        } else {
-          btn.classList.remove('bg-primary-container', 'text-on-primary-container');
-          btn.classList.add('bg-surface-container-high', 'text-on-surface-variant');
-        }
-      });
-      // Store that we came from 'nearby' tab
-      document.getElementById('filtersPanel').dataset.openedFromTab = 'nearby';
-      // Open filters panel to ask for location
-      const panel = document.getElementById('filtersPanel');
-      panel.classList.remove('hidden');
-      // Focus on the sort dropdown and select distance
-      document.getElementById('sortSelect').value = 'distance';
-      document.getElementById('locationInput').classList.remove('hidden');
-      // Show message to user
-      const statusEl = document.getElementById('locationStatus');
-      if (statusEl) {
-        statusEl.textContent = 'Introduce tu dirección para ordenar por distancia';
-        statusEl.className = 'text-label-sm mt-1 text-primary';
-      }
+      // Open the same location modal used by the "Añadir" button
+      openLocationModal();
       return; // Don't apply filters yet, wait for location
     }
     // If we have location, apply distance sort
