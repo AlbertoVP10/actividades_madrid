@@ -694,24 +694,25 @@ body { min-height: max(884px, 100dvh); }
   <p class="text-on-surface-variant text-body-md">Cargando actividades...</p>
 </div>
 
+<!-- Active Filters Bar (Outside main content to avoid spacing when hidden) -->
+<div id="activeFiltersBar" class="hidden px-4 py-2 bg-surface-container-low border-b border-outline-variant">
+  <div class="flex items-center gap-2">
+    <!-- Clear All Button (Sticky) -->
+    <button onclick="clearFilters()" class="filter-chip flex-shrink-0 bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-colors">
+      <span class="material-symbols-outlined">close</span>
+      <span class="text-label-md">Limpiar</span>
+    </button>
+    
+    <!-- Active Filter Chips (Scrollable) -->
+    <div id="activeFilterChips" class="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      <!-- Chips will be inserted here dynamically -->
+    </div>
+  </div>
+</div>
+
 <!-- Content Canvas -->
 <main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
   <!-- Results count -->
-  <!-- Active Filters Bar -->
-  <div id="activeFiltersBar" class="hidden px-4 py-2 bg-surface-container-low border-b border-outline-variant">
-    <div class="flex items-center gap-2">
-      <!-- Clear All Button (Sticky) -->
-      <button onclick="clearFilters()" class="filter-chip flex-shrink-0 bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-colors">
-        <span class="material-symbols-outlined">close</span>
-        <span class="text-label-md">Limpiar</span>
-      </button>
-      
-      <!-- Active Filter Chips (Scrollable) -->
-      <div id="activeFilterChips" class="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-        <!-- Chips will be inserted here dynamically -->
-      </div>
-    </div>
-  </div>
   
   <div id="resultsBar" class="flex justify-between items-center gap-4 px-4 py-2">
     <p id="resultsCount" class="text-body-md text-on-surface-variant">0 actividades</p>
