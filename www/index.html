@@ -1950,9 +1950,6 @@ function applyFilters() {
   if (currentView === 'map' && map) {
     updateMapMarkers();
   }
-
-  // Always adjust map size after filters change
-  adjustMapSize();
 }
 
 // Adjust map size based on filter chips visibility
@@ -2232,12 +2229,15 @@ function updateActiveFilterChips() {
   
   // Render chips
   chipsContainer.innerHTML = chips.map(chip => `
-    <button onclick="removeFilterChip('${chip.type}', '${chip.value}')" 
+    <button onclick="removeFilterChip('${chip.type}', '${chip.value}')"
             class="filter-chip bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors">
       <span class="text-label-md">${chip.label}</span>
       <span class="material-symbols-outlined">close</span>
     </button>
   `).join('');
+
+  // Adjust map size after updating filter chips visibility
+  adjustMapSize();
 }
 
 // Remove individual filter from chip
