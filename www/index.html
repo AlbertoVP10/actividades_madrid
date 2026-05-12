@@ -2656,7 +2656,6 @@ function setBottomTab(tab) {
   
   if (tab === 'list') {
     showView('list');
-    document.getElementById('favoritesOnly').checked = false;
     applyFilters();
   } else if (tab === 'map') {
     // Clear location filter when going back to map, keep other filters
@@ -2668,7 +2667,6 @@ function setBottomTab(tab) {
     showView('map');
   } else if (tab === 'favorites') {
     showView('list');
-    document.getElementById('favoritesOnly').checked = true;
     applyFilters();
   } else if (tab === 'profile') {
     showView('stats');
