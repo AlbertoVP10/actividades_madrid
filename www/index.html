@@ -2665,6 +2665,8 @@ function setBottomTab(tab) {
       applyFilters();
     }
     showView('map');
+    // Update filter chips visibility for map view
+    updateActiveFilterChips();
   } else if (tab === 'favorites') {
     showView('list');
     applyFilters();
@@ -2687,28 +2689,33 @@ function showView(view) {
   const tabNav = document.getElementById('tabNav');
   const kpiSection = document.getElementById('kpiSection');
   const resultsBar = document.getElementById('resultsBar');
-  const filtersBar = document.getElementById('activeFiltersBar');
 
   if (view === 'map') {
-    // Hide elements for full-screen map
+    // Hide elements for map view (keep filters bar visible)
     if (tabNav) tabNav.classList.add('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
     if (resultsBar) resultsBar.classList.add('hidden');
-    if (filtersBar) filtersBar.classList.add('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.body.classList.remove('overflow-hidden');
 
-    // Adjust map container to start below header
+    // Adjust map container to leave room for header and filters bar
     const mapContainer = document.getElementById('mapView');
     if (mapContainer) {
-      mapContainer.style.top = '64px'; // Height of header
+      mapContainer.style.top = '120px'; // Header + space for filters
+      mapContainer.style.height = 'calc(100vh - 200px)'; // Reduced height
     }
   } else {
     // Show elements for list/stats view
     if (tabNav) tabNav.classList.remove('hidden');
     if (kpiSection) kpiSection.classList.remove('hidden');
     if (resultsBar) resultsBar.classList.remove('hidden');
-    // Filters bar visibility is handled by updateActiveFilterChips based on active filters
     document.body.classList.remove('overflow-hidden');
+
+    // Reset map container styles
+    const mapContainer = document.getElementById('mapView');
+    if (mapContainer) {
+      mapContainer.style.top = '';
+      mapContainer.style.height = '';
+    }
   }
   
   if (view === 'map') {
