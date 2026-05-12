@@ -2687,14 +2687,16 @@ function showView(view) {
   const tabNav = document.getElementById('tabNav');
   const kpiSection = document.getElementById('kpiSection');
   const resultsBar = document.getElementById('resultsBar');
-  
+  const filtersBar = document.getElementById('activeFiltersBar');
+
   if (view === 'map') {
     // Hide elements for full-screen map
     if (tabNav) tabNav.classList.add('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
     if (resultsBar) resultsBar.classList.add('hidden');
+    if (filtersBar) filtersBar.classList.add('hidden');
     document.body.classList.add('overflow-hidden');
-    
+
     // Adjust map container to start below header
     const mapContainer = document.getElementById('mapView');
     if (mapContainer) {
@@ -2705,6 +2707,7 @@ function showView(view) {
     if (tabNav) tabNav.classList.remove('hidden');
     if (kpiSection) kpiSection.classList.remove('hidden');
     if (resultsBar) resultsBar.classList.remove('hidden');
+    // Filters bar visibility is handled by updateActiveFilterChips based on active filters
     document.body.classList.remove('overflow-hidden');
   }
   
