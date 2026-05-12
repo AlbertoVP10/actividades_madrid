@@ -1218,21 +1218,8 @@ function toggleFilters() {
 
   // If closing the panel
   if (!wasHidden && panel.classList.contains('hidden')) {
-    // Re-adjust map size if in map view (in case filter chips visibility changed)
-    if (currentView === 'map') {
-      const mapContainer = document.getElementById('mapView');
-      const filtersBar = document.getElementById('activeFiltersBar');
-      const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
-      if (mapContainer) {
-        if (hasFilters) {
-          mapContainer.style.top = '110px';
-          mapContainer.style.height = 'calc(100vh - 180px)';
-        } else {
-          mapContainer.style.top = '64px';
-          mapContainer.style.height = 'calc(100vh - 140px)';
-        }
-      }
-    }
+    // Always adjust map size after closing filters panel
+    adjustMapSize();
 
     // If closing the panel and we were waiting for location (nearby without userLocation)
     const openedFromTab = panel.dataset.openedFromTab;
@@ -1964,20 +1951,25 @@ function applyFilters() {
     updateMapMarkers();
   }
 
-  // Re-adjust map size if in map view (in case filter chips visibility changed)
-  if (currentView === 'map') {
-    const mapContainer = document.getElementById('mapView');
-    const filtersBar = document.getElementById('activeFiltersBar');
-    const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
-    if (mapContainer) {
-      if (hasFilters) {
-        mapContainer.style.top = '110px';
-        mapContainer.style.height = 'calc(100vh - 180px)';
-      } else {
-        mapContainer.style.top = '64px';
-        mapContainer.style.height = 'calc(100vh - 140px)';
-      }
-    }
+  // Always adjust map size after filters change
+  adjustMapSize();
+}
+
+// Adjust map size based on filter chips visibility
+function adjustMapSize() {
+  if (currentView !== 'map') return;
+
+  const mapContainer = document.getElementById('mapView');
+  const filtersBar = document.getElementById('activeFiltersBar');
+  if (!mapContainer) return;
+
+  const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
+  if (hasFilters) {
+    mapContainer.style.top = '110px';
+    mapContainer.style.height = 'calc(100vh - 180px)';
+  } else {
+    mapContainer.style.top = '64px';
+    mapContainer.style.height = 'calc(100vh - 140px)';
   }
 }
 
@@ -2337,22 +2329,6 @@ function removeFilterChip(type, value) {
   }
 
   applyFilters();
-
-  // Re-adjust map size if in map view (after filter chips are updated)
-  if (currentView === 'map') {
-    const mapContainer = document.getElementById('mapView');
-    const filtersBar = document.getElementById('activeFiltersBar');
-    const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
-    if (mapContainer) {
-      if (hasFilters) {
-        mapContainer.style.top = '110px';
-        mapContainer.style.height = 'calc(100vh - 180px)';
-      } else {
-        mapContainer.style.top = '64px';
-        mapContainer.style.height = 'calc(100vh - 140px)';
-      }
-    }
-  }
 }
 
 // Format price display
@@ -2747,18 +2723,8 @@ function showView(view) {
     if (resultsBar) resultsBar.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
 
-    // Adjust map container based on whether filters bar is visible
-    const mapContainer = document.getElementById('mapView');
-    const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
-    if (mapContainer) {
-      if (hasFilters) {
-        mapContainer.style.top = '110px'; // Header + filters bar
-        mapContainer.style.height = 'calc(100vh - 180px)';
-      } else {
-        mapContainer.style.top = '64px'; // Header only
-        mapContainer.style.height = 'calc(100vh - 140px)';
-      }
-    }
+    // Adjust map size based on current filter chips
+    adjustMapSize();
   } else {
     // Show elements for list/stats view
     if (tabNav) tabNav.classList.remove('hidden');
