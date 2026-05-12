@@ -2689,19 +2689,26 @@ function showView(view) {
   const tabNav = document.getElementById('tabNav');
   const kpiSection = document.getElementById('kpiSection');
   const resultsBar = document.getElementById('resultsBar');
+  const filtersBar = document.getElementById('activeFiltersBar');
 
   if (view === 'map') {
-    // Hide elements for map view (keep filters bar visible)
+    // Hide elements for map view
     if (tabNav) tabNav.classList.add('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
     if (resultsBar) resultsBar.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
 
-    // Adjust map container to leave room for header and filters bar
+    // Adjust map container based on whether filters bar is visible
     const mapContainer = document.getElementById('mapView');
+    const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
     if (mapContainer) {
-      mapContainer.style.top = '120px'; // Header + space for filters
-      mapContainer.style.height = 'calc(100vh - 200px)'; // Reduced height
+      if (hasFilters) {
+        mapContainer.style.top = '110px'; // Header + filters bar
+        mapContainer.style.height = 'calc(100vh - 180px)';
+      } else {
+        mapContainer.style.top = '64px'; // Header only
+        mapContainer.style.height = 'calc(100vh - 140px)';
+      }
     }
   } else {
     // Show elements for list/stats view
