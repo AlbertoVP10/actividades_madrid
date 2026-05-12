@@ -1938,13 +1938,29 @@ function applyFilters() {
   
   // Sync KPI state with current filters
   syncKPIStateWithFilters();
-  
+
   // Update active filter chips
   updateActiveFilterChips();
-  
+
   // Update map markers if in map view
   if (currentView === 'map' && map) {
     updateMapMarkers();
+  }
+
+  // Re-adjust map size if in map view (in case filter chips visibility changed)
+  if (currentView === 'map') {
+    const mapContainer = document.getElementById('mapView');
+    const filtersBar = document.getElementById('activeFiltersBar');
+    const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
+    if (mapContainer) {
+      if (hasFilters) {
+        mapContainer.style.top = '110px';
+        mapContainer.style.height = 'calc(100vh - 180px)';
+      } else {
+        mapContainer.style.top = '64px';
+        mapContainer.style.height = 'calc(100vh - 140px)';
+      }
+    }
   }
 }
 
