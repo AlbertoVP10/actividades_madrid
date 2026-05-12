@@ -1981,41 +1981,104 @@ function updateKPIs() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Determine base activities based on active filters (cumulative)
-  let baseActivities = allActivities;
+  // Get all available options for each multi-select
+  const allCategories = [...new Set(allActivities.map(a => a.category))];
+  const allDistricts = [...new Set(allActivities.map(a => a.district))].filter(d => d && d !== 'Desconocido');
+  const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
+  const allTimes = ['morning', 'afternoon', 'evening'];
 
-  // Apply Near filter if active
-  if (currentFilters.nearOnly && userLocation) {
-    baseActivities = baseActivities.filter(a => a.distance && a.distance < 2);
-  }
+  // Apply ALL current filters to determine base activities for KPIs
+  let baseActivities = allActivities.filter(activity => {
+    // Category filter
+    const categorySelected = currentFilters.category.length > 0 && currentFilters.category.length < allCategories.length;
+    if (categorySelected) {
+      if (!currentFilters.category.includes(activity.category)) return false;
+    }
 
-  // Apply Favorites filter if active
-  if (currentFilters.favoritesOnly) {
-    const validFavs = getValidFavorites();
-    baseActivities = baseActivities.filter(a => validFavs.includes(a.id));
-  }
+    // District filter
+    const districtSelected = currentFilters.district.length > 0 && currentFilters.district.length < allDistricts.length;
+    if (districtSelected) {
+      if (!currentFilters.district.includes(activity.district)) return false;
+    }
 
-  // Apply Today filter if active
-  if (currentFilters.date === 'today') {
-    baseActivities = baseActivities.filter(a => {
-      if (!a.date) return false;
-      const d = new Date(a.date);
-      d.setHours(0, 0, 0, 0);
-      return d.getTime() === today.getTime();
-    });
-  }
+    // Audience filter
+    const audienceSelected = currentFilters.audience.length > 0 && currentFilters.audience.length < allAudiences.length;
+    if (audienceSelected && activity.audience) {
+      const activityAudiences = activity.audience.split(',').map(a => a.trim());
+      const hasMatch = activityAudiences.some(a =>
+        currentFilters.audience.some(selected =>
+          a.toLowerCase().includes(selected.toLowerCase())
+        )
+      );
+      if (!hasMatch) return false;
+    }
 
-  // Apply Week filter if active
-  if (currentFilters.date === 'week') {
-    const weekFromNow = new Date(today);
-    weekFromNow.setDate(weekFromNow.getDate() + 7);
-    baseActivities = baseActivities.filter(a => {
-      if (!a.date) return false;
-      const d = new Date(a.date);
-      d.setHours(0, 0, 0, 0);
-      return d >= today && d <= weekFromNow;
-    });
-  }
+    // Date filter
+    if (currentFilters.date !== 'all' && activity.date) {
+      const activityDate = new Date(activity.date);
+      activityDate.setHours(0, 0, 0, 0);
+
+      if (currentFilters.date === 'today') {
+        if (activityDate.getTime() !== today.getTime()) return false;
+      } else if (currentFilters.date === 'tomorrow') {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (activityDate.getTime() !== tomorrow.getTime()) return false;
+      } else if (currentFilters.date === 'week') {
+        const weekFromNow = new Date(today);
+        weekFromNow.setDate(weekFromNow.getDate() + 7);
+        if (activityDate > weekFromNow) return false;
+      } else if (currentFilters.date === 'month') {
+        const monthFromNow = new Date(today);
+        monthFromNow.setMonth(monthFromNow.getMonth() + 1);
+        if (activityDate > monthFromNow) return false;
+      }
+    }
+
+    // Time filter
+    const timeSelected = currentFilters.time.length > 0 && currentFilters.time.length < allTimes.length;
+    if (timeSelected && activity.time) {
+      const hour = extractHour(activity.time);
+      if (hour !== null) {
+        let matchesTime = false;
+        if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
+        if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
+        if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+        if (!matchesTime) return false;
+      }
+    }
+
+    // Free filter
+    if (currentFilters.freeOnly && !activity.free) {
+      return false;
+    }
+
+    // Favorites filter
+    if (currentFilters.favoritesOnly) {
+      const validFavs = getValidFavorites();
+      if (!validFavs.includes(activity.id)) return false;
+    }
+
+    // Near filter
+    if (currentFilters.nearOnly && userLocation) {
+      if (!activity.distance || activity.distance >= 2) return false;
+    }
+
+    // Search filter
+    if (currentFilters.search) {
+      const searchIn = (activity.title + ' ' + activity.description).toLowerCase();
+      if (!searchIn.includes(currentFilters.search)) return false;
+    }
+
+    // Location filter
+    if (currentFilters.locationKey) {
+      if (!activity.lat || !activity.lon) return false;
+      const activityKey = `${activity.lat.toFixed(5)},${activity.lon.toFixed(5)}`;
+      if (activityKey !== currentFilters.locationKey) return false;
+    }
+
+    return true;
+  });
 
   // Count for "Today" KPI
   const kpiToday = baseActivities.filter(a => {
