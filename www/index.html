@@ -1200,14 +1200,14 @@ function populateFilters() {
 function toggleFilters() {
   const panel = document.getElementById('filtersPanel');
   const wasHidden = panel.classList.contains('hidden');
-  
+
   // If opening the panel, store the current tab
   if (wasHidden) {
     panel.dataset.openedFromTab = document.querySelector('.main-tab.bg-primary-container')?.dataset.tab || 'recent';
   }
-  
+
   panel.classList.toggle('hidden');
-  
+
   // If opening the panel, scroll to top
   if (wasHidden) {
     const panelContent = panel.querySelector('div[class*="max-h-"]') || panel.querySelector('div[class*="overflow-y"]');
@@ -1215,9 +1215,26 @@ function toggleFilters() {
       panelContent.scrollTop = 0;
     }
   }
-  
-  // If closing the panel and we were waiting for location (nearby without userLocation)
+
+  // If closing the panel
   if (!wasHidden && panel.classList.contains('hidden')) {
+    // Re-adjust map size if in map view (in case filter chips visibility changed)
+    if (currentView === 'map') {
+      const mapContainer = document.getElementById('mapView');
+      const filtersBar = document.getElementById('activeFiltersBar');
+      const hasFilters = filtersBar && !filtersBar.classList.contains('hidden');
+      if (mapContainer) {
+        if (hasFilters) {
+          mapContainer.style.top = '110px';
+          mapContainer.style.height = 'calc(100vh - 180px)';
+        } else {
+          mapContainer.style.top = '64px';
+          mapContainer.style.height = 'calc(100vh - 140px)';
+        }
+      }
+    }
+
+    // If closing the panel and we were waiting for location (nearby without userLocation)
     const openedFromTab = panel.dataset.openedFromTab;
     if (openedFromTab === 'nearby' && !userLocation) {
       // User closed filters without setting location, revert to 'recent'
