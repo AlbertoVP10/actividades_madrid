@@ -398,6 +398,125 @@ body { min-height: max(884px, 100dvh); }
 .onboarding-btn:hover {
   background: #2B7A78;
 }
+
+/* Preferences Styles */
+#preferences {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #3AAFA9 0%, #2B7A78 100%);
+  z-index: 9997;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+#preferences.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.preferences-header {
+  padding: 3rem 1.5rem 1.5rem;
+  text-align: center;
+}
+.preferences-title {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.preferences-subtitle {
+  color: rgba(255,255,255,0.9);
+  font-size: 16px;
+  font-weight: 400;
+}
+.preferences-content {
+  flex: 1;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+}
+.preferences-question {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1c1c;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem 1rem;
+  margin-bottom: 2rem;
+}
+.preference-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.preference-item:active {
+  transform: scale(0.95);
+}
+.preference-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  border: 3px solid transparent;
+}
+.preference-icon.selected {
+  border-color: #3AAFA9;
+  box-shadow: 0 0 0 3px rgba(58, 175, 169, 0.3);
+}
+.preference-icon svg {
+  width: 35px;
+  height: 35px;
+}
+.preference-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a1c1c;
+  text-transform: uppercase;
+  text-align: center;
+}
+.preferences-footer {
+  padding: 1rem 1.5rem 2rem;
+  background: white;
+}
+.preferences-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3AAFA9;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 1rem;
+}
+.preferences-btn:hover {
+  background: #2B7A78;
+}
+.preferences-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.preferences-note {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -493,6 +612,153 @@ body { min-height: max(884px, 100dvh); }
   </div>
   <div class="onboarding-footer">
     <button class="onboarding-btn" id="onboardingBtn" onclick="nextSlide()">Siguiente</button>
+  </div>
+</div>
+
+<!-- Preferences -->
+<div id="preferences" class="hidden">
+  <div class="preferences-header">
+    <h2 class="preferences-title">Madrid en Familia</h2>
+    <p class="preferences-subtitle">Descubre actividades para tus hijos</p>
+  </div>
+  <div class="preferences-content">
+    <p class="preferences-question">¿Qué le gusta a tus hijos?</p>
+    <div class="preferences-grid">
+      <!-- Títeres -->
+      <div class="preference-item" onclick="togglePreference(this, 'titeres')">
+        <div class="preference-icon" style="background: #E8D5F2;">
+          <svg viewBox="0 0 50 50">
+            <!-- Máscara de teatro -->
+            <ellipse cx="25" cy="20" rx="12" ry="10" fill="#9C27B0"/>
+            <ellipse cx="20" cy="18" rx="3" ry="4" fill="#FFCCBC"/>
+            <ellipse cx="30" cy="18" rx="3" ry="4" fill="#FFCCBC"/>
+            <path d="M18 25 Q25 30 32 25" stroke="#FFCCBC" stroke-width="2" fill="none"/>
+            <!-- Segunda máscara -->
+            <ellipse cx="35" cy="28" rx="8" ry="7" fill="#FF9800"/>
+            <ellipse cx="32" cy="26" rx="2" ry="3" fill="#FFCCBC"/>
+            <ellipse cx="38" cy="26" rx="2" ry="3" fill="#FFCCBC"/>
+          </svg>
+        </div>
+        <span class="preference-label">Títeres</span>
+      </div>
+      <!-- Música -->
+      <div class="preference-item" onclick="togglePreference(this, 'musica')">
+        <div class="preference-icon" style="background: #E3F2FD;">
+          <svg viewBox="0 0 50 50">
+            <!-- Nota musical -->
+            <ellipse cx="18" cy="35" rx="8" ry="6" fill="#2196F3"/>
+            <rect x="24" y="12" width="3" height="23" fill="#2196F3"/>
+            <path d="M24 12 Q35 8 35 18" stroke="#2196F3" stroke-width="3" fill="none"/>
+            <ellipse cx="35" cy="20" rx="5" ry="4" fill="#2196F3"/>
+          </svg>
+        </div>
+        <span class="preference-label">Música</span>
+      </div>
+      <!-- Talleres -->
+      <div class="preference-item" onclick="togglePreference(this, 'talleres')">
+        <div class="preference-icon" style="background: #FFF3E0;">
+          <svg viewBox="0 0 50 50">
+            <!-- Paleta de pintor -->
+            <ellipse cx="25" cy="28" rx="16" ry="12" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+            <circle cx="18" cy="24" r="3" fill="#F44336"/>
+            <circle cx="25" cy="20" r="3" fill="#4CAF50"/>
+            <circle cx="32" cy="24" r="3" fill="#2196F3"/>
+            <circle cx="20" cy="32" r="3" fill="#FFEB3B"/>
+            <circle cx="30" cy="32" r="3" fill="#9C27B0"/>
+            <ellipse cx="38" cy="28" rx="4" ry="3" fill="#FFCCBC"/>
+          </svg>
+        </div>
+        <span class="preference-label">Talleres</span>
+      </div>
+      <!-- Deporte -->
+      <div class="preference-item" onclick="togglePreference(this, 'deporte')">
+        <div class="preference-icon" style="background: #E8F5E9;">
+          <svg viewBox="0 0 50 50">
+            <!-- Balón de rugby/fútbol americano -->
+            <ellipse cx="25" cy="25" rx="14" ry="10" fill="#8D6E63" stroke="#5D4037" stroke-width="1.5" transform="rotate(-30 25 25)"/>
+            <line x1="15" y1="25" x2="35" y2="25" stroke="#5D4037" stroke-width="2" transform="rotate(-30 25 25)"/>
+            <line x1="20" y1="20" x2="20" y2="30" stroke="#5D4037" stroke-width="1.5" transform="rotate(-30 25 25)"/>
+            <line x1="25" y1="18" x2="25" y2="32" stroke="#5D4037" stroke-width="1.5" transform="rotate(-30 25 25)"/>
+            <line x1="30" y1="20" x2="30" y2="30" stroke="#5D4037" stroke-width="1.5" transform="rotate(-30 25 25)"/>
+          </svg>
+        </div>
+        <span class="preference-label">Deporte</span>
+      </div>
+      <!-- Cuentos -->
+      <div class="preference-item" onclick="togglePreference(this, 'cuentos')">
+        <div class="preference-icon" style="background: #E1F5FE;">
+          <svg viewBox="0 0 50 50">
+            <!-- Balón de fútbol -->
+            <circle cx="25" cy="25" r="12" fill="white" stroke="#333" stroke-width="2"/>
+            <polygon points="25,16 30,20 28,26 22,26 20,20" fill="#333"/>
+            <line x1="20" y1="20" x2="14" y2="16" stroke="#333" stroke-width="1.5"/>
+            <line x1="30" y1="20" x2="36" y2="16" stroke="#333" stroke-width="1.5"/>
+            <line x1="28" y1="26" x2="32" y2="32" stroke="#333" stroke-width="1.5"/>
+            <line x1="22" y1="26" x2="18" y2="32" stroke="#333" stroke-width="1.5"/>
+            <line x1="25" y1="16" x2="25" y2="10" stroke="#333" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <span class="preference-label">Cuentos</span>
+      </div>
+      <!-- Parques -->
+      <div class="preference-item" onclick="togglePreference(this, 'parques')">
+        <div class="preference-icon" style="background: #F1F8E9;">
+          <svg viewBox="0 0 50 50">
+            <!-- Árbol -->
+            <rect x="23" y="35" width="4" height="10" fill="#8D6E63"/>
+            <circle cx="25" cy="22" r="12" fill="#4CAF50"/>
+            <circle cx="18" cy="28" r="8" fill="#66BB6A"/>
+            <circle cx="32" cy="28" r="8" fill="#66BB6A"/>
+            <circle cx="25" cy="15" r="6" fill="#81C784"/>
+          </svg>
+        </div>
+        <span class="preference-label">Parques</span>
+      </div>
+      <!-- Teatro -->
+      <div class="preference-item" onclick="togglePreference(this, 'teatro')">
+        <div class="preference-icon" style="background: #FCE4EC;">
+          <svg viewBox="0 0 50 50">
+            <!-- Cortinas de teatro -->
+            <path d="M5 10 Q15 25 5 40" fill="#E91E63" stroke="#C2185B" stroke-width="1"/>
+            <path d="M45 10 Q35 25 45 40" fill="#E91E63" stroke="#C2185B" stroke-width="1"/>
+            <rect x="20" y="10" width="10" height="30" fill="#F8BBD9"/>
+            <circle cx="25" cy="25" r="5" fill="#F48FB1"/>
+          </svg>
+        </div>
+        <span class="preference-label">Teatro</span>
+      </div>
+      <!-- Danza -->
+      <div class="preference-item" onclick="togglePreference(this, 'danza')">
+        <div class="preference-icon" style="background: #F3E5F5;">
+          <svg viewBox="0 0 50 50">
+            <!-- Figura bailando -->
+            <circle cx="25" cy="12" r="5" fill="#FFCCBC"/>
+            <line x1="25" y1="17" x2="25" y2="28" stroke="#333" stroke-width="2"/>
+            <line x1="25" y1="20" x2="15" y2="15" stroke="#333" stroke-width="2"/>
+            <line x1="25" y1="20" x2="38" y2="18" stroke="#333" stroke-width="2"/>
+            <line x1="25" y1="28" x2="18" y2="38" stroke="#333" stroke-width="2"/>
+            <line x1="25" y1="28" x2="32" y2="40" stroke="#333" stroke-width="2"/>
+          </svg>
+        </div>
+        <span class="preference-label">Danza</span>
+      </div>
+      <!-- Excursiones -->
+      <div class="preference-item" onclick="togglePreference(this, 'excursiones')">
+        <div class="preference-icon" style="background: #E0F7FA;">
+          <svg viewBox="0 0 50 50">
+            <!-- Montaña -->
+            <path d="M10 40 L25 15 L40 40 Z" fill="#00BCD4" stroke="#0097A7" stroke-width="1.5"/>
+            <path d="M20 40 L30 25 L40 40" fill="#26C6DA"/>
+            <circle cx="35" cy="18" r="4" fill="#FFD54F"/>
+          </svg>
+        </div>
+        <span class="preference-label">Excursiones</span>
+      </div>
+    </div>
+  </div>
+  <div class="preferences-footer">
+    <button class="preferences-btn" id="preferencesBtn" onclick="savePreferences()">Confirmar</button>
+    <p class="preferences-note">Sin registro.<br>Preferencias guardadas localmente.</p>
   </div>
 </div>
 
@@ -1130,10 +1396,83 @@ function skipOnboarding() {
 
 function finishOnboarding() {
   const onboarding = document.getElementById('onboarding');
+  const preferences = document.getElementById('preferences');
+  
   if (onboarding) {
     onboarding.classList.add('hidden');
   }
   localStorage.setItem('onboardingSeen', 'true');
+  
+  // Mostrar preferencias solo si no se han configurado antes
+  if (preferences && !localStorage.getItem('preferencesSet')) {
+    preferences.classList.remove('hidden');
+  }
+}
+
+// Preferences Logic
+let selectedPreferences = [];
+
+function togglePreference(element, category) {
+  const icon = element.querySelector('.preference-icon');
+  const index = selectedPreferences.indexOf(category);
+  
+  if (index === -1) {
+    selectedPreferences.push(category);
+    icon.classList.add('selected');
+  } else {
+    selectedPreferences.splice(index, 1);
+    icon.classList.remove('selected');
+  }
+}
+
+function savePreferences() {
+  // Guardar preferencias en localStorage
+  localStorage.setItem('userPreferences', JSON.stringify(selectedPreferences));
+  localStorage.setItem('preferencesSet', 'true');
+  
+  // Ocultar pantalla de preferencias
+  const preferences = document.getElementById('preferences');
+  if (preferences) {
+    preferences.classList.add('hidden');
+  }
+  
+  // Aplicar filtros automáticamente si hay preferencias seleccionadas
+  if (selectedPreferences.length > 0) {
+    applyPreferenceFilters();
+  }
+}
+
+function applyPreferenceFilters() {
+  // Mapeo de preferencias a categorías de la app
+  const categoryMap = {
+    'titeres': 'Teatro',
+    'musica': 'Música',
+    'talleres': 'Talleres',
+    'deporte': 'Deporte',
+    'cuentos': 'Cuentacuentos',
+    'parques': 'Parques',
+    'teatro': 'Teatro',
+    'danza': 'Danza',
+    'excursiones': 'Excursiones'
+  };
+  
+  // Convertir preferencias a filtros de categoría
+  const preferredCategories = selectedPreferences
+    .map(pref => categoryMap[pref])
+    .filter(cat => cat);
+  
+  if (preferredCategories.length > 0) {
+    // Aquí se pueden aplicar los filtros a las actividades
+    console.log('Preferencias aplicadas:', preferredCategories);
+  }
+}
+
+// Cargar preferencias guardadas al iniciar
+function loadPreferences() {
+  const saved = localStorage.getItem('userPreferences');
+  if (saved) {
+    selectedPreferences = JSON.parse(saved);
+  }
 }
 
 // Swipe support for onboarding
