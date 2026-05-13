@@ -280,6 +280,124 @@ body { min-height: max(884px, 100dvh); }
   50% { width: 60%; margin-left: 20%; }
   100% { width: 0%; margin-left: 100%; }
 }
+
+/* Onboarding Styles */
+#onboarding {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+#onboarding.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.onboarding-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem;
+}
+.onboarding-skip {
+  color: #3AAFA9;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+}
+.onboarding-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.onboarding-slider {
+  display: flex;
+  transition: transform 0.3s ease-out;
+  height: 100%;
+}
+.onboarding-slide {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.onboarding-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  text-align: center;
+  max-width: 280px;
+  width: 100%;
+}
+.onboarding-icon {
+  font-size: 64px;
+  margin-bottom: 1rem;
+  display: block;
+}
+.onboarding-icon-img {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.onboarding-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1c1c;
+  line-height: 1.4;
+}
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 1.5rem 0;
+}
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  transition: background 0.3s ease;
+}
+.onboarding-dot.active {
+  background: #3AAFA9;
+}
+.onboarding-footer {
+  padding: 1.5rem 2rem 2rem;
+}
+.onboarding-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3AAFA9;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.onboarding-btn:hover {
+  background: #2B7A78;
+}
 </style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
@@ -292,6 +410,89 @@ body { min-height: max(884px, 100dvh); }
       <div class="splash-progress-bar"></div>
     </div>
     <p class="splash-text">Cargando planes...</p>
+  </div>
+</div>
+
+<!-- Onboarding -->
+<div id="onboarding" class="hidden">
+  <div class="onboarding-header">
+    <button class="onboarding-skip" onclick="skipOnboarding()">Saltar</button>
+  </div>
+  <div class="onboarding-container" id="onboardingContainer">
+    <div class="onboarding-slider" id="onboardingSlider">
+      <!-- Slide 1: Planes Gratuitos -->
+      <div class="onboarding-slide">
+        <div class="onboarding-card">
+          <div class="onboarding-icon-img">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <!-- Bolsa verde -->
+              <ellipse cx="35" cy="45" rx="18" ry="22" fill="#4CAF50"/>
+              <path d="M25 30 Q35 20 45 30" stroke="#2E7D32" stroke-width="2" fill="none"/>
+              <text x="35" y="50" font-size="14" fill="white" text-anchor="middle" font-weight="bold">$</text>
+              <!-- Bolsa naranja -->
+              <ellipse cx="60" cy="40" rx="18" ry="22" fill="#FF9800"/>
+              <path d="M50 25 Q60 15 70 25" stroke="#E65100" stroke-width="2" fill="none"/>
+              <text x="60" y="45" font-size="14" fill="white" text-anchor="middle" font-weight="bold">$</text>
+              <!-- X roja -->
+              <circle cx="47" cy="60" r="12" fill="#F44336"/>
+              <path d="M42 55 L52 65 M52 55 L42 65" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="onboarding-title">PLANES GRATUITOS<br>OFICIALES.</h3>
+        </div>
+      </div>
+      <!-- Slide 2: Cerca de ti -->
+      <div class="onboarding-slide">
+        <div class="onboarding-card">
+          <div class="onboarding-icon-img">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <!-- Mapa -->
+              <rect x="20" y="20" width="50" height="60" rx="4" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+              <path d="M25 35 L40 25 L55 40 L65 30" stroke="#81C784" stroke-width="2" fill="none"/>
+              <circle cx="40" cy="35" r="3" fill="#4CAF50"/>
+              <circle cx="55" cy="40" r="3" fill="#4CAF50"/>
+              <!-- Persona -->
+              <circle cx="70" cy="45" r="12" fill="#FFCCBC"/>
+              <circle cx="70" cy="38" r="5" fill="#8D6E63"/>
+              <path d="M60 55 Q70 65 80 55" stroke="#8D6E63" stroke-width="2" fill="none"/>
+              <!-- Pin de ubicación -->
+              <path d="M55 30 Q55 20 65 20 Q75 20 75 30 Q75 42 65 50 Q55 42 55 30" fill="#F44336"/>
+              <circle cx="65" cy="30" r="5" fill="white"/>
+            </svg>
+          </div>
+          <h3 class="onboarding-title">CERCA DE TI.</h3>
+        </div>
+      </div>
+      <!-- Slide 3: Sin registros -->
+      <div class="onboarding-slide">
+        <div class="onboarding-card">
+          <div class="onboarding-icon-img">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <!-- Marco de puerta -->
+              <rect x="25" y="20" width="50" height="70" rx="2" fill="#D7CCC8" stroke="#8D6E63" stroke-width="3"/>
+              <!-- Puerta abierta -->
+              <path d="M30 25 L30 85 L65 75 L65 35 Z" fill="#A1887F" stroke="#6D4C41" stroke-width="2"/>
+              <!-- Bisagras -->
+              <rect x="28" y="35" width="4" height="8" fill="#5D4037"/>
+              <rect x="28" y="70" width="4" height="8" fill="#5D4037"/>
+              <!-- Tirador -->
+              <circle cx="60" cy="55" r="3" fill="#FFD54F"/>
+              <!-- Interior oscuro -->
+              <rect x="32" y="28" width="30" height="54" fill="#4E342E" opacity="0.3"/>
+            </svg>
+          </div>
+          <h3 class="onboarding-title">SIN REGISTROS.</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="onboarding-dots" id="onboardingDots">
+    <div class="onboarding-dot active"></div>
+    <div class="onboarding-dot"></div>
+    <div class="onboarding-dot"></div>
+  </div>
+  <div class="onboarding-footer">
+    <button class="onboarding-btn" id="onboardingBtn" onclick="nextSlide()">Siguiente</button>
   </div>
 </div>
 
@@ -877,15 +1078,96 @@ body { min-height: max(884px, 100dvh); }
 </nav>
 
 <script>
-// Splashscreen - Ocultar después de cargar
+// Splashscreen - Ocultar después de cargar y mostrar onboarding
 window.addEventListener('load', function() {
   setTimeout(function() {
     const splash = document.getElementById('splashscreen');
+    const onboarding = document.getElementById('onboarding');
     if (splash) {
       splash.classList.add('hidden');
     }
+    // Mostrar onboarding solo si no se ha visto antes
+    if (onboarding && !localStorage.getItem('onboardingSeen')) {
+      onboarding.classList.remove('hidden');
+    }
   }, 2500); // Mostrar por 2.5 segundos
 });
+
+// Onboarding Logic
+let currentSlide = 0;
+const totalSlides = 3;
+
+function updateSlider() {
+  const slider = document.getElementById('onboardingSlider');
+  const dots = document.querySelectorAll('.onboarding-dot');
+  const btn = document.getElementById('onboardingBtn');
+  
+  if (slider) {
+    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+  
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === currentSlide);
+  });
+  
+  if (btn) {
+    btn.textContent = currentSlide === totalSlides - 1 ? 'Empezar' : 'Siguiente';
+  }
+}
+
+function nextSlide() {
+  if (currentSlide < totalSlides - 1) {
+    currentSlide++;
+    updateSlider();
+  } else {
+    finishOnboarding();
+  }
+}
+
+function skipOnboarding() {
+  finishOnboarding();
+}
+
+function finishOnboarding() {
+  const onboarding = document.getElementById('onboarding');
+  if (onboarding) {
+    onboarding.classList.add('hidden');
+  }
+  localStorage.setItem('onboardingSeen', 'true');
+}
+
+// Swipe support for onboarding
+let touchStartX = 0;
+let touchEndX = 0;
+
+const onboardingContainer = document.getElementById('onboardingContainer');
+if (onboardingContainer) {
+  onboardingContainer.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+  
+  onboardingContainer.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, false);
+}
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const diff = touchStartX - touchEndX;
+  
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0 && currentSlide < totalSlides - 1) {
+      // Swipe left - next slide
+      currentSlide++;
+      updateSlider();
+    } else if (diff < 0 && currentSlide > 0) {
+      // Swipe right - previous slide
+      currentSlide--;
+      updateSlider();
+    }
+  }
+}
 
 // Global state
 let allActivities = [];
