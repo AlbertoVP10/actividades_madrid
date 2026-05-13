@@ -219,8 +219,81 @@ body { min-height: max(884px, 100dvh); }
 }
 
 </style>
+<style>
+/* Splashscreen Styles */
+#splashscreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+#splashscreen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 320px;
+}
+.splash-logo {
+  width: 200px;
+  height: auto;
+  margin-bottom: 2rem;
+  animation: splashFadeIn 0.8s ease-out;
+}
+.splash-progress-container {
+  width: 100%;
+  max-width: 200px;
+  height: 6px;
+  background: #e8e8e8;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.splash-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3AAFA9 0%, #2B7A78 100%);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: splashProgress 2s ease-in-out infinite;
+}
+.splash-text {
+  margin-top: 1rem;
+  font-size: 14px;
+  color: #5b4039;
+  font-family: 'Inter', sans-serif;
+}
+@keyframes splashFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes splashProgress {
+  0% { width: 0%; margin-left: 0%; }
+  50% { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+</style>
 </head>
 <body class="bg-background text-on-background min-h-screen pb-24">
+
+<!-- Splashscreen -->
+<div id="splashscreen">
+  <div class="splash-content">
+    <img src="splashscreen.jpg" alt="Madrid en Familia" class="splash-logo">
+    <div class="splash-progress-container">
+      <div class="splash-progress-bar"></div>
+    </div>
+    <p class="splash-text">Cargando planes...</p>
+  </div>
+</div>
 
 <!-- Login Modal -->
 <div id="loginModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
@@ -804,6 +877,16 @@ body { min-height: max(884px, 100dvh); }
 </nav>
 
 <script>
+// Splashscreen - Ocultar después de cargar
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const splash = document.getElementById('splashscreen');
+    if (splash) {
+      splash.classList.add('hidden');
+    }
+  }, 2500); // Mostrar por 2.5 segundos
+});
+
 // Global state
 let allActivities = [];
 let filteredActivities = [];
