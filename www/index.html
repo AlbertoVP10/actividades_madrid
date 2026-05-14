@@ -1310,17 +1310,32 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Activity Detail Modal -->
 <div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
-  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
-    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
-      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
-      <button onclick="closeDetail()" class="p-2 hover:bg-surface-variant rounded-full justify-self-end">
+  <div id="detailModalContent" style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+    <!-- Imagen header con scroll effect -->
+    <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 40vh; min-height: 200px;">
+      <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
+      <button onclick="closeDetail()" class="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div id="detailContent" class="p-4 space-y-4">
-      <!-- Content will be inserted here -->
+    <!-- Contenido scrollable -->
+    <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
+      <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
+        <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
+      </div>
+      <div id="detailContent" class="p-4 space-y-4 pb-20">
+        <!-- Content will be inserted here -->
+      </div>
     </div>
   </div>
+</div>
+
+<!-- Image Fullscreen Modal -->
+<div id="imageFullscreenModal" class="hidden fixed inset-0 bg-black z-[200] flex items-center justify-center" onclick="closeImageFullscreen()">
+  <img id="fullscreenImage" src="" alt="" class="max-w-full max-h-full object-contain">
+  <button onclick="closeImageFullscreen()" class="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white">
+    <span class="material-symbols-outlined">close</span>
+  </button>
 </div>
 
 <!-- BottomNavBar Section -->
@@ -3163,6 +3178,36 @@ function showDetail(id) {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < filteredActivities.length - 1;
 
+  // Set image
+  const defaultImageUrl = 'https://st3.depositphotos.com/1594308/13059/i/450/depositphotos_130595028-stock-photo-dynamic-friends-enjoying-party-and.jpg';
+  document.getElementById('detailImage').src = defaultImageUrl;
+  document.getElementById('detailImage').alt = activity.title;
+  document.getElementById('fullscreenImage').src = defaultImageUrl;
+  
+  // Reset image height on open
+  const imageContainer = document.getElementById('detailImageContainer');
+  if (imageContainer) {
+    imageContainer.style.height = '40vh';
+  }
+  
+  // Setup scroll handler for image resize
+  const scrollContainer = document.getElementById('detailScrollContainer');
+  if (scrollContainer) {
+    scrollContainer.onscroll = function() {
+      const scrollTop = scrollContainer.scrollTop;
+      const maxScroll = 150;
+      const minHeight = 120;
+      const maxHeight = window.innerHeight * 0.4;
+      
+      if (scrollTop > 0) {
+        const newHeight = Math.max(minHeight, maxHeight - (scrollTop * 0.8));
+        imageContainer.style.height = newHeight + 'px';
+      } else {
+        imageContainer.style.height = maxHeight + 'px';
+      }
+    };
+  }
+
   document.getElementById('detailTitle').textContent = activity.title;
   
   document.getElementById('detailContent').innerHTML = `
@@ -3279,10 +3324,10 @@ function showDetail(id) {
   
   document.getElementById('detailModal').classList.remove('hidden');
   
-  // Reset scroll al inicio del modal
-  const modalContent = document.querySelector('#detailModal > div');
-  if (modalContent) {
-    modalContent.scrollTop = 0;
+  // Reset scroll al inicio del contenido
+  const scrollContainer = document.getElementById('detailScrollContainer');
+  if (scrollContainer) {
+    scrollContainer.scrollTop = 0;
   }
 }
 
@@ -3290,6 +3335,18 @@ function showDetail(id) {
 function closeDetail() {
   document.getElementById('detailModal').classList.add('hidden');
   currentDetailId = null;
+}
+
+// Open image fullscreen
+function openImageFullscreen() {
+  document.getElementById('imageFullscreenModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close image fullscreen
+function closeImageFullscreen() {
+  document.getElementById('imageFullscreenModal').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
 // Navigate to previous activity
