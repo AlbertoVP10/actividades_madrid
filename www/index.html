@@ -3152,6 +3152,78 @@ function toggleFavorite(event, id) {
   updateKPIs();
 }
 
+// Compartir actividad
+function shareActivity(id) {
+  const activity = allActivities.find(a => a.id === id);
+  if (!activity) return;
+  
+  const shareData = {
+    title: activity.title,
+    text: `${activity.title} - ${activity.category || 'Actividad'} en ${activity.district || 'Madrid'}`,
+    url: activity.link || window.location.href
+  };
+  
+  if (navigator.share) {
+    navigator.share(shareData).catch(err => console.log('Error al compartir:', err));
+  } else {
+    // Fallback: copiar al portapapeles
+    const textToCopy = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast('Enlace copiado al portapapeles');
+    }).catch(() => {
+      showToast('No se pudo compartir');
+    });
+  }
+}
+
+// Añadir al calendario
+function addToCalendar(id) {
+  const activity = allActivities.find(a => a.id === id);
+  if (!activity) return;
+  
+  // Crear evento para el calendario
+  const title = encodeURIComponent(activity.title);
+  const location = encodeURIComponent(`${activity.district || 'Madrid'}, ${activity.address || ''}`);
+  const details = encodeURIComponent(`${activity.description || ''}\n\nMás info: ${activity.link || ''}`);
+  
+  let startDate, endDate;
+  if (activity.date) {
+    startDate = activity.date.toISOString().replace(/[-:]/g, '').split('.')[0];
+    if (activity.endDate) {
+      endDate = activity.endDate.toISOString().replace(/[-:]/g, '').split('.')[0];
+    } else {
+      // Si no hay fecha fin, sumar 1 hora
+      const end = new Date(activity.date.getTime() + 60 * 60 * 1000);
+      endDate = end.toISOString().replace(/[-:]/g, '').split('.')[0];
+    }
+  } else {
+    // Si no hay fecha, usar mañana
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    startDate = tomorrow.toISOString().replace(/[-:]/g, '').split('.')[0];
+    const end = new Date(tomorrow.getTime() + 60 * 60 * 1000);
+    endDate = end.toISOString().replace(/[-:]/g, '').split('.')[0];
+  }
+  
+  // URL de Google Calendar
+  const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}&location=${location}`;
+  
+  // Abrir en nueva pestaña
+  window.open(googleCalendarUrl, '_blank');
+}
+
+// Mostrar toast notification
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-surface-container-high text-on-surface px-4 py-2 rounded-lg shadow-lg z-[200] text-body-md';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
 // Show detail modal
 function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
@@ -3318,6 +3390,19 @@ function showDetail(id) {
           <span class="material-symbols-outlined">map</span>
         </a>
         ` : ''}
+      </div>
+      
+      <!-- Botones de compartir y calendario -->
+      <div class="flex gap-3 pb-4">
+        <button onclick="shareActivity('${activity.id}')" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors">
+          <span class="material-symbols-outlined">share</span>
+          Compartir
+        </button>
+        
+        <button onclick="addToCalendar('${activity.id}')" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors">
+          <span class="material-symbols-outlined">event</span>
+          Añadir al calendario
+        </button>
       </div>
     </div>
   `;
