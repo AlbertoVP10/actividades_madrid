@@ -3379,30 +3379,25 @@ function showDetail(id) {
         </button>
         
         ${activity.link ? `
-        <a href="${activity.link}" target="_blank" class="flex-[2] bg-primary text-on-primary py-3 rounded-lg font-label-lg text-center flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined">open_in_new</span>
-          Ver más info
+        <a href="${activity.link}" target="_blank" class="bg-primary text-on-primary py-3 px-4 rounded-lg font-label-lg text-center flex items-center justify-center gap-1 flex-shrink-0">
+          <span class="material-symbols-outlined text-lg">open_in_new</span>
+          + info
         </a>
         ` : ''}
         
+        <button onclick="shareActivity('${activity.id}')" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-surface-variant transition-colors" title="Compartir">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+        
+        <button onclick="addToCalendar('${activity.id}')" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-surface-variant transition-colors" title="Añadir al calendario">
+          <span class="material-symbols-outlined">event</span>
+        </button>
+        
         ${activity.lat && activity.lon ? `
-        <a href="https://www.google.com/maps?q=${activity.lat},${activity.lon}" target="_blank" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+        <a href="https://www.google.com/maps?q=${activity.lat},${activity.lon}" target="_blank" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" title="Ver en mapa">
           <span class="material-symbols-outlined">map</span>
         </a>
         ` : ''}
-      </div>
-      
-      <!-- Botones de compartir y calendario -->
-      <div class="flex gap-3 pb-4">
-        <button onclick="shareActivity('${activity.id}')" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors">
-          <span class="material-symbols-outlined">share</span>
-          Compartir
-        </button>
-        
-        <button onclick="addToCalendar('${activity.id}')" class="flex-1 bg-surface-container-high text-on-surface py-3 rounded-lg font-label-lg flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors">
-          <span class="material-symbols-outlined">event</span>
-          Añadir al calendario
-        </button>
       </div>
     </div>
   `;
