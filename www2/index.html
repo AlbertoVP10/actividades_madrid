@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#6B4EE6">
+    <meta name="description" content="Descubre actividades culturales y planes para niños en Madrid">
+    <title>Madrid en Familia - Actividades</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: {
+                    primary: {
+                        DEFAULT: '#6B4EE6',
+                        light: '#8B6FF0',
+                        dark: '#5A3FD4',
+                        50: '#F0EBFF',
+                        100: '#E0D4FF',
+                    },
+                    accent: {
+                        DEFAULT: '#F08080',
+                        light: '#F4978E',
+                    },
+                    background: '#FFFFFF',
+                    surface: {
+                        DEFAULT: '#F8F9FA',
+                        elevated: '#FFFFFF',
+                    },
+                    text: {
+                        primary: '#1A1C1C',
+                        secondary: '#5B4039',
+                        muted: '#9CA3AF',
+                    }
+                },
+                fontFamily: {
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
+                },
+                animation: {
+                    'fade-in': 'fadeIn 0.3s ease-out',
+                    'slide-up': 'slideUp 0.3s ease-out',
+                    'slide-right': 'slideRight 0.3s ease-out',
+                    'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                },
+                keyframes: {
+                    fadeIn: {
+                        '0%': { opacity: '0' },
+                        '100%': { opacity: '1' },
+                    },
+                    slideUp: {
+                        '0%': { transform: 'translateY(100%)' },
+                        '100%': { transform: 'translateY(0)' },
+                    },
+                    slideRight: {
+                        '0%': { transform: 'translateX(-100%)' },
+                        '100%': { transform: 'translateX(0)' },
+                    },
+                },
+            },
+        },
+    }
+    </script>
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            overscroll-behavior: none;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Screen transitions */
+        .screen {
+            position: fixed;
+            inset: 0;
+            overflow-y: auto;
+            background: white;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        
+        .screen.hidden {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .screen.active {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Bottom sheet */
+        .bottom-sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 50;
+            max-height: 85vh;
+        }
+        
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+        
+        /* KPI Card */
+        .kpi-card {
+            transition: all 0.2s ease;
+        }
+        
+        .kpi-card:active {
+            transform: scale(0.95);
+        }
+        
+        .kpi-card.active {
+            ring: 2px solid #6B4EE6;
+            background-color: #F0EBFF;
+        }
+        
+        /* Activity card */
+        .activity-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        
+        .activity-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Filter chip */
+        .filter-chip {
+            animation: chipAppear 0.2s ease;
+        }
+        
+        @keyframes chipAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Map container */
+        #map {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+        
+        /* Custom marker */
+        .custom-marker {
+            background: #6B4EE6;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* Splashscreen */
+        #splashscreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #6B4EE6 0%, #8B6FF0 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+        
+        #splashscreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        /* Onboarding dots */
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .onboarding-dot.active {
+            background: white;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        /* Preference item */
+        .preference-item.selected .preference-icon {
+            border-color: #6B4EE6;
+            background: #F0EBFF;
+        }
+        
+        .preference-item.selected .preference-icon svg {
+            filter: drop-shadow(0 2px 4px rgba(107, 78, 230, 0.3));
+        }
+        
+        /* Safe area for mobile */
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary antialiased">
+    <!-- Splashscreen -->
+    <div id="splashscreen">
+        <div class="text-center px-6">
+            <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-sm">
+                <span class="material-symbols-outlined text-5xl text-white">location_on</span>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-2">Madrid en Familia</h1>
+            <p class="text-white/80 text-sm">Descubre actividades para tus hijos</p>
+            <div class="mt-8 flex justify-center gap-2">
+                <div class="w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-white/40 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-white/40 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Screen -->
+    <div id="onboarding-screen" class="screen hidden" style="background: linear-gradient(135deg, #6B4EE6 0%, #8B6FF0 100%);">
+        <div class="h-full flex flex-col">
+            <!-- Skip button -->
+            <div class="flex justify-end p-6">
+                <button onclick="skipOnboarding()" class="text-white/80 text-sm font-medium">Saltar</button>
+            </div>
+            
+            <!-- Slides container -->
+            <div class="flex-1 relative overflow-hidden">
+                <div id="onboarding-slides" class="flex transition-transform duration-300 h-full">
+                    <!-- Slide 1 -->
+                    <div class="min-w-full flex flex-col items-center justify-center px-8">
+                        <div class="w-48 h-48 mb-8">
+                            <svg viewBox="0 0 200 200" class="w-full h-full">
+                                <circle cx="100" cy="100" r="80" fill="white" opacity="0.1"/>
+                                <circle cx="70" cy="90" r="30" fill="#4CAF50"/>
+                                <text x="70" y="98" text-anchor="middle" fill="white" font-size="24" font-weight="bold">$</text>
+                                <circle cx="130" cy="80" r="30" fill="#FF9800"/>
+                                <text x="130" y="88" text-anchor="middle" fill="white" font-size="24" font-weight="bold">$</text>
+                                <circle cx="100" cy="130" r="20" fill="#F44336"/>
+                                <path d="M92 122 L108 138 M108 122 L92 138" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white text-center mb-4">PLANES GRATUITOS OFICIALES</h2>
+                        <p class="text-white/80 text-center text-sm">Encuentra actividades culturales, familiares y para niños en Madrid sin coste</p>
+                    </div>
+                    
+                    <!-- Slide 2 -->
+                    <div class="min-w-full flex flex-col items-center justify-center px-8">
+                        <div class="w-48 h-48 mb-8">
+                            <svg viewBox="0 0 200 200" class="w-full h-full">
+                                <rect x="40" y="40" width="100" height="120" rx="8" fill="white" opacity="0.1"/>
+                                <path d="M50 80 L80 60 L110 90 L130 70" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <circle cx="80" cy="70" r="6" fill="white"/>
+                                <circle cx="110" cy="85" r="6" fill="white"/>
+                                <path d="M120 50 Q120 30 140 30 Q160 30 160 50 Q160 75 140 90 Q120 75 120 50" fill="#F44336"/>
+                                <circle cx="140" cy="50" r="8" fill="white"/>
+                                <circle cx="150" cy="110" r="25" fill="#FFCCBC"/>
+                                <circle cx="150" cy="100" r="10" fill="#8D6E63"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white text-center mb-4">CERCA DE TI</h2>
+                        <p class="text-white/80 text-center text-sm">Actividades ordenadas por proximidad geográfica</p>
+                    </div>
+                    
+                    <!-- Slide 3 -->
+                    <div class="min-w-full flex flex-col items-center justify-center px-8">
+                        <div class="w-48 h-48 mb-8">
+                            <svg viewBox="0 0 200 200" class="w-full h-full">
+                                <rect x="50" y="40" width="100" height="120" rx="4" fill="white" opacity="0.1" stroke="white" stroke-width="3"/>
+                                <path d="M60 50 L60 150 L130 130 L130 60 Z" fill="white" opacity="0.2"/>
+                                <rect x="58" y="70" width="6" height="12" fill="white"/>
+                                <rect x="58" y="120" width="6" height="12" fill="white"/>
+                                <circle cx="120" cy="100" r="5" fill="white"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white text-center mb-4">SIN REGISTROS</h2>
+                        <p class="text-white/80 text-center text-sm">No necesitas crear cuenta. Guarda tus preferencias localmente</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dots indicator -->
+            <div class="flex justify-center gap-2 mb-8">
+                <div class="onboarding-dot active" data-slide="0"></div>
+                <div class="onboarding-dot" data-slide="1"></div>
+                <div class="onboarding-dot" data-slide="2"></div>
+            </div>
+            
+            <!-- Next button -->
+            <div class="px-6 pb-8 safe-bottom">
+                <button id="onboarding-next" onclick="nextOnboardingSlide()" class="w-full bg-white text-primary font-semibold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform">
+                    Siguiente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Screen -->
+    <div id="preferences-screen" class="screen hidden" style="background: linear-gradient(180deg, #6B4EE6 0%, #5A3FD4 30%, #FFFFFF 30%);">
+        <div class="h-full flex flex-col">
+            <!-- Header -->
+            <div class="pt-12 px-6 pb-6">
+                <h1 class="text-2xl font-bold text-white mb-1">Madrid en Familia</h1>
+                <p class="text-white/80 text-sm">Descubre actividades para tus hijos</p>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 bg-white rounded-t-3xl px-6 pt-8">
+                <p class="text-lg font-semibold text-center mb-6">¿Qué le gusta a tus hijos?</p>
+                
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <!-- Títeres -->
+                    <div class="preference-item cursor-pointer" data-preference="titeres" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-purple-600">theater_comedy</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Títeres</span>
+                    </div>
+                    
+                    <!-- Música -->
+                    <div class="preference-item cursor-pointer" data-preference="musica" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-blue-600">music_note</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Música</span>
+                    </div>
+                    
+                    <!-- Talleres -->
+                    <div class="preference-item cursor-pointer" data-preference="talleres" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-orange-600">palette</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Talleres</span>
+                    </div>
+                    
+                    <!-- Deporte -->
+                    <div class="preference-item cursor-pointer" data-preference="deporte" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-green-600">sports_soccer</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Deporte</span>
+                    </div>
+                    
+                    <!-- Cuentos -->
+                    <div class="preference-item cursor-pointer" data-preference="cuentos" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-amber-600">menu_book</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Cuentos</span>
+                    </div>
+                    
+                    <!-- Parques -->
+                    <div class="preference-item cursor-pointer" data-preference="parques" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-emerald-600">forest</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Parques</span>
+                    </div>
+                    
+                    <!-- Teatro -->
+                    <div class="preference-item cursor-pointer" data-preference="teatro" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-pink-600">theaters</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Teatro</span>
+                    </div>
+                    
+                    <!-- Danza -->
+                    <div class="preference-item cursor-pointer" data-preference="danza" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-rose-600">accessibility_new</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Danza</span>
+                    </div>
+                    
+                    <!-- Excursiones -->
+                    <div class="preference-item cursor-pointer" data-preference="excursiones" onclick="togglePreference(this)">
+                        <div class="preference-icon w-16 h-16 rounded-full bg-cyan-100 flex items-center justify-center mb-2 border-3 border-transparent transition-all">
+                            <span class="material-symbols-outlined text-3xl text-cyan-600">hiking</span>
+                        </div>
+                        <span class="text-xs font-medium text-center block">Excursiones</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="bg-white px-6 pb-8 pt-4 safe-bottom border-t">
+                <button onclick="savePreferences()" class="w-full bg-primary text-white font-semibold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform mb-3">
+                    Confirmar
+                </button>
+                <p class="text-xs text-text-muted text-center">Sin registro. Preferencias guardadas localmente.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen (Home) -->
+    <div id="home-screen" class="screen hidden bg-surface">
+        <!-- Header -->
+        <header class="bg-white sticky top-0 z-40 px-4 py-3 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-2xl">location_on</span>
+                    <span class="font-semibold text-lg">Madrid en Familia</span>
+                </div>
+                <button onclick="showInfo()" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-text-secondary">info</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="px-4 py-3 bg-white">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">search</span>
+                <input type="text" id="search-input" placeholder="Buscar actividades..." 
+                    class="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border-none focus:ring-2 focus:ring-primary/30 outline-none text-sm"
+                    oninput="handleSearch(this.value)">
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="px-4 py-3 bg-white">
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                <button onclick="toggleKPI('hoy')" id="kpi-hoy" class="kpi-card flex-shrink-0 bg-primary text-white px-4 py-3 rounded-xl min-w-[100px] text-center">
+                    <div class="text-2xl font-bold" id="count-hoy">0</div>
+                    <div class="text-xs opacity-90">Hoy</div>
+                </button>
+                <button onclick="toggleKPI('semana')" id="kpi-semana" class="kpi-card flex-shrink-0 bg-accent text-white px-4 py-3 rounded-xl min-w-[100px] text-center">
+                    <div class="text-2xl font-bold" id="count-semana">0</div>
+                    <div class="text-xs opacity-90">Esta semana</div>
+                </button>
+                <button onclick="toggleKPI('cercanos')" id="kpi-cercanos" class="kpi-card flex-shrink-0 bg-emerald-500 text-white px-4 py-3 rounded-xl min-w-[100px] text-center">
+                    <div class="text-2xl font-bold" id="count-cercanos">0</div>
+                    <div class="text-xs opacity-90">Cercanos</div>
+                </button>
+                <button onclick="toggleKPI('gratuitos')" id="kpi-gratuitos" class="kpi-card flex-shrink-0 bg-amber-500 text-white px-4 py-3 rounded-xl min-w-[100px] text-center">
+                    <div class="text-2xl font-bold" id="count-gratuitos">0</div>
+                    <div class="text-xs opacity-90">Gratuitos</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="px-4 py-3 bg-white border-t">
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="toggleFilterPanel()" class="flex items-center gap-1 px-3 py-2 bg-surface rounded-lg text-sm font-medium">
+                    <span class="material-symbols-outlined text-lg">tune</span>
+                    Filtros
+                </button>
+                <div id="active-filters" class="flex gap-2">
+                    <!-- Active filters will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities List -->
+        <div id="activities-list" class="px-4 py-4 pb-24 space-y-4">
+            <!-- Activities will be loaded here -->
+            <div class="text-center py-12">
+                <div class="skeleton w-16 h-16 rounded-full mx-auto mb-4"></div>
+                <div class="skeleton w-32 h-4 rounded mx-auto mb-2"></div>
+                <div class="skeleton w-24 h-3 rounded mx-auto"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-2 safe-bottom z-50">
+            <div class="flex justify-around items-center">
+                <button onclick="navigateTo('home')" class="nav-item active flex flex-col items-center gap-1 p-2 text-primary">
+                    <span class="material-symbols-outlined filled">home</span>
+                    <span class="text-xs">Inicio</span>
+                </button>
+                <button onclick="navigateTo('map')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">map</span>
+                    <span class="text-xs">Mapa</span>
+                </button>
+                <button onclick="navigateTo('favorites')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">favorite</span>
+                    <span class="text-xs">Favoritos</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="text-xs">Perfil</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Map Screen -->
+    <div id="map-screen" class="screen hidden">
+        <div class="h-full flex flex-col">
+            <!-- Map Header -->
+            <header class="bg-white px-4 py-3 shadow-sm z-10">
+                <div class="flex items-center justify-between">
+                    <h1 class="font-semibold text-lg">Mapa de Actividades</h1>
+                    <button onclick="navigateTo('home')" class="p-2 rounded-full hover:bg-gray-100">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Map Container -->
+            <div class="flex-1 relative">
+                <div id="map"></div>
+                
+                <!-- Map Controls -->
+                <div class="absolute top-4 right-4 flex flex-col gap-2 z-[400]">
+                    <button onclick="centerOnUser()" class="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+                        <span class="material-symbols-outlined text-primary">my_location</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Bottom Sheet for Activities -->
+            <div id="map-bottom-sheet" class="bottom-sheet bg-white">
+                <div class="p-4 border-b">
+                    <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <h2 class="font-semibold text-lg">Actividades cercanas</h2>
+                </div>
+                <div id="map-activities-list" class="p-4 space-y-3 max-h-[50vh] overflow-y-auto">
+                    <!-- Activities will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Screen -->
+    <div id="favorites-screen" class="screen hidden bg-surface">
+        <!-- Header -->
+        <header class="bg-white sticky top-0 z-40 px-4 py-3 shadow-sm">
+            <div class="flex items-center justify-between">
+                <h1 class="font-semibold text-lg">Mis Favoritos</h1>
+                <button onclick="navigateTo('home')" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Favorites List -->
+        <div id="favorites-list" class="px-4 py-4 pb-24 space-y-4">
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">favorite_border</span>
+                <p class="text-text-muted">No tienes favoritos guardados</p>
+                <button onclick="navigateTo('home')" class="mt-4 text-primary font-medium">Explorar actividades</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-2 safe-bottom z-50">
+            <div class="flex justify-around items-center">
+                <button onclick="navigateTo('home')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-xs">Inicio</span>
+                </button>
+                <button onclick="navigateTo('map')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">map</span>
+                    <span class="text-xs">Mapa</span>
+                </button>
+                <button onclick="navigateTo('favorites')" class="nav-item active flex flex-col items-center gap-1 p-2 text-primary">
+                    <span class="material-symbols-outlined filled">favorite</span>
+                    <span class="text-xs">Favoritos</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="text-xs">Perfil</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Profile Screen -->
+    <div id="profile-screen" class="screen hidden bg-surface">
+        <!-- Header -->
+        <header class="bg-white sticky top-0 z-40 px-4 py-3 shadow-sm">
+            <div class="flex items-center justify-between">
+                <h1 class="font-semibold text-lg">Perfil</h1>
+                <button onclick="navigateTo('home')" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Profile Content -->
+        <div class="px-4 py-4 pb-24 space-y-4">
+            <!-- User Info -->
+            <div class="bg-white rounded-2xl p-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-3xl text-primary">person</span>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-lg">Invitado</h2>
+                        <p class="text-text-muted text-sm">Sin cuenta registrada</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="bg-white rounded-2xl p-4">
+                <h3 class="font-semibold mb-4">Mis preferencias</h3>
+                <div id="profile-preferences" class="flex flex-wrap gap-2">
+                    <!-- Preferences will be loaded here -->
+                </div>
+                <button onclick="showPreferencesScreen()" class="mt-4 text-primary text-sm font-medium">Editar preferencias</button>
+            </div>
+
+            <!-- Info Section -->
+            <div class="bg-white rounded-2xl p-4">
+                <h3 class="font-semibold mb-4">Información</h3>
+                <div class="space-y-3">
+                    <button onclick="showAbout()" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-text-muted">info</span>
+                            <span>Sobre la app</span>
+                        </div>
+                        <span class="material-symbols-outlined text-text-muted">chevron_right</span>
+                    </button>
+                    <button onclick="showPrivacy()" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-text-muted">shield</span>
+                            <span>Privacidad</span>
+                        </div>
+                        <span class="material-symbols-outlined text-text-muted">chevron_right</span>
+                    </button>
+                    <a href="https://instagram.com" target="_blank" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-text-muted">photo_camera</span>
+                            <span>Instagram</span>
+                        </div>
+                        <span class="material-symbols-outlined text-text-muted">open_in_new</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Donate -->
+            <div class="bg-gradient-to-r from-primary to-primary-light rounded-2xl p-6 text-white">
+                <h3 class="font-semibold mb-2">¿Te gusta la app?</h3>
+                <p class="text-white/80 text-sm mb-4">Ayúdanos a mantenerla gratuita con una donación</p>
+                <button onclick="showDonate()" class="w-full bg-white text-primary font-semibold py-3 rounded-xl">
+                    Hacer donación
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-2 safe-bottom z-50">
+            <div class="flex justify-around items-center">
+                <button onclick="navigateTo('home')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-xs">Inicio</span>
+                </button>
+                <button onclick="navigateTo('map')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">map</span>
+                    <span class="text-xs">Mapa</span>
+                </button>
+                <button onclick="navigateTo('favorites')" class="nav-item flex flex-col items-center gap-1 p-2 text-text-muted">
+                    <span class="material-symbols-outlined">favorite</span>
+                    <span class="text-xs">Favoritos</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="nav-item active flex flex-col items-center gap-1 p-2 text-primary">
+                    <span class="material-symbols-outlined filled">person</span>
+                    <span class="text-xs">Perfil</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Activity Detail Modal -->
+    <div id="activity-detail" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeActivityDetail()"></div>
+        <div class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <button onclick="previousActivity()" id="btn-prev-activity" class="p-2 rounded-full hover:bg-gray-100">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <span class="text-sm text-text-muted">Detalle</span>
+                    <button onclick="nextActivity()" id="btn-next-activity" class="p-2 rounded-full hover:bg-gray-100">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+                <button onclick="closeActivityDetail()" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div id="activity-detail-content">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Panel Modal -->
+    <div id="filter-panel" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="toggleFilterPanel()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl overflow-y-auto">
+            <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b flex items-center justify-between">
+                <h2 class="font-semibold text-lg">Filtros</h2>
+                <button onclick="toggleFilterPanel()" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-4 space-y-6">
+                <!-- Category Filter -->
+                <div>
+                    <h3 class="font-medium mb-3">Categoría</h3>
+                    <div id="filter-categories" class="space-y-2">
+                        <!-- Categories will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- District Filter -->
+                <div>
+                    <h3 class="font-medium mb-3">Distrito</h3>
+                    <div id="filter-districts" class="space-y-2">
+                        <!-- Districts will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Audience Filter -->
+                <div>
+                    <h3 class="font-medium mb-3">Público</h3>
+                    <div id="filter-audiences" class="space-y-2">
+                        <!-- Audiences will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Time Filter -->
+                <div>
+                    <h3 class="font-medium mb-3">Horario</h3>
+                    <div id="filter-times" class="space-y-2">
+                        <!-- Times will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="sticky bottom-0 bg-white border-t p-4 safe-bottom">
+                <div class="flex gap-3">
+                    <button onclick="clearFilters()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium">
+                        Limpiar
+                    </button>
+                    <button onclick="applyFilters()" class="flex-1 py-3 bg-primary text-white rounded-xl font-medium">
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+</body>
+</html>
