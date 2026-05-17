@@ -4168,6 +4168,8 @@ function closeDetail() {
     const viewToReturn = window.previousViewBeforeDetail || 'home';
     showView(viewToReturn);
     updateBottomTabUI(viewToReturn);
+    // Update filter chips visibility based on current filters
+    updateActiveFilterChips();
   }
 }
 
