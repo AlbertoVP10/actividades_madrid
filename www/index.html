@@ -3962,18 +3962,18 @@ function showDetail(id) {
     </div>
   `;
   
-  // Guardar la vista actual antes de cambiar
-  const previousView = currentView;
-  
   // Detectar si es app (Cordova) o HTML puro
   const isApp = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+  
+  // Guardar la vista actual antes de cambiar (variable global para poder recuperarla)
+  window.previousViewBeforeDetail = currentView;
   
   // Mostrar la vista de detalle como pantalla completa
   showView('detail');
   
   // Actualizar el hash para navegación con botón atrás (solo en app)
   if (isApp) {
-    history.pushState({ view: 'detail', activityId: activity.id, previousView: previousView }, '', '#detail/' + activity.id);
+    history.pushState({ view: 'detail', activityId: activity.id, previousView: window.previousViewBeforeDetail }, '', '#detail/' + activity.id);
   }
   
   // Reset scroll al inicio del contenido
@@ -4009,8 +4009,10 @@ function closeDetail() {
     if (bottomNav) bottomNav.classList.remove('hidden');
     const mainHeader = document.getElementById('mainHeader');
     if (mainHeader) mainHeader.classList.remove('hidden');
-    // Volver a la vista anterior
-    showView(currentView === 'detail' ? 'home' : currentView);
+    // Volver a la vista anterior guardada
+    const viewToReturn = window.previousViewBeforeDetail || 'home';
+    showView(viewToReturn);
+    updateBottomTabUI(viewToReturn);
   }
 }
 
@@ -4615,8 +4617,8 @@ window.addEventListener('popstate', function(e) {
       const mainHeader = document.getElementById('mainHeader');
       if (mainHeader) mainHeader.classList.remove('hidden');
       
-      // Volver a la vista anterior guardada en el estado
-      const previousView = state.previousView || 'home';
+      // Volver a la vista anterior guardada en el estado o en variable global
+      const previousView = state.previousView || window.previousViewBeforeDetail || 'home';
       showView(previousView);
       updateBottomTabUI(previousView);
     } else if (state.view === 'home') {
