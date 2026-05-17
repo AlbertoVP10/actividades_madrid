@@ -223,6 +223,16 @@ body { min-height: max(884px, 100dvh); }
   }
 }
 
+/* Title truncation styles */
+.title-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
 </style>
 <style>
 /* Splashscreen Styles */
@@ -1666,7 +1676,7 @@ body { min-height: max(884px, 100dvh); }
   <!-- Contenido scrollable -->
   <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
     <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
-      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
+      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2 title-clamp-2"></h2>
       <div id="detailHeaderButtons" class="flex gap-2 items-center"></div>
     </div>
     <div id="detailContent" class="p-4 space-y-4 pb-20">
@@ -3998,7 +4008,8 @@ function showDetail(id, isNavigation = false) {
     };
   }
 
-  document.getElementById('detailTitle').textContent = activity.title;
+  const titleElement = document.getElementById('detailTitle');
+  titleElement.textContent = activity.title;
   
   // Render header buttons (share and favorite)
   const detailHeaderButtons = document.getElementById('detailHeaderButtons');
@@ -4155,6 +4166,23 @@ function showDetail(id, isNavigation = false) {
   if (scrollContainer) {
     scrollContainer.scrollTop = 0;
   }
+  
+  // Check if title is truncated after content is rendered
+  requestAnimationFrame(() => {
+    const isTitleTruncated = titleElement.scrollHeight > titleElement.clientHeight;
+    if (isTitleTruncated) {
+      const fullTitleDiv = document.createElement('div');
+      fullTitleDiv.className = 'p-3 bg-surface-container-low rounded-lg mb-4';
+      fullTitleDiv.innerHTML = `
+        <p class="text-label-sm text-on-surface-variant font-medium">Título completo:</p>
+        <p class="text-body-md text-on-surface">${activity.title}</p>
+      `;
+      const contentDiv = document.getElementById('detailContent').querySelector('.space-y-4');
+      const categoryDiv = contentDiv.querySelector('.flex.items-start.justify-between');
+      categoryDiv.insertAdjacentElement('afterend', fullTitleDiv);
+    }
+  });
+  
   if (activity.lat && activity.lon) {
     // Retrasar la inicialización del mapa para asegurar que el contenedor es visible
     setTimeout(() => {
