@@ -3803,11 +3803,37 @@ function toggleFavorite(event, id, refreshDetail = false) {
   
   localStorage.setItem('madridFavorites', JSON.stringify(favorites));
   updateFavCount();
-  renderActivities();
-  // updateKPIs();
   
-  if (refreshDetail && currentDetailId === id) {
-    showDetail(id);
+  // Only re-render activities if not coming from detail view
+  // If called from detail view with refreshDetail=true, only update header button
+  if (!refreshDetail) {
+    renderActivities();
+  } else if (refreshDetail && currentDetailId === id) {
+    // Only update the header button icon, don't call showDetail() again to keep navigation buttons functional
+    const isFav = favorites.includes(id);
+    const detailHeaderButtons = document.getElementById('detailHeaderButtons');
+    if (detailHeaderButtons) {
+      const favBtn = detailHeaderButtons.querySelector('button:last-child');
+      if (favBtn) {
+        const icon = favBtn.querySelector('span.material-symbols-outlined');
+        if (icon) {
+          // Update icon fill state
+          if (isFav) {
+            icon.classList.add('filled');
+          } else {
+            icon.classList.remove('filled');
+          }
+          // Update button colors
+          if (isFav) {
+            favBtn.classList.add('bg-primary', 'text-on-primary');
+            favBtn.classList.remove('text-on-surface');
+          } else {
+            favBtn.classList.remove('bg-primary', 'text-on-primary');
+            favBtn.classList.add('text-on-surface');
+          }
+        }
+      }
+    }
   }
 }
 
