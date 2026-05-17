@@ -212,6 +212,11 @@ body { min-height: max(884px, 100dvh); }
 .filter-chip .material-symbols-outlined {
   font-size: 0.875rem; /* text-sm */
 }
+.fullscreen-image-zoomable {
+  touch-action: none;
+  transform-origin: center center;
+  will-change: transform;
+}
 @keyframes chipAppear {
   from {
     opacity: 0;
@@ -1687,7 +1692,7 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Image Fullscreen Modal -->
 <div id="imageFullscreenModal" class="hidden fixed inset-0 bg-black z-[200] flex items-center justify-center" onclick="closeImageFullscreen()">
-  <img id="fullscreenImage" src="" alt="" class="max-w-full max-h-full object-contain">
+  <img id="fullscreenImage" src="" alt="" class="max-w-full max-h-full object-contain fullscreen-image-zoomable" onclick="event.stopPropagation()">
   <button onclick="closeImageFullscreen()" class="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white">
     <span class="material-symbols-outlined">close</span>
   </button>
@@ -4035,7 +4040,7 @@ function showDetail(id, isNavigation = false) {
         </div>
       </div>
       
-      <p class="text-body-lg text-on-surface-variant">${activity.description || 'Sin descripción disponible.'}</p>
+      <p class="text-body-lg text-on-surface-variant text-justify">${activity.description || 'Sin descripción disponible.'}</p>
       
       <div class="space-y-3 bg-surface-container-low rounded-lg p-4">
         <div class="flex items-center gap-3">
@@ -4231,6 +4236,56 @@ function openImageFullscreen() {
 function closeImageFullscreen() {
   document.getElementById('imageFullscreenModal').classList.add('hidden');
   document.body.style.overflow = '';
+  const fullscreenImage = document.getElementById('fullscreenImage');
+  if (fullscreenImage) {
+    fullscreenImage.style.transform = 'scale(1)';
+    fullscreenImage.dataset.zoomScale = '1';
+  }
+}
+
+const fullscreenImage = document.getElementById('fullscreenImage');
+if (fullscreenImage) {
+  fullscreenImage.dataset.zoomScale = '1';
+  let pinchData = { active: false, startDistance: 0, startScale: 1 };
+
+  const getDistance = touches => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  };
+
+  fullscreenImage.addEventListener('touchstart', event => {
+    if (event.touches.length === 2) {
+      event.preventDefault();
+      pinchData.active = true;
+      pinchData.startDistance = getDistance(event.touches);
+      pinchData.startScale = parseFloat(fullscreenImage.dataset.zoomScale || '1');
+    }
+  }, { passive: false });
+
+  fullscreenImage.addEventListener('touchmove', event => {
+    if (!pinchData.active || event.touches.length !== 2) return;
+    event.preventDefault();
+    const distance = getDistance(event.touches);
+    let scale = pinchData.startScale * (distance / pinchData.startDistance);
+    scale = Math.min(4, Math.max(1, scale));
+    fullscreenImage.dataset.zoomScale = scale.toString();
+    fullscreenImage.style.transform = `scale(${scale})`;
+  }, { passive: false });
+
+  fullscreenImage.addEventListener('touchend', event => {
+    if (event.touches.length < 2) {
+      pinchData.active = false;
+      if (parseFloat(fullscreenImage.dataset.zoomScale || '1') < 1) {
+        fullscreenImage.dataset.zoomScale = '1';
+        fullscreenImage.style.transform = 'scale(1)';
+      }
+    }
+  });
+
+  fullscreenImage.addEventListener('touchcancel', () => {
+    pinchData.active = false;
+  });
 }
 
 function initDetailLocationMap(lat, lon, locationLabel) {
