@@ -1592,25 +1592,23 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </main>
 
-<!-- Activity Detail Modal -->
-<div id="detailModal" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-0">
-  <div id="detailModalContent" style="background-color: #ffffff;" class="w-full h-full sm:w-full sm:h-full rounded-none flex flex-col overflow-hidden">
-    <!-- Imagen header con scroll effect -->
-    <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 30vh; min-height: 32px;">
-      <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
-      <button onclick="closeDetail()" class="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+<!-- Activity Detail View (pantalla separada, no modal) -->
+<div id="detailView" class="hidden fixed inset-0 bg-white z-[110] flex flex-col overflow-hidden">
+  <!-- Imagen header con scroll effect -->
+  <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 30vh; min-height: 32px;">
+    <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
+    <button onclick="closeDetail()" class="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <!-- Contenido scrollable -->
+  <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
+    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
+      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
+      <div id="detailHeaderButtons" class="flex gap-2 items-center"></div>
     </div>
-    <!-- Contenido scrollable -->
-    <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
-      <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
-        <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
-        <div id="detailHeaderButtons" class="flex gap-2 items-center"></div>
-      </div>
-      <div id="detailContent" class="p-4 space-y-4 pb-20">
-        <!-- Content will be inserted here -->
-      </div>
+    <div id="detailContent" class="p-4 space-y-4 pb-20">
+      <!-- Content will be inserted here -->
     </div>
   </div>
 </div>
@@ -3964,7 +3962,14 @@ function showDetail(id) {
     </div>
   `;
   
-  document.getElementById('detailModal').classList.remove('hidden');
+  // Guardar la vista actual antes de cambiar
+  const previousView = currentView;
+  
+  // Mostrar la vista de detalle como pantalla completa
+  showView('detail');
+  
+  // Actualizar el hash para navegación con botón atrás
+  history.pushState({ view: 'detail', activityId: activity.id, previousView: previousView }, '', '#detail/' + activity.id);
   
   // Reset scroll al inicio del contenido
   if (scrollContainer) {
@@ -3975,14 +3980,10 @@ function showDetail(id) {
   }
 }
 
-// Close detail modal
+// Close detail view
 function closeDetail() {
-  document.getElementById('detailModal').classList.add('hidden');
-  currentDetailId = null;
-  if (detailMap) {
-    detailMap.remove();
-    detailMap = null;
-  }
+  // Volver atrás en el historial
+  history.back();
 }
 
 // Open image fullscreen
@@ -4116,6 +4117,7 @@ function setMainTab(tab) {
 
 // Set bottom tab
 function setBottomTab(tab) {
+  // Actualizar UI de tabs
   document.querySelectorAll('.bottom-tab').forEach(btn => {
     if (btn.dataset.tab === tab) {
       btn.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
@@ -4126,12 +4128,15 @@ function setBottomTab(tab) {
     }
   });
   
+  // Actualizar estado y URL
   if (tab === 'home') {
     showView('home');
     renderHome();
+    history.pushState({ view: 'home' }, '', '#home');
   } else if (tab === 'list') {
     showView('list');
     applyFilters();
+    history.pushState({ view: 'list' }, '', '#list');
   } else if (tab === 'map') {
     if (currentFilters.locationKey) {
       currentFilters.locationKey = null;
@@ -4139,12 +4144,15 @@ function setBottomTab(tab) {
     }
     showView('map');
     updateActiveFilterChips();
+    history.pushState({ view: 'map' }, '', '#map');
   } else if (tab === 'favorites') {
     showView('list');
     applyFilters();
+    history.pushState({ view: 'favorites' }, '', '#favorites');
   } else if (tab === 'profile') {
     showView('profile');
     renderProfileSettings();
+    history.pushState({ view: 'profile' }, '', '#profile');
   }
 }
 
@@ -4157,6 +4165,7 @@ function showView(view) {
   document.getElementById('mapView').classList.toggle('hidden', view !== 'map');
   document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
   document.getElementById('profileSettingsView').classList.toggle('hidden', view !== 'profileSettings');
+  document.getElementById('detailView').classList.toggle('hidden', view !== 'detail');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
   
@@ -4166,9 +4175,15 @@ function showView(view) {
   const filtersBar = document.getElementById('activeFiltersBar');
   const mainHeader = document.getElementById('mainHeader');
   const profileDonateFooter = document.getElementById('profileDonateFooter');
+  const bottomNav = document.querySelector('nav.fixed.bottom-0');
+
+  // Mostrar/ocultar bottom nav según la vista
+  if (bottomNav) {
+    bottomNav.classList.toggle('hidden', view === 'detail');
+  }
 
   // if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile');
-  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings');
+  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail');
   if (profileDonateFooter) profileDonateFooter.classList.toggle('hidden', view !== 'profile');
 
   if (view === 'map') {
@@ -4189,6 +4204,13 @@ function showView(view) {
       mapContainer.style.top = '';
       mapContainer.style.height = '';
     }
+  } else if (view === 'detail') {
+    // Vista de detalle: ocultar elementos de navegación
+    if (tabNav) tabNav.classList.add('hidden');
+    if (kpiSection) kpiSection.classList.add('hidden');
+    if (resultsBar) resultsBar.classList.add('hidden');
+    if (filtersBar) filtersBar.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
   } else {
     if (tabNav) tabNav.classList.remove('hidden');
     if (kpiSection) kpiSection.classList.add('hidden');
@@ -4523,13 +4545,6 @@ function clearFilters() {
   applyFilters();
 }
 
-// Close modal on outside click
-document.getElementById('detailModal').addEventListener('click', function(e) {
-  if (e.target === this) {
-    closeDetail();
-  }
-});
-
 // Close filters modal on outside click
 document.getElementById('filtersPanel').addEventListener('click', function(e) {
   if (e.target === this) {
@@ -4543,6 +4558,79 @@ document.getElementById('passwordInput').addEventListener('keypress', function(e
     checkPassword();
   }
 });
+
+// Manejar navegación con botón atrás (popstate)
+window.addEventListener('popstate', function(e) {
+  const state = e.state;
+  
+  if (state && state.view) {
+    // Restaurar vista según el estado
+    if (state.view === 'detail') {
+      // Si estamos en detail y vamos atrás, cerrar detail y volver a la vista anterior
+      document.getElementById('detailView').classList.add('hidden');
+      currentDetailId = null;
+      if (detailMap) {
+        detailMap.remove();
+        detailMap = null;
+      }
+      // Mostrar la bottom nav y header
+      const bottomNav = document.querySelector('nav.fixed.bottom-0');
+      if (bottomNav) bottomNav.classList.remove('hidden');
+      const mainHeader = document.getElementById('mainHeader');
+      if (mainHeader) mainHeader.classList.remove('hidden');
+      
+      // Volver a la vista anterior guardada en el estado
+      const previousView = state.previousView || 'home';
+      showView(previousView);
+      updateBottomTabUI(previousView);
+    } else if (state.view === 'home') {
+      showView('home');
+      updateBottomTabUI('home');
+    } else if (state.view === 'list') {
+      showView('list');
+      updateBottomTabUI('list');
+    } else if (state.view === 'map') {
+      showView('map');
+      updateBottomTabUI('map');
+    } else if (state.view === 'favorites') {
+      showView('list');
+      updateBottomTabUI('favorites');
+    } else if (state.view === 'profile') {
+      showView('profile');
+      updateBottomTabUI('profile');
+    }
+  } else {
+    // Sin estado: estamos en home, permitir que la app se cierre (no hacer nada)
+    // El SO manejará el cierre de la app
+  }
+});
+
+// Helper para actualizar UI de bottom tabs
+function updateBottomTabUI(view) {
+  const tabMap = {
+    'home': 'home',
+    'list': 'list',
+    'map': 'map',
+    'favorites': 'favorites',
+    'profile': 'profile'
+  };
+  
+  const tab = tabMap[view] || 'home';
+  document.querySelectorAll('.bottom-tab').forEach(btn => {
+    if (btn.dataset.tab === tab) {
+      btn.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.remove('text-on-surface-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-container', 'rounded-xl');
+      btn.classList.add('text-on-surface-variant');
+    }
+  });
+}
+
+// Inicializar estado al cargar la página
+if (!window.location.hash) {
+  history.replaceState({ view: 'home' }, '', '#home');
+}
 </script>
 </body>
 </html>
