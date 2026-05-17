@@ -3804,12 +3804,11 @@ function toggleFavorite(event, id, refreshDetail = false) {
   localStorage.setItem('madridFavorites', JSON.stringify(favorites));
   updateFavCount();
   
-  // Only re-render activities if not coming from detail view
-  // If called from detail view with refreshDetail=true, only update header button
-  if (!refreshDetail) {
-    renderActivities();
-  } else if (refreshDetail && currentDetailId === id) {
-    // Only update the header button icon, don't call showDetail() again to keep navigation buttons functional
+  // Always update the activity list to reflect favorite state changes
+  renderActivities();
+  
+  // If called from detail view, also update the header button to reflect the change
+  if (refreshDetail && currentDetailId === id) {
     const isFav = favorites.includes(id);
     const detailHeaderButtons = document.getElementById('detailHeaderButtons');
     if (detailHeaderButtons) {
