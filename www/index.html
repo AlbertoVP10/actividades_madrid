@@ -3965,25 +3965,53 @@ function showDetail(id) {
   // Guardar la vista actual antes de cambiar
   const previousView = currentView;
   
+  // Detectar si es app (Cordova) o HTML puro
+  const isApp = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+  
   // Mostrar la vista de detalle como pantalla completa
   showView('detail');
   
-  // Actualizar el hash para navegación con botón atrás
-  history.pushState({ view: 'detail', activityId: activity.id, previousView: previousView }, '', '#detail/' + activity.id);
+  // Actualizar el hash para navegación con botón atrás (solo en app)
+  if (isApp) {
+    history.pushState({ view: 'detail', activityId: activity.id, previousView: previousView }, '', '#detail/' + activity.id);
+  }
   
   // Reset scroll al inicio del contenido
   if (scrollContainer) {
     scrollContainer.scrollTop = 0;
   }
   if (activity.lat && activity.lon) {
-    initDetailLocationMap(activity.lat, activity.lon, activity.location || 'Ubicación');
+    // Retrasar la inicialización del mapa para asegurar que el contenedor es visible
+    setTimeout(() => {
+      initDetailLocationMap(activity.lat, activity.lon, activity.location || 'Ubicación');
+    }, 100);
   }
 }
 
 // Close detail view
 function closeDetail() {
-  // Volver atrás en el historial
-  history.back();
+  // Detectar si es app (Cordova) o HTML puro
+  const isApp = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+  
+  if (isApp) {
+    // En app: usar navegación por historial
+    history.back();
+  } else {
+    // En HTML puro: comportamiento tradicional
+    document.getElementById('detailView').classList.add('hidden');
+    currentDetailId = null;
+    if (detailMap) {
+      detailMap.remove();
+      detailMap = null;
+    }
+    // Restaurar UI
+    const bottomNav = document.querySelector('nav.fixed.bottom-0');
+    if (bottomNav) bottomNav.classList.remove('hidden');
+    const mainHeader = document.getElementById('mainHeader');
+    if (mainHeader) mainHeader.classList.remove('hidden');
+    // Volver a la vista anterior
+    showView(currentView === 'detail' ? 'home' : currentView);
+  }
 }
 
 // Open image fullscreen
@@ -4128,15 +4156,18 @@ function setBottomTab(tab) {
     }
   });
   
+  // Detectar si es app (Cordova) o HTML puro
+  const isApp = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+  
   // Actualizar estado y URL
   if (tab === 'home') {
     showView('home');
     renderHome();
-    history.pushState({ view: 'home' }, '', '#home');
+    if (isApp) history.pushState({ view: 'home' }, '', '#home');
   } else if (tab === 'list') {
     showView('list');
     applyFilters();
-    history.pushState({ view: 'list' }, '', '#list');
+    if (isApp) history.pushState({ view: 'list' }, '', '#list');
   } else if (tab === 'map') {
     if (currentFilters.locationKey) {
       currentFilters.locationKey = null;
@@ -4144,15 +4175,15 @@ function setBottomTab(tab) {
     }
     showView('map');
     updateActiveFilterChips();
-    history.pushState({ view: 'map' }, '', '#map');
+    if (isApp) history.pushState({ view: 'map' }, '', '#map');
   } else if (tab === 'favorites') {
     showView('list');
     applyFilters();
-    history.pushState({ view: 'favorites' }, '', '#favorites');
+    if (isApp) history.pushState({ view: 'favorites' }, '', '#favorites');
   } else if (tab === 'profile') {
     showView('profile');
     renderProfileSettings();
-    history.pushState({ view: 'profile' }, '', '#profile');
+    if (isApp) history.pushState({ view: 'profile' }, '', '#profile');
   }
 }
 
@@ -4559,8 +4590,13 @@ document.getElementById('passwordInput').addEventListener('keypress', function(e
   }
 });
 
-// Manejar navegación con botón atrás (popstate)
+// Manejar navegación con botón atrás (popstate) - solo en app
 window.addEventListener('popstate', function(e) {
+  // Detectar si es app (Cordova) o HTML puro
+  const isApp = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+  
+  if (!isApp) return; // En HTML puro, no interceptar el botón atrás
+  
   const state = e.state;
   
   if (state && state.view) {
@@ -4627,8 +4663,9 @@ function updateBottomTabUI(view) {
   });
 }
 
-// Inicializar estado al cargar la página
-if (!window.location.hash) {
+// Inicializar estado al cargar la página (solo en app)
+const isAppEnv = typeof cordova !== 'undefined' || (window.webkit && window.webkit.messageHandlers);
+if (isAppEnv && !window.location.hash) {
   history.replaceState({ view: 'home' }, '', '#home');
 }
 </script>
