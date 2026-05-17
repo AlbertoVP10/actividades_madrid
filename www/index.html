@@ -2535,14 +2535,9 @@ async function geocodeAddressFromModal() {
       // Close modal after a short delay
       setTimeout(() => {
         closeLocationModal();
-        // Apply distance sort and near filter
-        if (!activeKPIFilters.includes('near')) {
-          activeKPIFilters.push('near');
-        }
-        updateKPICardStyles();
+        // Apply distance sort (without near filter)
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
-        currentFilters.nearOnly = true;
 
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
@@ -2608,14 +2603,9 @@ function getCurrentLocationFromModal() {
       // Close modal after a short delay
       setTimeout(() => {
         closeLocationModal();
-        // Apply distance sort and near filter
-        if (!activeKPIFilters.includes('near')) {
-          activeKPIFilters.push('near');
-        }
-        updateKPICardStyles();
+        // Apply distance sort (without near filter)
         document.getElementById('sortSelect').value = 'distance';
         currentFilters.sort = 'distance';
-        currentFilters.nearOnly = true;
 
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
@@ -3447,8 +3437,8 @@ function updateActiveFilterChips() {
     chips.push({ label: 'Favoritos', type: 'favorites', value: true });
   }
   
-  // Sort by distance (Cerca de mí)
-  if (currentFilters.sort === 'distance' && userLocation) {
+  // Near filter (Cerca de mí) - only show chip when nearOnly is active
+  if (currentFilters.nearOnly && userLocation) {
     chips.push({ label: '<2km', type: 'sort', value: 'distance' });
   }
   
