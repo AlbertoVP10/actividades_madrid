@@ -1596,7 +1596,7 @@ body { min-height: max(884px, 100dvh); }
 <div id="detailModal" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-0">
   <div id="detailModalContent" style="background-color: #ffffff;" class="w-full h-full sm:w-full sm:h-full rounded-none flex flex-col overflow-hidden">
     <!-- Imagen header con scroll effect -->
-    <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 40vh; min-height: 200px;">
+    <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 30vh; min-height: 32px;">
       <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
       <button onclick="closeDetail()" class="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm">
         <span class="material-symbols-outlined">close</span>
@@ -3795,7 +3795,7 @@ function showDetail(id) {
   // Reset image height on open
   const imageContainer = document.getElementById('detailImageContainer');
   if (imageContainer) {
-    imageContainer.style.height = '40vh';
+    imageContainer.style.height = '30vh';
     imageContainer.style.backgroundColor = '#000';
     imageContainer.style.overflow = 'hidden';
   }
@@ -3805,19 +3805,19 @@ function showDetail(id) {
   if (scrollContainer) {
     scrollContainer.onscroll = function() {
       const scrollTop = scrollContainer.scrollTop;
-      const minHeight = 56;
-      const maxHeight = window.innerHeight * 0.4;
+      const minHeight = window.innerHeight * 0.1;
+      const maxHeight = window.innerHeight * 0.3;
       
       if (scrollTop > 0) {
         const newHeight = Math.max(minHeight, maxHeight - (scrollTop * 1.2));
         imageContainer.style.height = newHeight + 'px';
-        detailImage.style.opacity = Math.max(0, 1 - scrollTop / 100);
-        detailImage.style.transform = `scale(${Math.max(0.95, 1 - scrollTop / 800)})`;
-        if (newHeight <= minHeight + 2) {
-          detailImage.style.visibility = 'hidden';
-        } else {
-          detailImage.style.visibility = 'visible';
-        }
+        // detailImage.style.opacity = Math.max(0, 1 - scrollTop / 100);
+        // detailImage.style.transform = `scale(${Math.max(0.95, 1 - scrollTop / 800)})`;
+        // if (newHeight <= minHeight + 2) {
+        //   detailImage.style.visibility = 'hidden';
+        // } else {
+        //   detailImage.style.visibility = 'visible';
+        // }
       } else {
         imageContainer.style.height = maxHeight + 'px';
         detailImage.style.opacity = '1';
