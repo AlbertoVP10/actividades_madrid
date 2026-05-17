@@ -216,16 +216,11 @@ body { min-height: max(884px, 100dvh); }
   touch-action: none;
   transform-origin: center center;
   will-change: transform;
+  cursor: grab;
+  user-select: none;
 }
-@keyframes chipAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.fullscreen-image-zoomable:active {
+  cursor: grabbing;
 }
 
 /* Title truncation styles */
@@ -4246,7 +4241,10 @@ function closeImageFullscreen() {
 const fullscreenImage = document.getElementById('fullscreenImage');
 if (fullscreenImage) {
   fullscreenImage.dataset.zoomScale = '1';
+  fullscreenImage.dataset.translateX = '0';
+  fullscreenImage.dataset.translateY = '0';
   let pinchData = { active: false, startDistance: 0, startScale: 1 };
+  let panData = { active: false, startX: 0, startY: 0, translateX: 0, translateY: 0 };
 
   const getDistance = touches => {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -4254,38 +4252,96 @@ if (fullscreenImage) {
     return Math.hypot(dx, dy);
   };
 
+  const updateTransform = () => {
+    const scale = parseFloat(fullscreenImage.dataset.zoomScale || '1');
+    const translateX = parseFloat(fullscreenImage.dataset.translateX || '0');
+    const translateY = parseFloat(fullscreenImage.dataset.translateY || '0');
+    fullscreenImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  };
+
+  const clampTranslate = (translate, maxTranslate) => {
+    return Math.max(-maxTranslate, Math.min(maxTranslate, translate));
+  };
+
   fullscreenImage.addEventListener('touchstart', event => {
     if (event.touches.length === 2) {
       event.preventDefault();
+      panData.active = false;
       pinchData.active = true;
       pinchData.startDistance = getDistance(event.touches);
       pinchData.startScale = parseFloat(fullscreenImage.dataset.zoomScale || '1');
+    } else if (event.touches.length === 1 && parseFloat(fullscreenImage.dataset.zoomScale || '1') > 1) {
+      event.preventDefault();
+      pinchData.active = false;
+      panData.active = true;
+      panData.startX = event.touches[0].clientX;
+      panData.startY = event.touches[0].clientY;
+      panData.translateX = parseFloat(fullscreenImage.dataset.translateX || '0');
+      panData.translateY = parseFloat(fullscreenImage.dataset.translateY || '0');
     }
   }, { passive: false });
 
   fullscreenImage.addEventListener('touchmove', event => {
-    if (!pinchData.active || event.touches.length !== 2) return;
-    event.preventDefault();
-    const distance = getDistance(event.touches);
-    let scale = pinchData.startScale * (distance / pinchData.startDistance);
-    scale = Math.min(4, Math.max(1, scale));
-    fullscreenImage.dataset.zoomScale = scale.toString();
-    fullscreenImage.style.transform = `scale(${scale})`;
+    if (pinchData.active && event.touches.length === 2) {
+      event.preventDefault();
+      const distance = getDistance(event.touches);
+      let scale = pinchData.startScale * (distance / pinchData.startDistance);
+      scale = Math.min(4, Math.max(1, scale));
+      fullscreenImage.dataset.zoomScale = scale.toString();
+      if (scale === 1) {
+        fullscreenImage.dataset.translateX = '0';
+        fullscreenImage.dataset.translateY = '0';
+      }
+      updateTransform();
+    } else if (panData.active && event.touches.length === 1) {
+      event.preventDefault();
+      const deltaX = event.touches[0].clientX - panData.startX;
+      const deltaY = event.touches[0].clientY - panData.startY;
+      const scale = parseFloat(fullscreenImage.dataset.zoomScale || '1');
+      const maxTranslateX = Math.max(0, (fullscreenImage.clientWidth * scale - fullscreenImage.clientWidth) / 2);
+      const maxTranslateY = Math.max(0, (fullscreenImage.clientHeight * scale - fullscreenImage.clientHeight) / 2);
+      let nextTranslateX = panData.translateX + deltaX;
+      let nextTranslateY = panData.translateY + deltaY;
+      nextTranslateX = clampTranslate(nextTranslateX, maxTranslateX);
+      nextTranslateY = clampTranslate(nextTranslateY, maxTranslateY);
+      fullscreenImage.dataset.translateX = nextTranslateX.toString();
+      fullscreenImage.dataset.translateY = nextTranslateY.toString();
+      updateTransform();
+    }
   }, { passive: false });
+
+  const resetGestureState = () => {
+    pinchData.active = false;
+    panData.active = false;
+    if (parseFloat(fullscreenImage.dataset.zoomScale || '1') < 1) {
+      fullscreenImage.dataset.zoomScale = '1';
+    }
+    if (parseFloat(fullscreenImage.dataset.zoomScale || '1') === 1) {
+      fullscreenImage.dataset.translateX = '0';
+      fullscreenImage.dataset.translateY = '0';
+    }
+    updateTransform();
+  };
 
   fullscreenImage.addEventListener('touchend', event => {
     if (event.touches.length < 2) {
-      pinchData.active = false;
-      if (parseFloat(fullscreenImage.dataset.zoomScale || '1') < 1) {
-        fullscreenImage.dataset.zoomScale = '1';
-        fullscreenImage.style.transform = 'scale(1)';
+      if (pinchData.active) {
+        pinchData.active = false;
+      }
+      if (panData.active && event.touches.length === 0) {
+        panData.active = false;
+      }
+      if (parseFloat(fullscreenImage.dataset.zoomScale || '1') === 1) {
+        fullscreenImage.dataset.translateX = '0';
+        fullscreenImage.dataset.translateY = '0';
+        updateTransform();
       }
     }
-  });
+  }, { passive: false });
 
   fullscreenImage.addEventListener('touchcancel', () => {
-    pinchData.active = false;
-  });
+    resetGestureState();
+  }, { passive: false });
 }
 
 function initDetailLocationMap(lat, lon, locationLabel) {
