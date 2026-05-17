@@ -1257,14 +1257,14 @@ body { min-height: max(884px, 100dvh); }
 
 <!-- Location Modal (for adding location when none exists) -->
 <div id="locationModal" class="hidden fixed inset-0 bg-black/50 z-[120] flex items-start sm:items-center justify-center pt-20 sm:pt-0">
-  <div style="background-color: #ffffff;" class="rounded-b-xl sm:rounded-xl w-full max-w-lg p-4 m-4 mt-0 sm:mt-4">
+  <div style="background-color: #ffffff;" class="rounded-xl sm:rounded-xl w-full max-w-lg p-4 m-4 mt-0 sm:mt-4">
     <div class="flex justify-between items-center mb-2">
       <h2 class="font-title-md text-title-md text-on-surface">Tu ubicación</h2>
       <button onclick="closeLocationModal()" class="p-1 hover:bg-surface-variant rounded-full">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <button onclick="getCurrentLocationFromModal()" class="w-full bg-surface-container-high text-on-surface py-2 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-1 mb-3">
+    <button onclick="getCurrentLocationFromModal()" class="w-full bg-primary text-on-primary py-2 rounded-lg font-label-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-1 mb-3">
       <span class="material-symbols-outlined text-base">my_location</span>
       Usar mi ubicación actual
     </button>
@@ -1281,8 +1281,8 @@ body { min-height: max(884px, 100dvh); }
       <input type="text" id="modalAddressInput" placeholder="Ej: Calle Mayor 10, Madrid" 
              class="bg-transparent flex-1 outline-none text-body-md">
     </div>
-    <p id="modalLocationStatus" class="text-label-sm mb-2 min-h-[16px]"></p>
-    <button onclick="geocodeAddressFromModal()" class="w-full bg-primary text-on-primary py-2 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-1">
+    <p id="modalLocationStatus" class="text-label-sm mb-2"></p>
+    <button onclick="geocodeAddressFromModal()" class="w-full bg-surface-container-high text-on-surface py-2 rounded-lg font-label-lg hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center justify-center gap-1">
       <span class="material-symbols-outlined text-base">search</span>
       Buscar
     </button>
@@ -4118,7 +4118,7 @@ function showDetail(id, isNavigation = false) {
         ${activity.link ? `
         <a href="${activity.link}" target="_blank" class="bg-primary text-on-primary py-3 px-4 rounded-lg font-label-lg text-center flex items-center justify-center gap-1 flex-shrink-0">
           <span class="material-symbols-outlined text-lg">open_in_new</span>
-          + info
+          Ver ficha
         </a>
         ` : ''}
         
