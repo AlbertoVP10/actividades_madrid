@@ -1087,6 +1087,75 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </div>
 
+<!-- Sort Modal -->
+<div id="sortModal" class="hidden fixed inset-0 bg-black/60 z-[115] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="sortModalTitle">
+  <div class="bg-[#0a1f2e] rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-white/10">
+      <button onclick="closeSortModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors" aria-label="Cerrar">
+        <span class="material-symbols-outlined text-white">close</span>
+      </button>
+      <h2 id="sortModalTitle" class="font-title-lg text-title-lg text-white">Ordenar por</h2>
+      <div class="w-10"></div>
+    </div>
+    
+    <!-- Sort Options -->
+    <div class="p-4 space-y-1">
+      <!-- Popularidad -->
+      <label class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
+        <span class="text-body-lg text-white">Popularidad</span>
+        <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center sort-check" data-value="popular">
+          <span class="material-symbols-outlined text-white text-sm hidden">check</span>
+        </div>
+        <input type="radio" name="sortOption" value="popular" class="hidden" onchange="selectSortOption('popular')">
+      </label>
+      
+      <!-- Precio -->
+      <label class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
+        <span class="text-body-lg text-white">Precio (de más bajo a más alto)</span>
+        <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center sort-check" data-value="price">
+          <span class="material-symbols-outlined text-white text-sm hidden">check</span>
+        </div>
+        <input type="radio" name="sortOption" value="price" class="hidden" onchange="selectSortOption('price')">
+      </label>
+      
+      <!-- Valoración -->
+      <label class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
+        <span class="text-body-lg text-white">Valoración (de 5 a 0)</span>
+        <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center sort-check" data-value="rating">
+          <span class="material-symbols-outlined text-white text-sm hidden">check</span>
+        </div>
+        <input type="radio" name="sortOption" value="rating" class="hidden" onchange="selectSortOption('rating')">
+      </label>
+      
+      <!-- Próxima fecha -->
+      <label class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
+        <span class="text-body-lg text-white">Próxima fecha</span>
+        <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center sort-check" data-value="recent">
+          <span class="material-symbols-outlined text-white text-sm hidden">check</span>
+        </div>
+        <input type="radio" name="sortOption" value="recent" class="hidden" onchange="selectSortOption('recent')">
+      </label>
+      
+      <!-- Distancia -->
+      <label class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
+        <span class="text-body-lg text-white">Distancia</span>
+        <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center sort-check" data-value="distance">
+          <span class="material-symbols-outlined text-white text-sm hidden">check</span>
+        </div>
+        <input type="radio" name="sortOption" value="distance" class="hidden" onchange="selectSortOption('distance')">
+      </label>
+    </div>
+    
+    <!-- Apply Button -->
+    <div class="p-4 mt-auto border-t border-white/10">
+      <button onclick="applySortSelection()" class="w-full bg-[#4a9eff] text-[#0a1f2e] py-4 rounded-full font-title-md text-title-md font-semibold hover:bg-[#3a8eef] transition-colors">
+        Aplicar
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Info Modal -->
 <div id="infoModal" class="hidden fixed inset-0 bg-black/50 z-[115] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
   <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
@@ -2459,20 +2528,89 @@ function toggleFilters() {
   }
 }
 
-// Sort Modal function
+// Sort Modal functions
+let selectedSortOption = 'recent';
+
 function openSortModal() {
-  // Open filters panel and scroll to sort section
-  const panel = document.getElementById('filtersPanel');
-  panel.classList.remove('hidden');
+  // Get current sort value
+  selectedSortOption = currentFilters.sort || 'recent';
   
-  // Scroll to sort section after panel opens
-  setTimeout(() => {
-    const sortSection = panel.querySelector('#sortSelect');
-    if (sortSection) {
-      sortSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      sortSection.focus();
+  // Update UI to show current selection
+  updateSortModalUI();
+  
+  // Show modal
+  document.getElementById('sortModal').classList.remove('hidden');
+  document.addEventListener('keydown', handleSortModalKeydown);
+}
+
+function closeSortModal() {
+  document.getElementById('sortModal').classList.add('hidden');
+  document.removeEventListener('keydown', handleSortModalKeydown);
+}
+
+function handleSortModalKeydown(event) {
+  if (event.key === 'Escape') {
+    closeSortModal();
+  }
+}
+
+function selectSortOption(value) {
+  selectedSortOption = value;
+  updateSortModalUI();
+}
+
+function updateSortModalUI() {
+  // Update all check indicators
+  document.querySelectorAll('.sort-check').forEach(check => {
+    const checkIcon = check.querySelector('.material-symbols-outlined');
+    if (check.dataset.value === selectedSortOption) {
+      check.classList.add('bg-white', 'border-white');
+      checkIcon.classList.remove('hidden');
+    } else {
+      check.classList.remove('bg-white', 'border-white');
+      checkIcon.classList.add('hidden');
     }
-  }, 100);
+  });
+  
+  // Update radio inputs
+  document.querySelectorAll('input[name="sortOption"]').forEach(radio => {
+    radio.checked = radio.value === selectedSortOption;
+  });
+}
+
+function applySortSelection() {
+  // Update current filters
+  currentFilters.sort = selectedSortOption;
+  
+  // Update the hidden select in filters panel
+  const sortSelect = document.getElementById('sortSelect');
+  if (sortSelect) {
+    // Map modal values to select values
+    const valueMap = {
+      'popular': 'recent', // Popularidad -> Más recientes (fallback)
+      'price': 'price',
+      'rating': 'recent', // Valoración -> Más recientes (fallback)
+      'recent': 'recent',
+      'distance': 'distance'
+    };
+    sortSelect.value = valueMap[selectedSortOption] || 'recent';
+  }
+  
+  // Show location input if distance is selected
+  const locationInput = document.getElementById('locationInput');
+  if (locationInput) {
+    if (selectedSortOption === 'distance') {
+      locationInput.classList.remove('hidden');
+    } else {
+      locationInput.classList.add('hidden');
+    }
+  }
+  
+  // Apply filters
+  applyFilters();
+  
+  // Close modal
+  closeSortModal();
 }
 
 // Location Modal functions
@@ -4574,6 +4712,13 @@ function clearFilters() {
 document.getElementById('filtersPanel').addEventListener('click', function(e) {
   if (e.target === this) {
     toggleFilters();
+  }
+});
+
+// Close sort modal on outside click
+document.getElementById('sortModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeSortModal();
   }
 });
 
