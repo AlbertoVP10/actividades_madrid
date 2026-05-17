@@ -886,8 +886,9 @@ body { min-height: max(884px, 100dvh); }
     </button>
   </div> -->
 
+  <!-- SearchBar Section -->
   <div class="bg-background flex items-center justify-center w-full px-4 py-3 sticky top-16 z-40 border-b border-outline-variant/20">
-    <div class="flex items-center bg-surface-container-low rounded-full px-2 py-1 border border-outline-variant/30 w-full max-w-md">
+    <div class="flex items-center bg-surface-container-low rounded-full px-2 py-1 border border-outline-variant/30 w-full ">
       <span class="material-symbols-outlined text-on-surface-variant ml-2">search</span>
       <input type="text" id="searchInput" placeholder="Buscar actividades..." class="flex-1 bg-transparent text-body-md text-on-surface outline-none border-none placeholder:text-on-surface-variant/60 px-2 py-1 min-w-0" oninput="applyFilters()">
 
@@ -1541,7 +1542,7 @@ body { min-height: max(884px, 100dvh); }
   </div>
 
   <div id="profileDonateFooter" class="fixed inset-x-0 bottom-[88px] z-50 hidden px-4">
-    <div class="mx-auto max-w-4xl rounded-3xl bg-gradient-to-r from-primary to-primary-light p-3 text-white shadow-2xl shadow-black/10 flex items-center justify-between gap-3">
+    <div class="mx-auto rounded-3xl bg-gradient-to-r from-primary to-primary-light p-3 text-white shadow-2xl shadow-black/10 flex items-center justify-between gap-3">
       <div class="min-w-0">
         <p class="font-semibold text-sm">¿Te gusta la app?</p>
         <p class="text-xs text-white/80">Ayuda a mantenerla gratuita con una donación.</p>
@@ -1592,8 +1593,8 @@ body { min-height: max(884px, 100dvh); }
 </main>
 
 <!-- Activity Detail Modal -->
-<div id="detailModal" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-end sm:items-center justify-center">
-  <div id="detailModalContent" style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+<div id="detailModal" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-0">
+  <div id="detailModalContent" style="background-color: #ffffff;" class="w-full h-full sm:w-full sm:h-full rounded-none flex flex-col overflow-hidden">
     <!-- Imagen header con scroll effect -->
     <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 40vh; min-height: 200px;">
       <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
@@ -1605,6 +1606,7 @@ body { min-height: max(884px, 100dvh); }
     <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
       <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
         <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2"></h2>
+        <div id="detailHeaderButtons" class="flex gap-2 items-center"></div>
       </div>
       <div id="detailContent" class="p-4 space-y-4 pb-20">
         <!-- Content will be inserted here -->
@@ -2025,11 +2027,12 @@ function handleSwipe() {
 // Global state
 let allActivities = [];
 let filteredActivities = [];
-let favorites = JSON.parse(localStorage.getItem('madridFavorites') || '[]');
+let favorites = (JSON.parse(localStorage.getItem('madridFavorites') || '[]') || []).map(String);
 let currentPage = 0;
 let itemsPerPage = 10;
 let userLocation = null;
 let map = null;
+let detailMap = null;
 let markers = [];
 let currentView = 'list';
 let currentDetailId = null;
@@ -2153,7 +2156,7 @@ function getValidFavorites() {
   today.setHours(0, 0, 0, 0);
   
   return favorites.filter(id => {
-    const activity = allActivities.find(a => a.id === id);
+    const activity = allActivities.find(a => String(a.id) === id);
     if (!activity) return false;
     
     // Check if activity has expired
@@ -2173,7 +2176,7 @@ function getExpiredFavorites() {
   today.setHours(0, 0, 0, 0);
   
   return favorites.filter(id => {
-    const activity = allActivities.find(a => a.id === id);
+    const activity = allActivities.find(a => String(a.id) === id);
     if (!activity) return true; // Consider non-existent as expired
     
     if (activity.date) {
@@ -2224,7 +2227,7 @@ async function init() {
   // Set default tab to 'recent'
   setMainTab('recent');
   // Initialize KPI Near button state
-  updateKPINearButton();
+  // updateKPINearButton();
 }
 
 // Check password
@@ -2528,8 +2531,8 @@ async function geocodeAddressFromModal() {
       status.className = 'text-label-sm mb-4 text-green-600';
       
       // Update KPI to show number instead of button
-      updateKPIs();
-      updateKPINearButton();
+      // updateKPIs();
+      // updateKPINearButton();
       
       // Close modal after a short delay
       setTimeout(() => {
@@ -2601,8 +2604,8 @@ function getCurrentLocationFromModal() {
       status.className = 'text-label-sm mb-2 text-green-600';
       
       // Update KPI to show number instead of button
-      updateKPIs();
-      updateKPINearButton();
+      // updateKPIs();
+      // updateKPINearButton();
       
       // Close modal after a short delay
       setTimeout(() => {
@@ -3369,16 +3372,16 @@ function updateKPIs() {
   const validFavs = getValidFavorites();
   const kpiFavorites = baseActivities.filter(a => validFavs.includes(a.id)).length;
 
-  document.getElementById('kpiToday').textContent = kpiToday;
-  document.getElementById('kpiWeek').textContent = kpiWeek;
-  document.getElementById('kpiNear').textContent = kpiNear;
-  document.getElementById('kpiFavorites').textContent = kpiFavorites;
+  // document.getElementById('kpiToday').textContent = kpiToday;
+  // document.getElementById('kpiWeek').textContent = kpiWeek;
+  // document.getElementById('kpiNear').textContent = kpiNear;
+  // document.getElementById('kpiFavorites').textContent = kpiFavorites;
 
   // Update KPI Favorites visual state
   updateKPIFavoritesStyle();
 
   // Update KPI Near button state
-  updateKPINearButton();
+  // updateKPINearButton();
 }
 
 // Update active filter chips display
@@ -3658,9 +3661,13 @@ function renderActivities() {
 }
 
 // Toggle favorite
-function toggleFavorite(event, id) {
-  event.stopPropagation();
+function toggleFavorite(event, id, refreshDetail = false) {
+  event = event || window.event;
+  if (event && event.stopPropagation) {
+    event.stopPropagation();
+  }
   
+  id = String(id);
   const index = favorites.indexOf(id);
   if (index > -1) {
     favorites.splice(index, 1);
@@ -3671,7 +3678,11 @@ function toggleFavorite(event, id) {
   localStorage.setItem('madridFavorites', JSON.stringify(favorites));
   updateFavCount();
   renderActivities();
-  updateKPIs();
+  // updateKPIs();
+  
+  if (refreshDetail && currentDetailId === id) {
+    showDetail(id);
+  }
 }
 
 // Compartir actividad
@@ -3751,6 +3762,7 @@ function showDetail(id) {
   const activity = allActivities.find(a => a.id === id);
   if (!activity) return;
   
+  id = String(id);
   currentDetailId = id;
   
   // Construir string de fecha para el detalle (rango si aplica - comparando solo día)
@@ -3766,9 +3778,10 @@ function showDetail(id) {
       dateStr = startStr;
     }
   }
+  id = String(id);
   const isFav = favorites.includes(id);
   
-  const currentIndex = filteredActivities.findIndex(a => a.id === id);
+  const currentIndex = filteredActivities.findIndex(a => String(a.id) === id);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < filteredActivities.length - 1;
 
@@ -3777,11 +3790,14 @@ function showDetail(id) {
   document.getElementById('detailImage').src = defaultImageUrl;
   document.getElementById('detailImage').alt = activity.title;
   document.getElementById('fullscreenImage').src = defaultImageUrl;
+  const detailImage = document.getElementById('detailImage');
   
   // Reset image height on open
   const imageContainer = document.getElementById('detailImageContainer');
   if (imageContainer) {
     imageContainer.style.height = '40vh';
+    imageContainer.style.backgroundColor = '#000';
+    imageContainer.style.overflow = 'hidden';
   }
   
   // Setup scroll handler for image resize
@@ -3789,20 +3805,40 @@ function showDetail(id) {
   if (scrollContainer) {
     scrollContainer.onscroll = function() {
       const scrollTop = scrollContainer.scrollTop;
-      const maxScroll = 150;
-      const minHeight = 120;
+      const minHeight = 56;
       const maxHeight = window.innerHeight * 0.4;
       
       if (scrollTop > 0) {
-        const newHeight = Math.max(minHeight, maxHeight - (scrollTop * 0.8));
+        const newHeight = Math.max(minHeight, maxHeight - (scrollTop * 1.2));
         imageContainer.style.height = newHeight + 'px';
+        detailImage.style.opacity = Math.max(0, 1 - scrollTop / 100);
+        detailImage.style.transform = `scale(${Math.max(0.95, 1 - scrollTop / 800)})`;
+        if (newHeight <= minHeight + 2) {
+          detailImage.style.visibility = 'hidden';
+        } else {
+          detailImage.style.visibility = 'visible';
+        }
       } else {
         imageContainer.style.height = maxHeight + 'px';
+        detailImage.style.opacity = '1';
+        detailImage.style.transform = 'scale(1)';
+        detailImage.style.visibility = 'visible';
       }
     };
   }
 
   document.getElementById('detailTitle').textContent = activity.title;
+  
+  // Render header buttons (share and favorite)
+  const detailHeaderButtons = document.getElementById('detailHeaderButtons');
+  detailHeaderButtons.innerHTML = `
+    <button onclick="shareActivity('${activity.id}')" class="border text-on-surface w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Compartir">
+      <span class="material-symbols-outlined text-xl">share</span>
+    </button>
+    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-primary text-on-primary' : 'text-on-surface'} border w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Favorito">
+      <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''}">favorite</span>
+    </button>
+  `;
   
   document.getElementById('detailContent').innerHTML = `
     <div class="space-y-4">
@@ -3893,13 +3929,10 @@ function showDetail(id) {
           </div>
         </div>
         ` : ''}
+        
       </div>
       
       <div class="flex gap-3 pb-4">
-        <button onclick="toggleFavorite(event, '${activity.id}'); showDetail('${activity.id}')" class="${isFav ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
-        </button>
-        
         ${activity.link ? `
         <a href="${activity.link}" target="_blank" class="bg-primary text-on-primary py-3 px-4 rounded-lg font-label-lg text-center flex items-center justify-center gap-1 flex-shrink-0">
           <span class="material-symbols-outlined text-lg">open_in_new</span>
@@ -3907,12 +3940,9 @@ function showDetail(id) {
         </a>
         ` : ''}
         
-        <button onclick="shareActivity('${activity.id}')" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-surface-variant transition-colors" title="Compartir">
-          <span class="material-symbols-outlined">share</span>
-        </button>
-        
-        <button onclick="addToCalendar('${activity.id}')" class="bg-surface-container-high text-on-surface w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-surface-variant transition-colors" title="Añadir al calendario">
+        <button onclick="addToCalendar('${activity.id}')" class="bg-surface-container-high text-on-surface py-3 px-4 rounded-lg flex items-center justify-center gap-1 flex-shrink-0 hover:bg-surface-variant transition-colors" title="Añadir al calendario">
           <span class="material-symbols-outlined">event</span>
+          <span class="text-label-lg font-medium">Calendario</span>
         </button>
         
         ${activity.lat && activity.lon ? `
@@ -3921,6 +3951,16 @@ function showDetail(id) {
         </a>
         ` : ''}
       </div>
+      ${activity.lat && activity.lon ? `
+        <div class="space-y-3">
+          <h2 class="font-title-lg text-title-lg text-left px-2">Ubicación</h2>
+          <p class="text-body-md">${activity.location || 'Ubicación desconocida'}${activity.distance ? ` • ${activity.distance.toFixed(1)} km` : ''}</p>
+          <div id="detailLocationMap" class="w-full h-52 sm:h-64 md:h-80 lg:h-96 rounded-3xl overflow-hidden bg-surface-container-low" style="touch-action: pan-y pinch-zoom;"></div>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activity.lat + ',' + activity.lon)}" target="_blank" class="inline-flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-on-primary font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M320-360h80v-120h140v100l140-140-140-140v100H360q-17 0-28.5 11.5T320-520v160ZM480-80q-15 0-29.5-6T424-104L104-424q-12-12-18-26.5T80-480q0-15 6-29.5t18-26.5l320-320q12-12 26.5-18t29.5-6q15 0 29.5 6t26.5 18l320 320q12 12 18 26.5t6 29.5q0 15-6 29.5T856-424L536-104q-12 12-26.5 18T480-80ZM320-320l160 160 320-320-320-320-320 320 160 160Zm160-160Z"/></svg>            Cómo llegar
+          </a>
+        </div>
+        ` : ''}
     </div>
   `;
   
@@ -3930,12 +3970,19 @@ function showDetail(id) {
   if (scrollContainer) {
     scrollContainer.scrollTop = 0;
   }
+  if (activity.lat && activity.lon) {
+    initDetailLocationMap(activity.lat, activity.lon, activity.location || 'Ubicación');
+  }
 }
 
 // Close detail modal
 function closeDetail() {
   document.getElementById('detailModal').classList.add('hidden');
   currentDetailId = null;
+  if (detailMap) {
+    detailMap.remove();
+    detailMap = null;
+  }
 }
 
 // Open image fullscreen
@@ -3948,6 +3995,44 @@ function openImageFullscreen() {
 function closeImageFullscreen() {
   document.getElementById('imageFullscreenModal').classList.add('hidden');
   document.body.style.overflow = '';
+}
+
+function initDetailLocationMap(lat, lon, locationLabel) {
+  const mapContainer = document.getElementById('detailLocationMap');
+  if (!mapContainer) return;
+  if (detailMap) {
+    detailMap.remove();
+    detailMap = null;
+  }
+
+  detailMap = L.map(mapContainer, {
+    attributionControl: false,
+    zoomControl: true,
+    dragging: true,
+    scrollWheelZoom: true,
+    doubleClickZoom: true,
+    touchZoom: true,
+    boxZoom: false
+  }).setView([lat, lon], 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(detailMap);
+
+  const detailIcon = L.divIcon({
+    className: 'detail-marker',
+    html: `<div class="detail-marker-icon bg-primary" style="width:20px; height:20px; border-radius:50% 50% 50% 0; transform: rotate(-45deg); border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 20],
+    popupAnchor: [0, -18]
+  });
+
+  L.marker([lat, lon], { icon: detailIcon }).addTo(detailMap)
+    .bindPopup(`<strong>${locationLabel}</strong>`).openPopup();
+  // Invalidate size after a short delay to ensure container is visible and sized
+  setTimeout(() => {
+    try { detailMap.invalidateSize(); } catch (e) { /* ignore */ }
+  }, 200);
 }
 
 // Navigate to previous activity
