@@ -2251,7 +2251,16 @@ function getValidFavorites() {
     if (activity.date) {
       const activityDate = new Date(activity.date);
       activityDate.setHours(0, 0, 0, 0);
-      if (activityDate < today) return false;
+      
+      // If activity has both start and end dates, only filter if both are before today
+      if (activity.endDate) {
+        const endDate = new Date(activity.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        if (endDate < today && activityDate < today) return false;
+      } else {
+        // If only start date, filter if start is before today
+        if (activityDate < today) return false;
+      }
     }
     
     return true;
@@ -2270,7 +2279,16 @@ function getExpiredFavorites() {
     if (activity.date) {
       const activityDate = new Date(activity.date);
       activityDate.setHours(0, 0, 0, 0);
-      return activityDate < today;
+      
+      // If activity has both start and end dates, only consider expired if both are before today
+      if (activity.endDate) {
+        const endDate = new Date(activity.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate < today && activityDate < today;
+      } else {
+        // If only start date, consider expired if start is before today
+        return activityDate < today;
+      }
     }
     
     return false;
