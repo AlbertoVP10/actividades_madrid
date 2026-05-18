@@ -1188,13 +1188,13 @@ body { min-height: max(884px, 100dvh); }
               <p class="text-label-md text-on-surface-variant">Ayúdanos a mantener la app gratuita</p>
             </div>
           </a>
-          <a href="https://actividadesmadrid.shop" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          <!-- <a href="https://actividadesmadrid.shop" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
             <span class="material-symbols-outlined text-primary">shopping_bag</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Tienda</p>
               <p class="text-label-md text-on-surface-variant">Productos y merchandising</p>
             </div>
-          </a>
+          </a> -->
         </div>
       </div>
 
@@ -1209,20 +1209,20 @@ body { min-height: max(884px, 100dvh); }
               <p class="text-label-md text-on-surface-variant">@nicola</p>
             </div>
           </a>
-          <a href="https://twitter.com/actividadesmad" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          <!-- <a href="https://twitter.com/actividadesmad" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
             <span class="material-symbols-outlined text-primary">chat</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Twitter</p>
               <p class="text-label-md text-on-surface-variant">@actividadesmad</p>
             </div>
-          </a>
-          <a href="https://facebook.com/actividadesmadrid" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          </a> -->
+          <!-- <a href="https://facebook.com/actividadesmadrid" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
             <span class="material-symbols-outlined text-primary">group</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Facebook</p>
               <p class="text-label-md text-on-surface-variant">Actividades Madrid</p>
             </div>
-          </a>
+          </a> -->
         </div>
       </div>
 
@@ -1244,8 +1244,39 @@ body { min-height: max(884px, 100dvh); }
               <p class="text-label-md text-on-surface-variant">Ayúdanos a mejorar</p>
             </div>
           </a>
+          <a href="mailto:colabora@actividadesmadrid.com?subject=Colabora%20con%20nosotros" class="flex flex-col gap-2 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary">handshake</span>
+              <div>
+                <p class="font-label-lg text-label-lg text-on-surface">Colabora con nosotros</p>
+                <p class="text-label-md text-on-surface-variant">Participa en el desarrollo o envía actividades</p>
+              </div>
+            </div>
+          </a>
         </div>
       </div>
+
+      <!-- Legal -->
+      <div class="space-y-3">
+        <h3 class="font-title-md text-title-md text-on-surface">Legal</h3>
+        <div class="grid grid-cols-1 gap-3">
+          <button onclick="showPrivacyPolicy()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors text-left">
+            <span class="material-symbols-outlined text-primary">privacy_tip</span>
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Política de privacidad</p>
+              <p class="text-label-md text-on-surface-variant">Consulta cómo usamos tus datos</p>
+            </div>
+          </button>
+          <button onclick="showTermsAndConditions()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors text-left">
+            <span class="material-symbols-outlined text-primary">gavel</span>
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Términos y condiciones</p>
+              <p class="text-label-md text-on-surface-variant">Lee nuestras condiciones de uso</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
 
       <!-- Version -->
       <div class="pt-4 border-t border-surface-variant/20">
@@ -1441,13 +1472,6 @@ body { min-height: max(884px, 100dvh); }
           </div>
           <span class="material-symbols-outlined text-text-muted">chevron_right</span>
         </button>
-        <button onclick="showPrivacyPolicy()" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-text-muted">shield</span>
-            <span>Privacidad</span>
-          </div>
-          <span class="material-symbols-outlined text-text-muted">chevron_right</span>
-        </button>
         <a href="https://instagram.com" target="_blank" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-text-muted">photo_camera</span>
@@ -1598,15 +1622,7 @@ body { min-height: max(884px, 100dvh); }
 
     <div class="bg-white rounded-3xl p-4 space-y-4">
       <button onclick="saveProfileSettings()" class="w-full rounded-3xl bg-primary text-on-primary py-3 font-semibold">Guardar cambios</button>
-      <!-- <button onclick="showPrivacyPolicy()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Política de privacidad</button> -->
-      <!-- <button onclick="showTermsAndConditions()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Términos y condiciones</button> -->
     </div>
-    <h3 class="font-semibold mb-4">Legal</h3>
-    <div class="bg-white rounded-3xl p-4 space-y-4">
-      <button onclick="showPrivacyPolicy()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Política de privacidad</button>
-      <button onclick="showTermsAndConditions()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Términos y condiciones</button>
-    </div>
-
     <div class="bg-white rounded-3xl p-4 space-y-3">
       <button onclick="deleteAccount()" class="w-full rounded-3xl bg-error-container text-on-error-container py-3 font-semibold">Borrar cuenta</button>
       <button onclick="logout()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Salir</button>
