@@ -1161,16 +1161,15 @@ body { min-height: max(884px, 100dvh); }
   </div>
 </div>
 
-<!-- Info Modal -->
-<div id="infoModal" class="hidden fixed inset-0 bg-black/50 z-[115] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
-  <div style="background-color: #ffffff;" class="rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto pb-20">
-    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 flex justify-between items-center z-10">
-      <h2 id="infoModalTitle" class="font-title-lg text-title-lg pr-4">Información</h2>
-      <button onclick="closeInfo()" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Cerrar información">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div id="infoContent" class="p-4 space-y-6">
+<!-- Info View -->
+<div id="infoView" class="hidden px-4 pt-4 pb-24 space-y-4">
+  <div class="sticky top-0 z-10 bg-background p-4 border-b border-surface-variant/20 flex items-center gap-4">
+    <button onclick="closeInfo()" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <h2 id="infoViewTitle" class="font-title-lg text-title-lg">Información</h2>
+  </div>
+  <div id="infoContent" class="space-y-6">
       <!-- App Description -->
       <div class="space-y-3">
         <h3 class="font-title-md text-title-md text-on-surface">Sobre la App</h3>
@@ -2251,16 +2250,7 @@ function getValidFavorites() {
     if (activity.date) {
       const activityDate = new Date(activity.date);
       activityDate.setHours(0, 0, 0, 0);
-      
-      // If activity has both start and end dates, only filter if both are before today
-      if (activity.endDate) {
-        const endDate = new Date(activity.endDate);
-        endDate.setHours(0, 0, 0, 0);
-        if (endDate < today && activityDate < today) return false;
-      } else {
-        // If only start date, filter if start is before today
-        if (activityDate < today) return false;
-      }
+      if (activityDate < today) return false;
     }
     
     return true;
@@ -2279,16 +2269,7 @@ function getExpiredFavorites() {
     if (activity.date) {
       const activityDate = new Date(activity.date);
       activityDate.setHours(0, 0, 0, 0);
-      
-      // If activity has both start and end dates, only consider expired if both are before today
-      if (activity.endDate) {
-        const endDate = new Date(activity.endDate);
-        endDate.setHours(0, 0, 0, 0);
-        return endDate < today && activityDate < today;
-      } else {
-        // If only start date, consider expired if start is before today
-        return activityDate < today;
-      }
+      return activityDate < today;
     }
     
     return false;
@@ -2378,7 +2359,9 @@ async function loadActivities() {
       // Filter out past activities
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      allActivities = allActivities.filter(a => !a.date || a.date >= today 
+                      // || (a.endDate && a.endDate >= today)
+                  );
       
       populateFilters();
       applyFilters();
@@ -2664,12 +2647,15 @@ function applySortSelection() {
 // Location Modal functions
 // Info Modal functions
 function openInfo() {
-  document.getElementById('infoModal').classList.remove('hidden');
+  window.previousViewBeforeInfo = currentView;
+  showView('info');
   document.addEventListener('keydown', handleInfoModalKeydown);
 }
 
 function closeInfo() {
-  document.getElementById('infoModal').classList.add('hidden');
+  const previousView = window.previousViewBeforeInfo || 'home';
+  showView(previousView);
+  updateBottomTabUI(previousView);
   document.removeEventListener('keydown', handleInfoModalKeydown);
 }
 
@@ -4551,6 +4537,7 @@ function showView(view) {
   document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
   document.getElementById('profileSettingsView').classList.toggle('hidden', view !== 'profileSettings');
   document.getElementById('detailView').classList.toggle('hidden', view !== 'detail');
+  document.getElementById('infoView').classList.toggle('hidden', view !== 'info');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
   
@@ -4568,7 +4555,7 @@ function showView(view) {
   }
 
   // if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile');
-  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail');
+  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail'|| view === 'info');
   if (profileDonateFooter) profileDonateFooter.classList.toggle('hidden', view !== 'profile');
 
   if (view === 'map') {
