@@ -52,15 +52,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Leer el archivo HTML
-html_file = os.path.join(os.path.dirname(__file__), 'www/index.html')
+# Defino las rutas de mis archivos
+base_dir = os.path.dirname(__file__)
+html_file = os.path.join(base_dir, 'www/index.html')
+css_file = os.path.join(base_dir, 'www/css/styles.css')
+js_file = os.path.join(base_dir, 'www/js/app.js')
 
+# 2. Verificar y leer todos los componentes
 if os.path.exists(html_file):
+    # Leer el HTML base
     with open(html_file, 'r', encoding='utf-8') as f:
         html_content = f.read()
-    
-    # Mostrar el HTML en un iframe
+
+    # Leer CSS si existe, si no, inicializar vacío
+    css_content = ""
+    if os.path.exists(css_file):
+        with open(css_file, 'r', encoding='utf-8') as f:
+            css_content = f"<style>{f.read()}</style>"
+
+    # Leer JS si existe, si no, inicializar vacío
+    js_content = ""
+    if os.path.exists(js_file):
+        with open(js_file, 'r', encoding='utf-8') as f:
+            js_content = f"<script>{f.read()}</script>"
+
+    # 3. Inyectar dinámicamente los estilos y scripts al final de la estructura
+    # Colocamos el CSS antes de cerrar </head> y el JS antes de cerrar </body>
+    html_content = html_content.replace("</head>", f"{css_content}</head>")
+    html_content = html_content.replace("</body>", f"{js_content}</body>")
+
+    # 4. Mostrar el resultado a pantalla completa
+    # Nota: El height aquí da igual por el CSS forzado a 100vh del iframe
     st.components.v1.html(html_content, height=1000, scrolling=True)
+
 else:
     st.error("No se encontró el archivo index.html")
-    st.info("Asegúrate de que el archivo index.html esté en la misma carpeta que este script.")
+    st.info("Asegúrate de que la carpeta 'www' exista al lado de app.py.")
