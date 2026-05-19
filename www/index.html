@@ -1524,12 +1524,13 @@ body { min-height: max(884px, 100dvh); }
   </div>
 
   <div id="profileSettingsView" class="hidden px-4 pt-4 pb-4 space-y-4">
-    <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2">
+    <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2 pb-2">
       <button onclick="showView('profile')" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver al perfil">
         <span class="material-symbols-outlined">arrow_back</span>
       </button>
       <h2 class="font-title-lg text-title-lg">Ajustes de cuenta</h2>
     </div>
+    <div class="space-y-6">
 
     <!-- <h3 class="font-semibold mb-4">Perfil</h3>
     <div class="bg-white rounded-3xl p-4 space-y-4">
@@ -1579,7 +1580,7 @@ body { min-height: max(884px, 100dvh); }
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileNotificationsCheckbox" type="checkbox" class="sr-only peer" aria-label="Notificaciones">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </button>
         <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('promotionalEmails')" type="button">
@@ -1590,7 +1591,7 @@ body { min-height: max(884px, 100dvh); }
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileEmailsCheckbox" type="checkbox" class="sr-only peer" aria-label="Email">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </button>
         <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('locationAccess')" type="button">
@@ -1601,7 +1602,7 @@ body { min-height: max(884px, 100dvh); }
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileLocationCheckbox" type="checkbox" class="sr-only peer" aria-label="Ubicación">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </button>
       </div>
@@ -1634,6 +1635,7 @@ body { min-height: max(884px, 100dvh); }
         </button>
       </div>
     </div>
+  </div>
   </div>
 
   <div id="profileDonateFooter" class="fixed inset-x-0 bottom-[88px] z-50 hidden px-4">
