@@ -1523,17 +1523,12 @@ body { min-height: max(884px, 100dvh); }
     </div> -->
   </div>
 
-  <div id="profileSettingsView" class="hidden space-y-4 pb-40">
-    <div class="bg-white rounded-3xl p-4">
-      <div class="flex items-center gap-3">
-        <button onclick="showView('profile')" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver al perfil">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
-        <div>
-          <p class="font-semibold mb-4">Ajustes de cuenta</p>
-          <!-- <h2 class="font-title-md text-title-md">Editar perfil</h2> -->
-        </div>
-      </div>
+  <div id="profileSettingsView" class="hidden px-4 pt-4 pb-4 space-y-4">
+    <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2">
+      <button onclick="showView('profile')" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver al perfil">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h2 class="font-title-lg text-title-lg">Ajustes de cuenta</h2>
     </div>
 
     <!-- <h3 class="font-semibold mb-4">Perfil</h3>
@@ -1572,61 +1567,72 @@ body { min-height: max(884px, 100dvh); }
       </div>
     </div> -->
 
-    <h3 class="font-semibold mb-4">Preferencias de comunicaciones</h3>
+    <!-- Preferencias de comunicaciones -->
     <div class="space-y-3">
-      <button class="w-full flex flex-col gap-2 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('notifications')" type="button">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">notifications</span>
-            <div class="text-left">
-              <p class="font-label-lg text-label-lg text-on-surface">Notificaciones</p>
-              <p class="text-label-lg text-on-surface-variant">Notificaciones personalizadas sobre los mejores planes de tu ciudad.</p>
-            </div>
+      <h3 class="font-title-md text-title-md text-on-surface">Preferencias de comunicaciones</h3>
+      <div class="grid grid-cols-1 gap-3">
+        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('notifications')" type="button">
+          <span class="material-symbols-outlined text-primary px-2">notifications</span>
+          <div class="flex-1 text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Notificaciones</p>
+            <p class="text-label-lg text-on-surface-variant">Notificaciones personalizadas sobre los mejores planes de tu ciudad.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileNotificationsCheckbox" type="checkbox" class="sr-only peer" aria-label="Notificaciones">
             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
-        </div>
-      </button>
-      <button class="w-full flex flex-col gap-2 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('promotionalEmails')" type="button">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">mail</span>
-            <div class="text-left">
-              <p class="font-label-lg text-label-lg text-on-surface">Email</p>
-              <p class="text-label-lg text-on-surface-variant">Recibe cupones, descuentos, ofertas exclusivas y las últimas novedades.</p>
-            </div>
+        </button>
+        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('promotionalEmails')" type="button">
+          <span class="material-symbols-outlined text-primary px-2">mail</span>
+          <div class="flex-1 text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Email</p>
+            <p class="text-label-lg text-on-surface-variant">Recibe cupones, descuentos, ofertas exclusivas y las últimas novedades.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileEmailsCheckbox" type="checkbox" class="sr-only peer" aria-label="Email">
             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
-        </div>
-      </button>
-      <button class="w-full flex flex-col gap-2 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('locationAccess')" type="button">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">location_on</span>
-            <div class="text-left">
-              <p class="font-label-lg text-label-lg text-on-surface">Activar mi localización</p>
-              <p class="text-label-lg text-on-surface-variant">Usamos tu ubicación para mejorar tu experiencia.</p>
-            </div>
+        </button>
+        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('locationAccess')" type="button">
+          <span class="material-symbols-outlined text-primary px-2">location_on</span>
+          <div class="flex-1 text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Activar mi localización</p>
+            <p class="text-label-lg text-on-surface-variant">Usamos tu ubicación para mejorar tu experiencia.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileLocationCheckbox" type="checkbox" class="sr-only peer" aria-label="Ubicación">
             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
-        </div>
-      </button>
+        </button>
+      </div>
     </div>
 
-    <div class="bg-white rounded-3xl p-4 space-y-4">
-      <button onclick="saveProfileSettings()" class="w-full rounded-3xl bg-primary text-on-primary py-3 font-semibold">Guardar cambios</button>
-    </div>
-    <div class="bg-white rounded-3xl p-4 space-y-3">
-      <button onclick="deleteAccount()" class="w-full rounded-3xl bg-error-container text-on-error-container py-3 font-semibold">Borrar cuenta</button>
-      <button onclick="logout()" class="w-full rounded-3xl border border-outline bg-surface py-3 text-on-surface">Salir</button>
+    <!-- Acciones de cuenta -->
+    <div class="space-y-3">
+      <h3 class="font-title-md text-title-md text-on-surface">Acciones de cuenta</h3>
+      <div class="grid grid-cols-1 gap-3">
+        <button onclick="saveProfileSettings()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-primary px-2">save</span>
+          <div class="text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Guardar cambios</p>
+            <p class="text-label-lg text-on-surface-variant">Guarda tus preferencias actualizadas.</p>
+          </div>
+        </button>
+        <button onclick="deleteAccount()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-error px-2">delete_forever</span>
+          <div class="text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Borrar cuenta</p>
+            <p class="text-label-lg text-on-surface-variant">Elimina permanentemente tu cuenta.</p>
+          </div>
+        </button>
+        <button onclick="logout()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-on-surface-variant px-2">logout</span>
+          <div class="text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Salir</p>
+            <p class="text-label-lg text-on-surface-variant">Cierra tu sesión actual.</p>
+          </div>
+        </button>
+      </div>
     </div>
   </div>
 
