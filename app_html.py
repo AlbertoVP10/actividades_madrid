@@ -57,6 +57,7 @@ base_dir = os.path.dirname(__file__)
 html_file = os.path.join(base_dir, 'www/index.html')
 css_file = os.path.join(base_dir, 'www/css/styles.css')
 js_file = os.path.join(base_dir, 'www/js/app.js')
+js_tw_file = os.path.join(base_dir, 'www/js/tailwind-config.js')
 
 # 2. Verificar y leer todos los componentes
 if os.path.exists(html_file):
@@ -76,10 +77,17 @@ if os.path.exists(html_file):
         with open(js_file, 'r', encoding='utf-8') as f:
             js_content = f"<script>{f.read()}</script>"
 
+    # Leer la configuración de Tailwind si existe
+    js_tw_content = ""
+    if os.path.exists(js_tw_file):
+        with open(js_tw_file, 'r', encoding='utf-8') as f:
+            js_tw_content = f"<script>{f.read()}</script>"
+
     # 3. Inyectar dinámicamente los estilos y scripts al final de la estructura
     # Colocamos el CSS antes de cerrar </head> y el JS antes de cerrar </body>
     html_content = html_content.replace("</head>", f"{css_content}</head>")
     html_content = html_content.replace("</body>", f"{js_content}</body>")
+    html_content = html_content.replace("</body>", f"{js_tw_content}</body>")
 
     # 4. Mostrar el resultado a pantalla completa
     # Nota: El height aquí da igual por el CSS forzado a 100vh del iframe
