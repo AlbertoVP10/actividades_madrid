@@ -91,7 +91,7 @@ tailwind.config = {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
-.material-symbols-outlined.filled {
+.material-symbols-outlined-filled {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 body { font-family: 'Inter', sans-serif; }
@@ -1235,14 +1235,14 @@ body { min-height: max(884px, 100dvh); }
             <span class="material-symbols-outlined text-primary px-2">email</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Sugerencias</p>
-              <p class="text-label-md text-on-surface-variant">Envíanos tus ideas</p>
+              <p class="text-label-lg text-on-surface-variant">Envíanos tus ideas</p>
             </div>
           </a>
           <a href="mailto:soporte@actividadesmadrid.com?subject=Error%20en%20la%20app" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
             <span class="material-symbols-outlined text-primary px-2">bug_report</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Reportar Error</p>
-              <p class="text-label-md text-on-surface-variant">Ayúdanos a mejorar</p>
+              <p class="text-label-lg text-on-surface-variant">Ayúdanos a mejorar</p>
             </div>
           </a>
           <a href="mailto:colabora@actividadesmadrid.com?subject=Colabora%20con%20nosotros" class="flex flex-col gap-2 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
@@ -1250,7 +1250,7 @@ body { min-height: max(884px, 100dvh); }
               <span class="material-symbols-outlined text-primary px-2">handshake</span>
               <div>
                 <p class="font-label-lg text-label-lg text-on-surface">Colabora con nosotros</p>
-                <p class="text-label-md text-on-surface-variant">Participa en el desarrollo o envía actividades</p>
+                <p class="text-label-lg text-on-surface-variant">Participa en el desarrollo o envía actividades</p>
               </div>
             </div>
           </a>
@@ -1265,14 +1265,14 @@ body { min-height: max(884px, 100dvh); }
             <span class="material-symbols-outlined text-primary px-2">privacy_tip</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Política de privacidad</p>
-              <p class="text-label-md text-on-surface-variant">Consulta cómo usamos tus datos</p>
+              <p class="text-label-lg text-on-surface-variant">Consulta cómo usamos tus datos</p>
             </div>
           </button>
           <button onclick="showTermsAndConditions()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors text-left">
             <span class="material-symbols-outlined text-primary px-2">gavel</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Términos y condiciones</p>
-              <p class="text-label-md text-on-surface-variant">Lee nuestras condiciones de uso</p>
+              <p class="text-label-lg text-on-surface-variant">Lee nuestras condiciones de uso</p>
             </div>
           </button>
         </div>
@@ -1439,11 +1439,11 @@ body { min-height: max(884px, 100dvh); }
   </div>
 
   <!-- Profile View -->
-  <div id="profileView" class="hidden space-y-0 pb-40">
-    <div class="bg-white rounded-2xl p-4">
+  <div id="profileView" class="hidden space-y-0 pb-8">
+    <div class="bg-white rounded-2xl pb-4">
       <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+          <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
             <span class="material-symbols-outlined text-3xl text-primary">person</span>
           </div>
           <div>
@@ -1451,8 +1451,8 @@ body { min-height: max(884px, 100dvh); }
             <p id="profileSubtitle" class="text-text-muted text-sm">Sin cuenta registrada</p>
           </div>
         </div>
-        <button onclick="openProfileSettings()" aria-label="Abrir configuración de perfil" class="inline-flex items-center justify-center rounded-full bg-surface-container-high p-3 text-on-surface hover:bg-surface-container-highest transition-colors">
-          <span class="material-symbols-outlined">settings</span>
+        <button onclick="openProfileSettings()" aria-label="Abrir configuración de perfil" class="inline-flex items-center justify-center rounded-full  text-on-surface  transition-colors px-2">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
         </button>
       </div>
     </div>
@@ -1526,17 +1526,17 @@ body { min-height: max(884px, 100dvh); }
   <div id="profileSettingsView" class="hidden space-y-4 pb-40">
     <div class="bg-white rounded-3xl p-4">
       <div class="flex items-center gap-3">
-        <button onclick="showView('profile')" class="inline-flex items-center justify-center rounded-full bg-surface-container-high p-3 text-on-surface hover:bg-surface-container-highest transition-colors" aria-label="Volver al perfil">
+        <button onclick="showView('profile')" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver al perfil">
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <div>
-          <p class="text-label-sm text-on-surface-variant">Ajustes de cuenta</p>
-          <h2 class="font-title-md text-title-md">Editar perfil</h2>
+          <p class="font-semibold mb-4">Ajustes de cuenta</p>
+          <!-- <h2 class="font-title-md text-title-md">Editar perfil</h2> -->
         </div>
       </div>
     </div>
 
-    <h3 class="font-semibold mb-4">Perfil</h3>
+    <!-- <h3 class="font-semibold mb-4">Perfil</h3>
     <div class="bg-white rounded-3xl p-4 space-y-4">
       <div class="rounded-3xl border border-outline bg-surface-container-lowest p-4">
         <div class="flex items-start gap-3">
@@ -1570,7 +1570,7 @@ body { min-height: max(884px, 100dvh); }
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <h3 class="font-semibold mb-4">Preferencias de comunicaciones</h3>
     <div class="space-y-3">
@@ -1579,8 +1579,8 @@ body { min-height: max(884px, 100dvh); }
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">notifications</span>
             <div class="text-left">
-              <p class="font-medium">Notificaciones</p>
-              <p class="text-label-sm text-on-surface-variant">Notificaciones personalizadas sobre los mejores planes de tu ciudad.</p>
+              <p class="font-label-lg text-label-lg text-on-surface">Notificaciones</p>
+              <p class="text-label-lg text-on-surface-variant">Notificaciones personalizadas sobre los mejores planes de tu ciudad.</p>
             </div>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
@@ -1594,8 +1594,8 @@ body { min-height: max(884px, 100dvh); }
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">mail</span>
             <div class="text-left">
-              <p class="font-medium">Email</p>
-              <p class="text-label-sm text-on-surface-variant">Recibe cupones, descuentos, ofertas exclusivas y las últimas novedades.</p>
+              <p class="font-label-lg text-label-lg text-on-surface">Email</p>
+              <p class="text-label-lg text-on-surface-variant">Recibe cupones, descuentos, ofertas exclusivas y las últimas novedades.</p>
             </div>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
@@ -1609,8 +1609,8 @@ body { min-height: max(884px, 100dvh); }
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">location_on</span>
             <div class="text-left">
-              <p class="font-medium">Activar mi localización</p>
-              <p class="text-label-sm text-on-surface-variant">Usamos tu ubicación para mejorar tu experiencia.</p>
+              <p class="font-label-lg text-label-lg text-on-surface">Activar mi localización</p>
+              <p class="text-label-lg text-on-surface-variant">Usamos tu ubicación para mejorar tu experiencia.</p>
             </div>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
