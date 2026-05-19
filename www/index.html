@@ -1162,8 +1162,8 @@ body { min-height: max(884px, 100dvh); }
 </div>
 
 <!-- Info View -->
-<div id="infoView" class="hidden px-4 pt-4 pb-24 space-y-4">
-  <div class="sticky top-0 z-10 bg-background p-4 border-b border-surface-variant/20 flex items-center gap-4">
+<div id="infoView" class="hidden px-4 pt-4 pb-4 space-y-4">
+  <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2">
     <button onclick="closeInfo()" class="p-2 hover:bg-surface-variant rounded-full" aria-label="Volver">
       <span class="material-symbols-outlined">arrow_back</span>
     </button>
@@ -1186,7 +1186,7 @@ body { min-height: max(884px, 100dvh); }
             <span class="material-symbols-outlined text-primary px-2">favorite</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Donar</p>
-              <p class="text-label-md text-on-surface-variant">Ayúdanos a mantener la app gratuita</p>
+              <p class="text-label-lg text-on-surface-variant">Ayúdanos a mantener la app gratuita</p>
             </div>
           </a>
           <!-- <a href="https://actividadesmadrid.shop" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
@@ -1207,7 +1207,7 @@ body { min-height: max(884px, 100dvh); }
             <span class="material-symbols-outlined text-primary px-2">public</span>
             <div>
               <p class="font-label-lg text-label-lg text-on-surface">Instagram</p>
-              <p class="text-label-md text-on-surface-variant">@nicola</p>
+              <p class="text-label-lg text-on-surface-variant">@nicola</p>
             </div>
           </a>
           <!-- <a href="https://twitter.com/actividadesmad" target="_blank" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
@@ -1376,7 +1376,7 @@ body { min-height: max(884px, 100dvh); }
 </div>
 
 <!-- Content Canvas -->
-<main id="mainContent" class="px-4 pt-4 pb-24 space-y-4 hidden">
+<main id="mainContent" class="px-4 pt-4 pb-4 space-y-4 hidden">
   <!-- Results count -->
   
   <div id="resultsBar" class="flex justify-between items-center gap-4">
@@ -1670,7 +1670,7 @@ body { min-height: max(884px, 100dvh); }
   </div>
   
   <!-- Pagination -->
-  <div id="pagination" class="flex justify-center items-center gap-2 py-4 pb-24">
+  <div id="pagination" class="flex justify-center items-center gap-2 py-4 pb-4">
     <button onclick="prevPage()" id="prevBtn" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface disabled:opacity-50" disabled>
       <span class="material-symbols-outlined">chevron_left</span>
     </button>
@@ -2649,6 +2649,13 @@ function applySortSelection() {
 function openInfo() {
   window.previousViewBeforeInfo = currentView;
   showView('info');
+
+  const infoView = document.getElementById('infoView');
+  if (infoView) {
+    infoView.scrollTop = 0;
+  }
+  window.scrollTo({ top: 0, behavior: 'auto' });
+
   document.addEventListener('keydown', handleInfoModalKeydown);
 }
 
@@ -4540,6 +4547,14 @@ function showView(view) {
   document.getElementById('infoView').classList.toggle('hidden', view !== 'info');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
+
+  if (view === 'profile') {
+    const profileView = document.getElementById('profileView');
+    if (profileView) {
+      profileView.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
   
   const tabNav = document.getElementById('tabNav');
   const kpiSection = document.getElementById('kpiSection');
