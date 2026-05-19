@@ -2983,8 +2983,6 @@ function initMap() {
       .bindPopup(popupContent);
   });
 
-  document.getElementById('mapCaption').textContent =
-    `Mostrando ${activitiesWithCoords.length} actividades en ${Object.keys(uniqueLocations).length} ubicaciones`;
 }
 
 // Update map markers without reinitializing the map
@@ -3057,8 +3055,6 @@ function updateMapMarkers() {
       .bindPopup(popupContent);
   });
 
-  document.getElementById('mapCaption').textContent =
-    `Mostrando ${activitiesWithCoords.length} actividades en ${Object.keys(uniqueLocations).length} ubicaciones`;
 }
 
 // Render statistics
