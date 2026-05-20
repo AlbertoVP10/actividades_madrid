@@ -355,13 +355,17 @@ function guardarFiltro() {
   const nombre = nameInput.value.trim();
   if (nombre.length === 0) return;
 
+  const existingIndex = savedFilters.findIndex(item => item.nombre_personalizado.trim().toLowerCase() === nombre.toLowerCase());
   const filtro = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: existingIndex >= 0 ? savedFilters[existingIndex].id : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     nombre_personalizado: nombre,
     parametros: getCurrentFilterParameters()
   };
 
-  savedFilters = savedFilters.filter(item => item.id !== filtro.id);
+  if (existingIndex >= 0) {
+    savedFilters.splice(existingIndex, 1);
+  }
+
   savedFilters.unshift(filtro);
   localStorage.setItem(SAVED_FILTERS_STORAGE_KEY, JSON.stringify(savedFilters));
   renderSavedFilterSection();
@@ -1002,39 +1006,37 @@ function populateFilters() {
 }
 
 // Toggle filters panel
+function openFiltersView() {
+  const filtersView = document.getElementById('filtersView');
+  if (!filtersView) return;
+  filtersView.dataset.previousView = currentView;
+  showView('filters');
+  filtersView.scrollTop = 0;
+}
+
+function closeFiltersView() {
+  const filtersView = document.getElementById('filtersView');
+  if (!filtersView) return;
+  const previousView = filtersView.dataset.previousView || 'list';
+  showView(previousView);
+  applyFilters();
+
+  if (previousView === 'nearby' && !userLocation) {
+    setTimeout(() => {
+      setMainTab('recent');
+      applyFilters();
+    }, 0);
+  }
+}
+
 function toggleFilters() {
-  const panel = document.getElementById('filtersPanel');
-  const wasHidden = panel.classList.contains('hidden');
+  const filtersView = document.getElementById('filtersView');
+  if (!filtersView) return;
 
-  // If opening the panel, store the current tab
-  if (wasHidden) {
-    panel.dataset.openedFromTab = document.querySelector('.main-tab.bg-primary-container')?.dataset.tab || 'recent';
-  }
-
-  panel.classList.toggle('hidden');
-
-  // If opening the panel, scroll to top
-  if (wasHidden) {
-    const panelContent = panel.querySelector('div[class*="max-h-"]') || panel.querySelector('div[class*="overflow-y"]');
-    if (panelContent) {
-      panelContent.scrollTop = 0;
-    }
-  }
-
-  // If closing the panel
-  if (!wasHidden && panel.classList.contains('hidden')) {
-    // Always adjust map size after closing filters panel
-    adjustMapSize();
-
-    // If closing the panel and we were waiting for location (nearby without userLocation)
-    const openedFromTab = panel.dataset.openedFromTab;
-    if (openedFromTab === 'nearby' && !userLocation) {
-      // User closed filters without setting location, revert to 'recent'
-      setTimeout(() => {
-        setMainTab('recent');
-        applyFilters();
-      }, 0);
-    }
+  if (filtersView.classList.contains('hidden')) {
+    openFiltersView();
+  } else {
+    closeFiltersView();
   }
 }
 
@@ -3036,6 +3038,7 @@ function showView(view) {
   document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
   document.getElementById('profileSettingsView').classList.toggle('hidden', view !== 'profileSettings');
   document.getElementById('detailView').classList.toggle('hidden', view !== 'detail');
+  document.getElementById('filtersView').classList.toggle('hidden', view !== 'filters');
   document.getElementById('infoView').classList.toggle('hidden', view !== 'info');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
@@ -3062,7 +3065,7 @@ function showView(view) {
   }
 
   // if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile');
-  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail'|| view === 'info');
+  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail'|| view === 'info' || view === 'filters');
   if (profileDonateFooter) profileDonateFooter.classList.toggle('hidden', view !== 'profile');
 
   if (view === 'map') {
@@ -3422,13 +3425,6 @@ function clearFilters() {
 
   applyFilters();
 }
-
-// Close filters modal on outside click
-document.getElementById('filtersPanel').addEventListener('click', function(e) {
-  if (e.target === this) {
-    toggleFilters();
-  }
-});
 
 // Close sort modal on outside click
 document.getElementById('sortModal').addEventListener('click', function(e) {
