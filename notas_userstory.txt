@@ -1,0 +1,69 @@
+1. Historia del problema
+Usuario: Carlos, 38 años, arquitecto y padre de dos niños (4 y 7 años). Vive en Chamberí y valora mucho el tiempo de calidad en familia fuera de casa.
+Narrativa: Los viernes por la tarde, Carlos intenta organizar el fin de semana. Sabe que el Ayuntamiento ofrece actividades gratuitas y de calidad, pero acaba frustrado navegando por una web institucional "no responsive", con PDFs infinitos y buscadores que no funcionan. Al final, termina yendo al parque de siempre por no perder dos horas filtrando información.
+Contexto de mercado: Existen plataformas como Madrid Diferente o Time Out, pero se centran en ocio comercial, nocturno o de tendencias. La oferta pública oficial está dispersa en el portal "Madrid.es", diseñada con una lógica administrativa y no centrada en la experiencia del ciudadano.
+
+2. Pain points clave
+Exceso de ruido: Dificultad para separar eventos de adultos de los específicos para niños.
+Fricción de búsqueda: Los filtros por distrito o edad son poco intuitivos o inexistentes.
+Información desactualizada: Miedo a llegar a un centro cultural y que el evento esté cancelado o el aforo completo.
+Invisibilidad geográfica: No saber qué planes ocurren "ahora mismo" cerca de su ubicación actual.
+
+3. Definición del MVP (Objetivo)
+Objetivo: Crear una herramienta ágil que conecte la agenda cultural del Ayuntamiento de Madrid con padres que necesitan encontrar planes infantiles en menos de 3 minutos.
+Funcionalidades mínimas:
+Filtro por segmento de edad: Selección rápida (0-3, 4-7, 8-12 años) para mostrar solo contenido relevante.
+Mapa interactivo "Cerca de mí": Visualización geolocalizada de centros culturales, bibliotecas y parques con actividades.
+Sistema de alertas de aforo: Indicador visual (semáforo) sobre la disponibilidad de plazas o necesidad de reserva previa.
+Guardado en Favoritos: Opción para crear una agenda personalizada y recibir recordatorios antes del evento.
+
+4. Datos de apoyo
+72% de los padres residentes en Madrid afirman que les gustaría asistir a más eventos públicos, pero no se enteran a tiempo de la programación.
+8,5 minutos es el tiempo medio que tarda un usuario en encontrar un evento específico en la web actual del Ayuntamiento, frente a los 45 segundos de media en apps de ocio privado.
+60% de la oferta cultural gratuita de los distritos de Madrid queda con aforo sin cubrir por falta de visibilidad en canales digitales optimizados.
+
+--------------------------------------------------------------------------
+
+1. MVP Sin Registro (Acceso Abierto)
+Este modelo se centra en la utilidad inmediata y en eliminar cualquier barrera de entrada.
+Enfoque: Consultar y descubrir. El usuario es un "espectador".
+Funcionalidades:
+Buscador con filtros básicos (edad, fecha, distrito).
+Visualización en mapa y lista.
+Botón de "Compartir" (WhatsApp/RRSS).
+Valor: Rapidez extrema. Ideal para el padre que está en la calle y necesita una solución en 30 segundos sin querer dar sus datos.
+
+2. MVP Con Registro (Perfil de Usuario)
+Este modelo se centra en la recurrencia y la personalización. El usuario es un "miembro de la comunidad".
+Enfoque: Anticipar y gestionar. El sistema aprende de la familia.
+Funcionalidades:
+Perfil familiar: Guardar las edades de los hijos para que el feed se filtre automáticamente al abrir la app.
+Sistema de Favoritos/Agenda: Guardar planes para el futuro y recibir notificaciones si hay cambios (ej. cancelación por lluvia).
+Historial y Recomendaciones: "Como fuiste a un cuentacuentos en Retiro, te recomendamos este taller en Arganzuela".
+
+3. ¿Qué valor extra aporta registrarse?
+Si el usuario decide dar el paso y crear una cuenta, la app debe ofrecer beneficios que justifiquen el "esfuerzo":
+
+Beneficio
+Valor para el usuario
+Personalización Pasiva
+    No tener que marcar filtros cada vez. La app ya sabe que tienes un hijo de 3 años y otro de 6.
+Alertas de "Últimas Plazas"
+    Notificaciones push cuando un evento muy demandado (ej. talleres en Matadero) abre inscripciones.
+Sincronización
+    Posibilidad de ver tus planes guardados tanto en el móvil como en la tablet o web.
+Reserva en un clic
+    Autocompletar formularios de inscripción con los datos ya guardados (nombre, DNI, contacto).
+Gamificación/Social
+    Poder dejar reseñas de los planes para ayudar a otros padres o ganar "insignias" de explorador de la ciudad.
+
+--------------------------------------------------------------------------------
+
+"Tu fin de semana en familia, resuelto en un minuto."
+¿Aún sin planes para este fin de semana? Explora la agenda oficial del Ayuntamiento de Madrid por cercanía y temática para que tu única preocupación sea disfrutar con ellos.
+Opción 2: Enfoque Logístico (Práctico y Ágil)
+"Organiza el finde sin complicaciones."
+Accede a todos los talleres, cuentacuentos y teatros gratuitos de Madrid. Filtra por día, consulta el mapa y llega directo al evento sin perder tiempo buscando.
+Opción 3: Enfoque de Oportunidad (Breve y Directo)
+"Madrid espera a tus hijos. ¿Qué plan tenéis para este finde?"
+No te pierdas nada de la programación cultural de los distritos. Consulta hoy lo que pasará el sábado y el domingo, o descubre planes de última hora cerca de ti. Gratis, oficial y sin registros.
