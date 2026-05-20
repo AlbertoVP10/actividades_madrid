@@ -612,7 +612,7 @@
           </div>
         </div>
         <button onclick="openProfileSettings()" aria-label="Abrir configuración de perfil" class="inline-flex items-center justify-center rounded-full  text-on-surface  transition-colors px-2">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings_account_box</span>
         </button>
       </div>
     </div>
@@ -620,21 +620,33 @@
     <div class="bg-white rounded-2xl py-4">
       <h3 class="font-semibold mb-4">Mis preferencias</h3>
       <div id="profilePreferences" class="flex flex-wrap gap-2"></div>
-      <button onclick="openPreferencesEditor()" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-lg">Editar preferencias</button>
-      <button onclick="openPreferencesEditor()" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-lg">Editar filtros guardados</button>
+      <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary">settings_heart</span>
+          <span>Editar preferencias</span>
+        </div> 
+        <span class="material-symbols-outlined text-primary">chevron_right</span>
+      </button>
+      <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary">tune</span>
+          <span>Editar filtros guardados</span>
+        </div> 
+        <span class="material-symbols-outlined text-primary">chevron_right</span>
+      </button>
     </div>
 
     <div class="bg-white rounded-2xl py-4">
       <h3 class="font-semibold mb-4">Información</h3>
       <div class="space-y-3">
-        <button onclick="openInfo()" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
+        <button onclick="openInfo()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">info</span>
             <span>Sobre la app</span>
           </div>
-          <span class="material-symbols-outlined text-text-muted">chevron_right</span>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
         </button>
-        <a href="https://instagram.com" target="_blank" class="w-full flex items-center justify-between p-3 hover:bg-surface rounded-xl">
+        <a href="https://instagram.com" target="_blank" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">
                 <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -645,7 +657,7 @@
             </span>
             <span>Síguenos</span>
           </div>
-          <span class="material-symbols-outlined text-text-muted">open_in_new</span>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
         </a>
       </div>
     </div>
