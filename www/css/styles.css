@@ -107,6 +107,42 @@ body { min-height: max(884px, 100dvh); }
   display: none;
 }
 
+#seccion-filtros-favoritos {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.save-filters-button {
+  background: #F08080;
+  color: #ffffff;
+  border: none;
+}
+
+.save-filter-modal {
+  max-height: calc(100vh - 3rem);
+}
+
+.save-filter-input {
+  min-height: 3rem;
+}
+
+.button-primary {
+  background: #F08080;
+  color: #ffffff;
+  border: none;
+}
+
+.button-secondary {
+  background: #F4F4F5;
+  color: #1f2937;
+  border: 1px solid #d4d4d8;
+}
+
+@media (max-width: 640px) {
+  .save-filters-button {
+    width: 100%;
+  }
+}
+
 /* Active filter chip styles - Same size as KPI buttons */
 .filter-chip {
   flex-shrink: 0;

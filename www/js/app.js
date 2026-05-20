@@ -247,6 +247,227 @@ function openPreferencesEditor() {
   }
 }
 
+function setSortState(value) {
+  currentFilters.sort = value;
+  selectedSortOption = value;
+}
+
+function getCurrentFilterParameters() {
+  return {
+    category: Array.isArray(multiSelectState.category) ? [...multiSelectState.category] : [],
+    district: Array.isArray(multiSelectState.district) ? [...multiSelectState.district] : [],
+    audience: Array.isArray(multiSelectState.audience) ? [...multiSelectState.audience] : [],
+    time: Array.isArray(multiSelectState.time) ? [...multiSelectState.time] : [],
+    date: document.getElementById('dateSelect')?.value || 'all',
+    search: document.getElementById('searchInput')?.value || '',
+    freeOnly: document.getElementById('freeOnly')?.checked || false,
+    favoritesOnly: document.getElementById('favoritesOnly')?.checked || false,
+    sort: currentFilters.sort || 'recent',
+    locationKey: currentFilters.locationKey || null
+  };
+}
+
+function cargarFiltrosFavoritos() {
+  try {
+    const saved = localStorage.getItem(SAVED_FILTERS_STORAGE_KEY);
+    if (saved) {
+      savedFilters = JSON.parse(saved) || [];
+    } else {
+      savedFilters = [];
+    }
+  } catch (error) {
+    console.warn('No se pudieron cargar filtros guardados:', error);
+    savedFilters = [];
+  }
+  renderSavedFilterSection();
+}
+
+function renderSavedFilterSection() {
+  const section = document.getElementById('seccion-filtros-favoritos');
+  const select = document.getElementById('savedFiltersSelect');
+  if (!section || !select) return;
+
+  select.innerHTML = '<option value="">Selecciona un filtro guardado</option>';
+
+  if (savedFilters.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+
+  section.classList.remove('hidden');
+  savedFilters.forEach(filtro => {
+    const option = document.createElement('option');
+    option.value = filtro.id;
+    option.textContent = filtro.nombre_personalizado;
+    select.appendChild(option);
+  });
+}
+
+function openSaveFiltersModal() {
+  const modal = document.getElementById('saveFilterModal');
+  const nameInput = document.getElementById('savedFilterNameInput');
+  const saveBtn = document.getElementById('saveFilterSubmitButton');
+  if (!modal || !nameInput || !saveBtn) return;
+
+  modal.classList.remove('hidden');
+  nameInput.value = '';
+  saveBtn.disabled = true;
+  nameInput.focus();
+
+  nameInput.oninput = () => {
+    saveBtn.disabled = nameInput.value.trim().length === 0;
+  };
+
+  document.addEventListener('keydown', handleSaveFilterModalKeydown);
+  modal.addEventListener('click', handleSaveFilterModalClickOutside);
+}
+
+function closeSaveFiltersModal() {
+  const modal = document.getElementById('saveFilterModal');
+  const nameInput = document.getElementById('savedFilterNameInput');
+  const saveBtn = document.getElementById('saveFilterSubmitButton');
+  if (!modal || !nameInput || !saveBtn) return;
+
+  modal.classList.add('hidden');
+  nameInput.value = '';
+  saveBtn.disabled = true;
+
+  document.removeEventListener('keydown', handleSaveFilterModalKeydown);
+  modal.removeEventListener('click', handleSaveFilterModalClickOutside);
+}
+
+function handleSaveFilterModalKeydown(event) {
+  if (event.key === 'Escape') {
+    closeSaveFiltersModal();
+  }
+}
+
+function handleSaveFilterModalClickOutside(event) {
+  const modalCard = document.querySelector('#saveFilterModal .save-filter-modal');
+  if (!modalCard || modalCard.contains(event.target)) return;
+  closeSaveFiltersModal();
+}
+
+function guardarFiltro() {
+  const nameInput = document.getElementById('savedFilterNameInput');
+  if (!nameInput) return;
+
+  const nombre = nameInput.value.trim();
+  if (nombre.length === 0) return;
+
+  const filtro = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    nombre_personalizado: nombre,
+    parametros: getCurrentFilterParameters()
+  };
+
+  savedFilters = savedFilters.filter(item => item.id !== filtro.id);
+  savedFilters.unshift(filtro);
+  localStorage.setItem(SAVED_FILTERS_STORAGE_KEY, JSON.stringify(savedFilters));
+  renderSavedFilterSection();
+  closeSaveFiltersModal();
+  syncSavedFiltersToServer(filtro);
+}
+
+async function syncSavedFiltersToServer(filtro) {
+  try {
+    await fetch('/api/user/filters', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(filtro)
+    });
+  } catch (error) {
+    console.warn('No se pudo sincronizar el filtro con el backend:', error);
+  }
+}
+
+function aplicarFiltroFavorito(filterId) {
+  if (!filterId) return;
+
+  const filtro = savedFilters.find(item => item.id === filterId);
+  if (!filtro) return;
+
+  const params = filtro.parametros || {};
+  setFilterInputsFromParameters(params);
+  applyFilters();
+}
+
+function setFilterInputsFromParameters(params) {
+  if (!params || typeof params !== 'object') return;
+
+  if (Array.isArray(params.category)) {
+    multiSelectState.category = [...params.category];
+    setDropdownCheckboxes('category', multiSelectState.category);
+  }
+  if (Array.isArray(params.district)) {
+    multiSelectState.district = [...params.district];
+    setDropdownCheckboxes('district', multiSelectState.district);
+  }
+  if (Array.isArray(params.audience)) {
+    multiSelectState.audience = [...params.audience];
+    setDropdownCheckboxes('audience', multiSelectState.audience);
+  }
+  if (Array.isArray(params.time)) {
+    multiSelectState.time = [...params.time];
+    setDropdownCheckboxes('time', multiSelectState.time);
+  }
+
+  const dateSelect = document.getElementById('dateSelect');
+  if (dateSelect && params.date) {
+    dateSelect.value = params.date;
+  }
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput && typeof params.search === 'string') {
+    searchInput.value = params.search;
+  }
+  const freeOnly = document.getElementById('freeOnly');
+  if (freeOnly) {
+    freeOnly.checked = !!params.freeOnly;
+  }
+  const favoritesOnly = document.getElementById('favoritesOnly');
+  if (favoritesOnly) {
+    favoritesOnly.checked = !!params.favoritesOnly;
+  }
+  if (params.sort) {
+    setSortState(params.sort);
+  }
+
+  updateMultiSelectLabels();
+}
+
+function setDropdownCheckboxes(type, values) {
+  const dropdown = document.getElementById(`${type}Dropdown`);
+  if (!dropdown) return;
+  const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = values.includes(checkbox.value);
+  });
+}
+
+function updateMultiSelectLabels() {
+  ['category', 'district', 'audience', 'time'].forEach(type => {
+    const allOptions = Array.from(document.querySelectorAll(`#${type}Dropdown input[type=checkbox]`)).map(cb => cb.value);
+    const selected = Array.from(document.querySelectorAll(`#${type}Dropdown input[type=checkbox]:checked`)).map(cb => cb.value);
+    const label = document.getElementById(`${type}SelectLabel`);
+    if (!label) return;
+    if (selected.length === 0 || selected.length === allOptions.length) {
+      const defaults = {
+        category: 'Todas',
+        district: 'Todos',
+        audience: 'Todos',
+        time: 'Todo el día'
+      };
+      label.textContent = defaults[type];
+    } else if (selected.length === 1) {
+      label.textContent = selected[0];
+    } else {
+      label.textContent = `${selected.length} seleccionados`;
+    }
+  });
+}
+
 function loadProfileSettings() {
   const saved = localStorage.getItem('profileSettings');
   if (saved) {
@@ -401,6 +622,9 @@ let currentFilters = {
   locationKey: null,
   sort: 'recent'
 };
+
+const SAVED_FILTERS_STORAGE_KEY = 'madridSavedFilterPresets';
+let savedFilters = [];
 
 // Active KPI filter state (array to allow multiple filters)
 let activeKPIFilters = []; // Can contain: 'today', 'week', 'near', 'favorites'
@@ -571,6 +795,7 @@ const categoryMap = {
 async function init() {
   loadPreferences();
   loadProfileSettings();
+  cargarFiltrosFavoritos();
   updateFavCount();
   await loadActivities();
   setBottomTab('home');
@@ -881,16 +1106,10 @@ function applySortSelection() {
     return;
   }
 
-  // Update current filters
-  currentFilters.sort = selectedSortOption;
-  
-  // Update the hidden select in filters panel
-  const sortSelect = document.getElementById('sortSelect');
-  if (sortSelect) {
-    sortSelect.value = selectedSortOption;
-  }
-  
-  // Show location input if distance is selected
+  // Update current filters using the modal selection
+  setSortState(selectedSortOption);
+
+  // Show location input only if it is present in the DOM
   const locationInput = document.getElementById('locationInput');
   if (locationInput) {
     if (selectedSortOption === 'distance') {
@@ -990,8 +1209,7 @@ async function geocodeAddressFromModal() {
       setTimeout(() => {
         closeLocationModal(true);
         // Apply distance sort (without near filter)
-        document.getElementById('sortSelect').value = 'distance';
-        currentFilters.sort = 'distance';
+        setSortState('distance');
 
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
@@ -1058,8 +1276,7 @@ function getCurrentLocationFromModal() {
       setTimeout(() => {
         closeLocationModal(true);
         // Apply distance sort (without near filter)
-        document.getElementById('sortSelect').value = 'distance';
-        currentFilters.sort = 'distance';
+        setSortState('distance');
 
         // Update user location marker first if in map view
         if (currentView === 'map' && map) {
@@ -1270,9 +1487,11 @@ function applyKPIFilter(type) {
     case 'near':
       if (userLocation) {
         currentFilters.nearOnly = true;
-        currentFilters.sort = 'distance';
-        document.getElementById('sortSelect').value = 'distance';
-        document.getElementById('locationInput').classList.remove('hidden');
+        setSortState('distance');
+        const locationInput = document.getElementById('locationInput');
+        if (locationInput) {
+          locationInput.classList.remove('hidden');
+        }
       }
       break;
     case 'favorites':
@@ -1318,9 +1537,11 @@ function clearKPIFilter(filterToClear) {
       break;
     case 'near':
       currentFilters.nearOnly = false;
-      currentFilters.sort = 'recent';
-      document.getElementById('sortSelect').value = 'recent';
-      document.getElementById('locationInput').classList.add('hidden');
+      setSortState('recent');
+      const locationInput = document.getElementById('locationInput');
+      if (locationInput) {
+        locationInput.classList.add('hidden');
+      }
       break;
     case 'favorites':
       currentFilters.favoritesOnly = false;
@@ -1463,14 +1684,16 @@ function applyFilters() {
   currentFilters.date = document.getElementById('dateSelect').value;
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
-  currentFilters.sort = document.getElementById('sortSelect').value;
+  currentFilters.sort = currentFilters.sort || 'recent';
 
-  // Show/hide location input
+  // Show/hide location input only if the element exists
   const locationInput = document.getElementById('locationInput');
-  if (currentFilters.sort === 'distance') {
-    locationInput.classList.remove('hidden');
-  } else {
-    locationInput.classList.add('hidden');
+  if (locationInput) {
+    if (currentFilters.sort === 'distance') {
+      locationInput.classList.remove('hidden');
+    } else {
+      locationInput.classList.add('hidden');
+    }
   }
 
   // Get all available options for each multi-select to check if all/none selected
@@ -1664,7 +1887,7 @@ function adjustMapSize() {
 
 // Sync main tabs with current filter state
 function syncTabsWithFilters() {
-  const sort = document.getElementById('sortSelect').value;
+  const sort = currentFilters.sort;
   const date = document.getElementById('dateSelect').value;
   
   // Determine which tab should be active based on filters
@@ -2003,8 +2226,11 @@ function removeFilterChip(type, value) {
     case 'sort':
       currentFilters.sort = 'recent';
       currentFilters.nearOnly = false;
-      document.getElementById('sortSelect').value = 'recent';
-      document.getElementById('locationInput').classList.add('hidden');
+      setSortState('recent');
+      const locationInput = document.getElementById('locationInput');
+      if (locationInput) {
+        locationInput.classList.add('hidden');
+      }
       const nearIndex = activeKPIFilters.indexOf('near');
       if (nearIndex > -1) {
         activeKPIFilters.splice(nearIndex, 1);
@@ -2728,23 +2954,26 @@ function setMainTab(tab) {
       return; // Don't apply filters yet, wait for location
     }
     // If we have location, apply distance sort
-    document.getElementById('sortSelect').value = 'distance';
+    setSortState('distance');
     document.getElementById('dateSelect').value = 'all';
-    currentFilters.sort = 'distance';
     currentFilters.date = 'all';
   } else if (tab === 'recent') {
     // Sort by recent, clear date filter
-    document.getElementById('sortSelect').value = 'recent';
+    setSortState('recent');
     document.getElementById('dateSelect').value = 'all';
-    document.getElementById('locationInput').classList.add('hidden');
-    currentFilters.sort = 'recent';
+    const locationInput = document.getElementById('locationInput');
+    if (locationInput) {
+      locationInput.classList.add('hidden');
+    }
     currentFilters.date = 'all';
   } else if (tab === 'week') {
     // Filter next 7 days and sort by recent
-    document.getElementById('sortSelect').value = 'recent';
+    setSortState('recent');
     document.getElementById('dateSelect').value = 'week';
-    document.getElementById('locationInput').classList.add('hidden');
-    currentFilters.sort = 'recent';
+    const locationInput = document.getElementById('locationInput');
+    if (locationInput) {
+      locationInput.classList.add('hidden');
+    }
     currentFilters.date = 'week';
   }
   
@@ -3179,11 +3408,14 @@ function clearFilters() {
 
   document.getElementById('searchInput').value = '';
   document.getElementById('dateSelect').value = 'all';
-  document.getElementById('sortSelect').value = 'recent';
+  setSortState('recent');
   document.getElementById('freeOnly').checked = false;
   document.getElementById('favoritesOnly').checked = false;
 
-  document.getElementById('locationInput').classList.add('hidden');
+  const locationInput = document.getElementById('locationInput');
+  if (locationInput) {
+    locationInput.classList.add('hidden');
+  }
   
   // Reset main tabs to 'recent' as default
   setMainTab('recent');
