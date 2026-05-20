@@ -619,24 +619,25 @@
 
     <div class="bg-white rounded-2xl py-4">
       <h3 class="font-semibold mb-4">Mis preferencias</h3>
-      <div id="profilePreferences" class="flex flex-wrap gap-2"></div>
-      <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-primary">settings_heart</span>
-          <span>Editar preferencias</span>
-        </div> 
-        <span class="material-symbols-outlined text-primary">chevron_right</span>
-      </button>
-      <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-primary">tune</span>
-          <span>Editar filtros guardados</span>
-        </div> 
-        <span class="material-symbols-outlined text-primary">chevron_right</span>
-      </button>
+      <div class="space-y-3">
+        <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">settings_heart</span>
+            <span>Editar preferencias</span>
+          </div> 
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+        <button onclick="openPreferencesEditor()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">tune</span>
+            <span>Editar filtros guardados</span>
+          </div> 
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+      </div>
     </div>
 
-    <div class="bg-white rounded-2xl py-4">
+    <div class="bg-white rounded-2xl pb-4">
       <h3 class="font-semibold mb-4">Información</h3>
       <div class="space-y-3">
         <button onclick="openInfo()" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -676,34 +677,38 @@
     <!-- Preferencias de comunicaciones -->
     <div class="space-y-3">
       <h3 class="font-title-md text-title-md text-on-surface">Preferencias de comunicaciones</h3>
-      <div class="grid grid-cols-1 gap-3">
-        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('notifications')" type="button">
+      <div class="grid grid-cols-1 gap-1">
+        <button class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20" onclick="toggleProfileSetting('notifications')" type="button">
           <span class="material-symbols-outlined text-primary px-2">notifications</span>
           <div class="flex-1 text-left">
             <p class="font-label-lg text-label-lg text-on-surface">Notificaciones</p>
-            <p class="text-label-lg text-on-surface-variant">Notificaciones personalizadas sobre los mejores planes de tu ciudad.</p>
+            <p class="text-label-md text-on-surface-variant">Sobre tus favoritos y preferencias</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileNotificationsCheckbox" type="checkbox" class="sr-only peer" aria-label="Notificaciones">
             <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </button>
-        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('promotionalEmails')" type="button">
+        <button class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20" onclick="toggleProfileSetting('promotionalEmails')" type="button">
           <span class="material-symbols-outlined text-primary px-2">mail</span>
           <div class="flex-1 text-left">
             <p class="font-label-lg text-label-lg text-on-surface">Email</p>
-            <p class="text-label-lg text-on-surface-variant">Recibe cupones, descuentos, ofertas exclusivas y las últimas novedades.</p>
+            <p class="text-label-md text-on-surface-variant">Recibe informes, novedades y ventajas.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileEmailsCheckbox" type="checkbox" class="sr-only peer" aria-label="Email">
             <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </button>
-        <button class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors" onclick="toggleProfileSetting('locationAccess')" type="button">
+    </div>
+    <!-- Permiso de geolocalización -->
+    <div class="space-y-3"></div>
+      <h3 class="font-title-md text-title-md text-on-surface">Permiso de geolocalización</h3>
+        <button class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20" onclick="toggleProfileSetting('locationAccess')" type="button">
           <span class="material-symbols-outlined text-primary px-2">location_on</span>
           <div class="flex-1 text-left">
-            <p class="font-label-lg text-label-lg text-on-surface">Activar mi localización</p>
-            <p class="text-label-lg text-on-surface-variant">Usamos tu ubicación para mejorar tu experiencia.</p>
+            <p class="font-label-lg text-label-lg text-on-surface">Permitir localización</p>
+            <p class="text-label-md text-on-surface-variant">Descubre eventos cerca de ti.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-2">
             <input id="profileLocationCheckbox" type="checkbox" class="sr-only peer" aria-label="Ubicación">
@@ -716,26 +721,26 @@
     <!-- Acciones de cuenta -->
     <div class="space-y-3">
       <h3 class="font-title-md text-title-md text-on-surface">Acciones de cuenta</h3>
-      <div class="grid grid-cols-1 gap-3">
-        <button onclick="saveProfileSettings()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+      <div class="grid grid-cols-1 gap-1">
+        <!-- <button onclick="saveProfileSettings()" class="flex items-center gap-3 p-2 bg-secondary-container rounded-lg transition-colors text-left">
           <span class="material-symbols-outlined text-primary px-2">save</span>
           <div class="text-left">
             <p class="font-label-lg text-label-lg text-on-surface">Guardar cambios</p>
             <p class="text-label-lg text-on-surface-variant">Guarda tus preferencias actualizadas.</p>
           </div>
-        </button>
-        <button onclick="deleteAccount()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
-          <span class="material-symbols-outlined text-error px-2">delete_forever</span>
+        </button> -->
+        <button onclick="deleteAccount()" class="flex items-center gap-3 p-2 bg-surface-container-low rounded-lg transition-colors text-left">
+          <span class="material-symbols-outlined text-primary px-2">delete</span>
           <div class="text-left">
             <p class="font-label-lg text-label-lg text-on-surface">Borrar cuenta</p>
-            <p class="text-label-lg text-on-surface-variant">Elimina permanentemente tu cuenta.</p>
+            <!-- <p class="text-label-lg text-on-surface-variant">Elimina permanentemente tu cuenta.</p> -->
           </div>
         </button>
-        <button onclick="logout()" class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
-          <span class="material-symbols-outlined text-on-surface-variant px-2">logout</span>
+        <button onclick="logout()" class="flex items-center gap-3 p-2 bg-surface-container-low rounded-lg transition-colors text-left">
+          <span class="material-symbols-outlined text-primary px-2">logout</span>
           <div class="text-left">
             <p class="font-label-lg text-label-lg text-on-surface">Salir</p>
-            <p class="text-label-lg text-on-surface-variant">Cierra tu sesión actual.</p>
+            <!-- <p class="text-label-lg text-on-surface-variant">Cierra tu sesión actual.</p> -->
           </div>
         </button>
       </div>
