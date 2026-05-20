@@ -10,7 +10,7 @@ tailwind.config = {
         "on-primary": "#ffffff",
         "on-primary-container": "#5a2525",
         "secondary": "#FBC4AB",
-        "secondary-container": "#FFDAB9",
+        "secondary-container": "#fff3f1",
         "on-secondary": "#5a3d2b",
         "on-secondary-container": "#7a4d35",
         "background": "#ffffff",
