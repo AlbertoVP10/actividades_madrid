@@ -124,6 +124,18 @@ body { min-height: max(884px, 100dvh); }
   touch-action: manipulation;
 }
 
+/* Deshabilitar hover en dispositivos táctiles para evitar que persista */
+@media (hover: none) and (pointer: coarse) {
+  .filter-grid button:hover {
+    background-color: inherit !important;
+  }
+  
+  /* Solo aplicar el color de fondo cuando está seleccionado */
+  .filter-grid button.bg-primary-container {
+    background-color: var(--color-primary-container, #EADDFF) !important;
+  }
+}
+
 /* Hide scrollbar for active filter chips */
 .scrollbar-hide {
   -ms-overflow-style: none;

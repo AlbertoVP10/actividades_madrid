@@ -1321,6 +1321,13 @@ function toggleCategoryButton(button, category) {
   if (document.activeElement === button) {
     document.activeElement.blur();
   }
+  
+  // Forzar recálculo de estilos para eliminar el estado hover en móviles
+  void button.offsetWidth;
+  button.style.pointerEvents = 'none';
+  setTimeout(() => {
+    button.style.pointerEvents = '';
+  }, 50);
 
   refreshFilterFieldLabel('category');
   applyFilters();
@@ -1345,6 +1352,13 @@ function toggleTimeButton(button, time) {
   if (document.activeElement === button) {
     document.activeElement.blur();
   }
+  
+  // Forzar recálculo de estilos para eliminar el estado hover en móviles
+  void button.offsetWidth;
+  button.style.pointerEvents = 'none';
+  setTimeout(() => {
+    button.style.pointerEvents = '';
+  }, 50);
 
   refreshFilterFieldLabel('time');
   applyFilters();
@@ -1378,6 +1392,13 @@ function toggleAudienceButton(button, audience) {
   if (document.activeElement === button) {
     document.activeElement.blur();
   }
+  
+  // Forzar recálculo de estilos para eliminar el estado hover en móviles
+  void button.offsetWidth;
+  button.style.pointerEvents = 'none';
+  setTimeout(() => {
+    button.style.pointerEvents = '';
+  }, 50);
 
   refreshFilterFieldLabel('audience');
   applyFilters();
