@@ -1036,15 +1036,31 @@ function renderFilterFieldContent(field) {
     }
   }
 
-  if (['district', 'audience'].includes(field)) {
-    const dropdown = document.getElementById(`${field}Dropdown`);
+  if (field === 'district') {
+    const dropdown = document.getElementById('districtDropdown');
     if (dropdown) {
-      const selectedValues = multiSelectState[field] || [];
+      const selectedValues = multiSelectState.district || [];
       dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.checked = selectedValues.includes(cb.value);
       });
     }
-    refreshFilterFieldLabel(field);
+    refreshFilterFieldLabel('district');
+  }
+
+  if (field === 'audience') {
+    const selectedValues = multiSelectState.audience || [];
+    const buttons = document.querySelectorAll('#audienceGrid button[data-type="audience"]');
+    buttons.forEach(btn => {
+      const audience = btn.dataset.value;
+      if (selectedValues.includes(audience)) {
+        btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.remove('border-outline-variant');
+      } else {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      }
+    });
+    refreshFilterFieldLabel('audience');
   }
 
   if (field === 'time') {
@@ -1076,6 +1092,9 @@ function refreshFilterFieldLabel(type) {
     allOptions = grid ? Array.from(grid.querySelectorAll('button')).map(btn => btn.dataset.value) : [];
   } else if (type === 'time') {
     allOptions = ['morning', 'afternoon', 'evening', 'unspecified'];
+  } else if (type === 'audience') {
+    const grid = document.getElementById('audienceGrid');
+    allOptions = grid ? Array.from(grid.querySelectorAll('button')).map(btn => btn.dataset.value) : ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
   } else {
     const dropdown = document.getElementById(`${type}Dropdown`);
     allOptions = dropdown ? Array.from(dropdown.querySelectorAll('input[type="checkbox"]')).map(cb => cb.value) : [];
@@ -1136,13 +1155,23 @@ function resetFilterField() {
       });
     }
     refreshFilterFieldLabel('time');
-  } else if (['district', 'audience'].includes(currentFilterField)) {
-    multiSelectState[currentFilterField] = [];
-    const dropdown = document.getElementById(`${currentFilterField}Dropdown`);
+  } else if (currentFilterField === 'audience') {
+    multiSelectState.audience = [];
+    const grid = document.getElementById('audienceGrid');
+    if (grid) {
+      grid.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      });
+    }
+    refreshFilterFieldLabel('audience');
+  } else if (currentFilterField === 'district') {
+    multiSelectState.district = [];
+    const dropdown = document.getElementById('districtDropdown');
     if (dropdown) {
       dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
     }
-    refreshFilterFieldLabel(currentFilterField);
+    refreshFilterFieldLabel('district');
   }
 
   applyFilters();
@@ -1156,7 +1185,7 @@ function toggleMultiSelect(type) {
   const isHidden = dropdown.classList.contains('hidden');
   
   // Close all other dropdowns
-  ['category', 'district', 'audience', 'time'].forEach(t => {
+  ['district'].forEach(t => {
     const el = document.getElementById(t + 'Dropdown');
     if (el) {
       el.classList.add('hidden');
@@ -1172,7 +1201,7 @@ function toggleMultiSelect(type) {
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.multi-select-container')) {
-    ['category', 'district', 'audience', 'time'].forEach(type => {
+    ['district'].forEach(type => {
       const dropdown = document.getElementById(type + 'Dropdown');
       if (dropdown) {
         dropdown.classList.add('hidden');
@@ -1289,6 +1318,24 @@ function toggleTimeFilter(time) {
   if (button) {
     toggleTimeButton(button, time);
   }
+}
+
+// Toggle audience filter button
+function toggleAudienceButton(button, audience) {
+  const isSelected = multiSelectState.audience.includes(audience);
+
+  if (isSelected) {
+    multiSelectState.audience = multiSelectState.audience.filter(a => a !== audience);
+    button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+    button.classList.add('border-outline-variant');
+  } else {
+    multiSelectState.audience.push(audience);
+    button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+    button.classList.remove('border-outline-variant');
+  }
+
+  refreshFilterFieldLabel('audience');
+  applyFilters();
 }
 
 // Toggle filters panel
@@ -3725,6 +3772,15 @@ function clearFilters() {
   const timeGrid = document.getElementById('timeGrid');
   if (timeGrid) {
     timeGrid.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.add('border-outline-variant');
+    });
+  }
+
+  // Reset audience grid buttons
+  const audienceGrid = document.getElementById('audienceGrid');
+  if (audienceGrid) {
+    audienceGrid.querySelectorAll('button').forEach(btn => {
       btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
       btn.classList.add('border-outline-variant');
     });

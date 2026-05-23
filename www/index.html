@@ -1106,12 +1106,32 @@
 
         <div id="filterField_audience" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">👥 Público</label>
-          <div class="multi-select-container relative" id="audienceMultiSelect">
-            <button type="button" onclick="toggleMultiSelect('audience')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
-              <span id="audienceSelectLabel">Todos</span>
-              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+          <div id="audienceGrid" class="grid grid-cols-2 gap-2">
+            <!-- Niños -->
+            <button type="button" onclick="toggleAudienceButton(this, 'Niños')" data-value="Niños" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">child_care</span>
+              <span>Niños</span>
             </button>
-            <div id="audienceDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto"></div>
+            <!-- Familias -->
+            <button type="button" onclick="toggleAudienceButton(this, 'Familias')" data-value="Familias" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">family_restroom</span>
+              <span>Familias</span>
+            </button>
+            <!-- Adultos -->
+            <button type="button" onclick="toggleAudienceButton(this, 'Adultos')" data-value="Adultos" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">person</span>
+              <span>Adultos</span>
+            </button>
+            <!-- Mayores -->
+            <button type="button" onclick="toggleAudienceButton(this, 'Mayores')" data-value="Mayores" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">elderly</span>
+              <span>Mayores</span>
+            </button>
+            <!-- Jóvenes -->
+            <button type="button" onclick="toggleAudienceButton(this, 'Jóvenes')" data-value="Jóvenes" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">face_6</span>
+              <span>Jóvenes</span>
+            </button>
           </div>
         </div>
 
@@ -1131,12 +1151,12 @@
           <div id="timeGrid" class="grid grid-cols-2 gap-2">
             <!-- Mañana -->
             <button type="button" onclick="toggleTimeButton(this, 'morning')" data-value="morning" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
-              <span class="material-symbols-outlined text-primary">wb_sunny</span>
+              <span class="material-symbols-outlined text-primary">wb_twilight</span>
               <span>Mañana (6-12h)</span>
             </button>
             <!-- Tarde -->
             <button type="button" onclick="toggleTimeButton(this, 'afternoon')" data-value="afternoon" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
-              <span class="material-symbols-outlined text-primary">wb_twilight</span>
+              <span class="material-symbols-outlined text-primary">wb_sunny</span>
               <span>Tarde (12-18h)</span>
             </button>
             <!-- Noche -->
