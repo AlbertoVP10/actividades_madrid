@@ -1126,7 +1126,17 @@ function resetFilterField() {
       });
     }
     refreshFilterFieldLabel('category');
-  } else if (['district', 'audience', 'time'].includes(currentFilterField)) {
+  } else if (currentFilterField === 'time') {
+    multiSelectState.time = [];
+    const grid = document.getElementById('timeGrid');
+    if (grid) {
+      grid.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      });
+    }
+    refreshFilterFieldLabel('time');
+  } else if (['district', 'audience'].includes(currentFilterField)) {
     multiSelectState[currentFilterField] = [];
     const dropdown = document.getElementById(`${currentFilterField}Dropdown`);
     if (dropdown) {
@@ -3685,7 +3695,7 @@ function clearFilters() {
   multiSelectState.time = [];
 
   // Uncheck all multi-select checkboxes with validation
-  ['category', 'district', 'audience', 'time'].forEach(type => {
+  ['district', 'audience'].forEach(type => {
     const dropdown = document.getElementById(type + 'Dropdown');
     if (dropdown) {
       const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
@@ -3694,16 +3704,31 @@ function clearFilters() {
     
     // Reset labels
     const defaults = {
-      category: 'Todas',
       district: 'Todos',
-      audience: 'Todos',
-      time: 'Todo el día'
+      audience: 'Todos'
     };
     const labelEl = document.getElementById(type + 'SelectLabel');
     if (labelEl) {
       labelEl.textContent = defaults[type];
     }
   });
+
+  // Reset category grid buttons
+  const categoryGrid = document.getElementById('categoryGrid');
+  if (categoryGrid) {
+    categoryGrid.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+    });
+  }
+
+  // Reset time grid buttons
+  const timeGrid = document.getElementById('timeGrid');
+  if (timeGrid) {
+    timeGrid.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.add('border-outline-variant');
+    });
+  }
 
   currentFilters = {
     category: [],
