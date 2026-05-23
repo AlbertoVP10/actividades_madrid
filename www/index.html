@@ -167,6 +167,18 @@ body { min-height: max(884px, 100dvh); }
   border-radius: 3px;
 }
 
+/* Time filter grid styles */
+#timeDropdown label {
+  position: relative;
+}
+#timeDropdown input[type="checkbox"]:checked + div {
+  box-shadow: 0 0 0 3px #F08080;
+}
+#timeDropdown label:has(input[type="checkbox"]:checked) {
+  border-color: #F08080 !important;
+  background-color: rgba(240, 128, 128, 0.1) !important;
+}
+
 /* KPI Card styles */
 .kpi-card {
   position: relative;
@@ -1064,19 +1076,41 @@ body { min-height: max(884px, 100dvh); }
         <span id="timeSelectLabel">Todo el día</span>
         <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
       </button>
-      <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
-        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-          <input type="checkbox" value="morning" onchange="updateMultiSelect('time')" class="accent-primary">
-          <span>Mañana (6:00 - 12:00)</span>
-        </label>
-        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-          <input type="checkbox" value="afternoon" onchange="updateMultiSelect('time')" class="accent-primary">
-          <span>Tarde (12:00 - 18:00)</span>
-        </label>
-        <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-          <input type="checkbox" value="evening" onchange="updateMultiSelect('time')" class="accent-primary">
-          <span>Noche (18:00 - 24:00)</span>
-        </label>
+      <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto p-3">
+        <div class="grid grid-cols-3 gap-3">
+          <!-- Mañana -->
+          <label class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-all border-2 border-transparent hover:border-primary/30">
+            <input type="checkbox" value="morning" onchange="updateMultiSelect('time')" class="accent-primary hidden">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-amber-800">wb_sunny</span>
+            </div>
+            <span class="text-label-sm font-medium text-center">Mañana<br><span class="text-xs text-on-surface-variant">6-12h</span></span>
+          </label>
+          <!-- Tarde -->
+          <label class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-all border-2 border-transparent hover:border-primary/30">
+            <input type="checkbox" value="afternoon" onchange="updateMultiSelect('time')" class="accent-primary hidden">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-orange-900">wb_twilight</span>
+            </div>
+            <span class="text-label-sm font-medium text-center">Tarde<br><span class="text-xs text-on-surface-variant">12-18h</span></span>
+          </label>
+          <!-- Noche -->
+          <label class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-all border-2 border-transparent hover:border-primary/30">
+            <input type="checkbox" value="evening" onchange="updateMultiSelect('time')" class="accent-primary hidden">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-white">dark_mode</span>
+            </div>
+            <span class="text-label-sm font-medium text-center">Noche<br><span class="text-xs text-on-surface-variant">18-24h</span></span>
+          </label>
+          <!-- Sin especificar -->
+          <label class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high cursor-pointer transition-all border-2 border-transparent hover:border-primary/30 col-span-3">
+            <input type="checkbox" value="unspecified" onchange="updateMultiSelect('time')" class="accent-primary hidden">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-white">help_outline</span>
+            </div>
+            <span class="text-label-sm font-medium text-center">Sin especificar</span>
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -3222,7 +3256,7 @@ function applyFilters() {
   const allCategories = [...new Set(allActivities.map(a => a.category))];
   const allDistricts = [...new Set(allActivities.map(a => a.district))].filter(d => d && d !== 'Desconocido');
   const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
-  const allTimes = ['morning', 'afternoon', 'evening'];
+  const allTimes = ['morning', 'afternoon', 'evening', 'unspecified'];
 
   // Calculate distances first if user location is available (needed for near filter)
   if (userLocation) {
@@ -3287,15 +3321,28 @@ function applyFilters() {
 
     // Time filter - multi-select
     const timeSelected = currentFilters.time.length > 0 && currentFilters.time.length < allTimes.length;
-    if (timeSelected && activity.time) {
-      const hour = extractHour(activity.time);
-      if (hour !== null) {
-        let matchesTime = false;
-        if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
-        if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
-        if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
-        if (!matchesTime) return false;
+    if (timeSelected) {
+      let matchesTime = false;
+      const hasUnspecified = currentFilters.time.includes('unspecified');
+      const hasTimeSlots = currentFilters.time.some(t => ['morning', 'afternoon', 'evening'].includes(t));
+      
+      // Check if activity has no time and 'unspecified' is selected
+      if (!activity.time && hasUnspecified) {
+        matchesTime = true;
       }
+      // Check time slots if activity has time
+      else if (activity.time && hasTimeSlots) {
+        const hour = extractHour(activity.time);
+        if (hour !== null) {
+          if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
+          if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
+          if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+        }
+      }
+      // If only 'unspecified' is selected and activity has time, it doesn't match
+      // If only time slots are selected and activity has no time, it doesn't match
+      
+      if (!matchesTime) return false;
     }
 
     // Free filter
@@ -3444,7 +3491,7 @@ function updateKPIs() {
   const allCategories = [...new Set(allActivities.map(a => a.category))];
   const allDistricts = [...new Set(allActivities.map(a => a.district))].filter(d => d && d !== 'Desconocido');
   const allAudiences = ['Niños', 'Familias', 'Adultos', 'Mayores', 'Jóvenes'];
-  const allTimes = ['morning', 'afternoon', 'evening'];
+  const allTimes = ['morning', 'afternoon', 'evening', 'unspecified'];
 
   // Apply ALL current filters to determine base activities for KPIs
   let baseActivities = allActivities.filter(activity => {
@@ -3496,15 +3543,26 @@ function updateKPIs() {
 
     // Time filter
     const timeSelected = currentFilters.time.length > 0 && currentFilters.time.length < allTimes.length;
-    if (timeSelected && activity.time) {
-      const hour = extractHour(activity.time);
-      if (hour !== null) {
-        let matchesTime = false;
-        if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
-        if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
-        if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
-        if (!matchesTime) return false;
+    if (timeSelected) {
+      let matchesTime = false;
+      const hasUnspecified = currentFilters.time.includes('unspecified');
+      const hasTimeSlots = currentFilters.time.some(t => ['morning', 'afternoon', 'evening'].includes(t));
+      
+      // Check if activity has no time and 'unspecified' is selected
+      if (!activity.time && hasUnspecified) {
+        matchesTime = true;
       }
+      // Check time slots if activity has time
+      else if (activity.time && hasTimeSlots) {
+        const hour = extractHour(activity.time);
+        if (hour !== null) {
+          if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
+          if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
+          if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+        }
+      }
+      
+      if (!matchesTime) return false;
     }
 
     // Free filter
@@ -3625,7 +3683,8 @@ function updateActiveFilterChips() {
     const timeLabels = {
       'morning': 'Mañana',
       'afternoon': 'Tarde',
-      'evening': 'Noche'
+      'evening': 'Noche',
+      'unspecified': 'Sin especificar'
     };
     multiSelectState.time.forEach(time => {
       chips.push({ label: timeLabels[time] || time, type: 'time', value: time });
