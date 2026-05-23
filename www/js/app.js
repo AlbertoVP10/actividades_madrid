@@ -1029,10 +1029,8 @@ function renderFilterFieldContent(field) {
       grid.querySelectorAll('button').forEach(btn => {
         if (selected.includes(btn.dataset.value)) {
           btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-          btn.classList.remove('border-outline-variant');
         } else {
           btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-          btn.classList.add('border-outline-variant');
         }
       });
     }
@@ -1309,17 +1307,15 @@ function populateFilters() {
 
 function toggleCategoryButton(button, category) {
   const isSelected = multiSelectState.category.includes(category);
-
+  
   if (isSelected) {
     multiSelectState.category = multiSelectState.category.filter(c => c !== category);
     button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.classList.add('border-outline-variant');
   } else {
     multiSelectState.category.push(category);
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.classList.remove('border-outline-variant');
   }
-
+  
   refreshFilterFieldLabel('category');
   applyFilters();
 }
