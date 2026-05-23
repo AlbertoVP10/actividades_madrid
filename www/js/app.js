@@ -1307,15 +1307,19 @@ function populateFilters() {
 
 function toggleCategoryButton(button, category) {
   const isSelected = multiSelectState.category.includes(category);
-  
+
   if (isSelected) {
     multiSelectState.category = multiSelectState.category.filter(c => c !== category);
     button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+    button.style.backgroundColor = '';
+    button.style.borderColor = '';
   } else {
     multiSelectState.category.push(category);
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+    button.style.backgroundColor = '';
+    button.style.borderColor = '';
   }
-  
+
   refreshFilterFieldLabel('category');
   applyFilters();
 }
