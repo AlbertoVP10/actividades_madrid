@@ -501,6 +501,23 @@ function setFilterInputsFromParameters(params) {
 }
 
 function setDropdownCheckboxes(type, values) {
+  // Handle grid-based filters (category, district, audience, time)
+  const grid = document.getElementById(`${type}Grid`);
+  if (grid) {
+    const buttons = grid.querySelectorAll('button');
+    buttons.forEach(btn => {
+      if (values.includes(btn.dataset.value)) {
+        btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.remove('border-outline-variant');
+      } else {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      }
+    });
+    return;
+  }
+  
+  // Handle dropdown-based filters (legacy)
   const dropdown = document.getElementById(`${type}Dropdown`);
   if (!dropdown) return;
   const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
@@ -1037,11 +1054,15 @@ function renderFilterFieldContent(field) {
   }
 
   if (field === 'district') {
-    const dropdown = document.getElementById('districtDropdown');
-    if (dropdown) {
-      const selectedValues = multiSelectState.district || [];
-      dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.checked = selectedValues.includes(cb.value);
+    const grid = document.getElementById('districtGrid');
+    if (grid) {
+      const selected = multiSelectState.district || [];
+      grid.querySelectorAll('button').forEach(btn => {
+        if (selected.includes(btn.dataset.value)) {
+          btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        } else {
+          btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        }
       });
     }
     refreshFilterFieldLabel('district');
@@ -1089,6 +1110,9 @@ function refreshFilterFieldLabel(type) {
   
   if (type === 'category') {
     const grid = document.getElementById('categoryGrid');
+    allOptions = grid ? Array.from(grid.querySelectorAll('button')).map(btn => btn.dataset.value) : [];
+  } else if (type === 'district') {
+    const grid = document.getElementById('districtGrid');
     allOptions = grid ? Array.from(grid.querySelectorAll('button')).map(btn => btn.dataset.value) : [];
   } else if (type === 'time') {
     allOptions = ['morning', 'afternoon', 'evening', 'unspecified'];
@@ -1289,19 +1313,33 @@ function populateFilters() {
     categoryGrid.appendChild(button);
   });
   
-  // Districts
+  // Districts as grid buttons
   const districts = [...new Set(allActivities.map(a => a.district))]
     .filter(d => d && d !== 'Desconocido')
     .sort();
-  const districtDropdown = document.getElementById('districtDropdown');
+  const districtGrid = document.getElementById('districtGrid');
+  districtGrid.innerHTML = '';
+  
   districts.forEach(d => {
-    const label = document.createElement('label');
-    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
-    label.innerHTML = `
-      <input type="checkbox" value="${d}" onchange="updateMultiSelect('district')" class="accent-primary">
-      <span>${d}</span>
-    `;
-    districtDropdown.appendChild(label);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'flex items-center justify-left gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    
+    // Add icon
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'material-symbols-outlined text-primary';
+    iconSpan.textContent = 'location_on';
+    button.appendChild(iconSpan);
+    
+    const textSpan = document.createElement('span');
+    textSpan.className = 'font-label-lg text-label-lg text-on-surface';
+    textSpan.textContent = d;
+    button.appendChild(textSpan);
+    
+    button.dataset.value = d;
+    button.dataset.type = 'district';
+    button.onclick = () => toggleDistrictButton(button, d);
+    districtGrid.appendChild(button);
   });
 }
 
@@ -1330,6 +1368,35 @@ function toggleCategoryButton(button, category) {
   }, 50);
 
   refreshFilterFieldLabel('category');
+  applyFilters();
+}
+
+// Toggle district filter button
+function toggleDistrictButton(button, district) {
+  const isSelected = multiSelectState.district.includes(district);
+
+  if (isSelected) {
+    multiSelectState.district = multiSelectState.district.filter(d => d !== district);
+    button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+  } else {
+    multiSelectState.district.push(district);
+    button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+  }
+
+  // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
+  button.blur();
+  if (document.activeElement === button) {
+    document.activeElement.blur();
+  }
+  
+  // Forzar recálculo de estilos para eliminar el estado hover en móviles
+  void button.offsetWidth;
+  button.style.pointerEvents = 'none';
+  setTimeout(() => {
+    button.style.pointerEvents = '';
+  }, 50);
+
+  refreshFilterFieldLabel('district');
   applyFilters();
 }
 
