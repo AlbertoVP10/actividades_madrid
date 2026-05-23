@@ -2571,38 +2571,24 @@ function updateActiveFilterChips() {
     chips.push({ label: 'Este mes', type: 'date', value: 'month' });
   }
   
-  // Category filters
+  // Category filters - grouped into single chip
   if (multiSelectState.category.length > 0) {
-    multiSelectState.category.forEach(cat => {
-      chips.push({ label: cat, type: 'category', value: cat });
-    });
+    chips.push({ label: 'Categoría', type: 'category', value: '__all__' });
   }
   
-  // District filters
+  // District filters - grouped into single chip
   if (multiSelectState.district.length > 0) {
-    multiSelectState.district.forEach(dist => {
-      chips.push({ label: dist, type: 'district', value: dist });
-    });
+    chips.push({ label: 'Distrito', type: 'district', value: '__all__' });
   }
   
-  // Audience filters
+  // Audience filters - grouped into single chip
   if (multiSelectState.audience.length > 0) {
-    multiSelectState.audience.forEach(aud => {
-      chips.push({ label: aud, type: 'audience', value: aud });
-    });
+    chips.push({ label: 'Público', type: 'audience', value: '__all__' });
   }
   
-  // Time filters
+  // Time filters - grouped into single chip
   if (multiSelectState.time.length > 0) {
-    const timeLabels = {
-      'morning': 'Mañana',
-      'afternoon': 'Tarde',
-      'evening': 'Noche',
-      'unspecified': 'Sin especificar'
-    };
-    multiSelectState.time.forEach(time => {
-      chips.push({ label: timeLabels[time] || time, type: 'time', value: time });
-    });
+    chips.push({ label: 'Horario', type: 'time', value: '__all__' });
   }
   
   // Free only
@@ -2670,42 +2656,107 @@ function removeFilterChip(type, value) {
       }
       break;
     case 'category':
-      const catIndex = multiSelectState.category.indexOf(value);
-      if (catIndex > -1) {
-        multiSelectState.category.splice(catIndex, 1);
+      if (value === '__all__') {
+        // Remove all category filters
+        multiSelectState.category = [];
         const categoryGrid = document.getElementById('categoryGrid');
-        const catButton = categoryGrid.querySelector(`button[data-value="${value}"]`);
-        if (catButton) {
-          catButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        if (categoryGrid) {
+          categoryGrid.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+          });
         }
         refreshFilterFieldLabel('category');
+      } else {
+        // Remove single category filter (legacy)
+        const catIndex = multiSelectState.category.indexOf(value);
+        if (catIndex > -1) {
+          multiSelectState.category.splice(catIndex, 1);
+          const categoryGrid = document.getElementById('categoryGrid');
+          const catButton = categoryGrid.querySelector(`button[data-value="${value}"]`);
+          if (catButton) {
+            catButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+          }
+          refreshFilterFieldLabel('category');
+        }
       }
       break;
     case 'district':
-      const distIndex = multiSelectState.district.indexOf(value);
-      if (distIndex > -1) {
-        multiSelectState.district.splice(distIndex, 1);
-        const distCheckbox = document.querySelector(`#districtDropdown input[value="${value}"]`);
-        if (distCheckbox) distCheckbox.checked = false;
-        updateMultiSelect('district');
+      if (value === '__all__') {
+        // Remove all district filters
+        multiSelectState.district = [];
+        const districtGrid = document.getElementById('districtGrid');
+        if (districtGrid) {
+          districtGrid.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+          });
+        }
+        refreshFilterFieldLabel('district');
+      } else {
+        // Remove single district filter (legacy)
+        const distIndex = multiSelectState.district.indexOf(value);
+        if (distIndex > -1) {
+          multiSelectState.district.splice(distIndex, 1);
+          const districtGrid = document.getElementById('districtGrid');
+          const distButton = districtGrid.querySelector(`button[data-value="${value}"]`);
+          if (distButton) {
+            distButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+          }
+          refreshFilterFieldLabel('district');
+        }
       }
       break;
     case 'audience':
-      const audIndex = multiSelectState.audience.indexOf(value);
-      if (audIndex > -1) {
-        multiSelectState.audience.splice(audIndex, 1);
-        const audCheckbox = document.querySelector(`#audienceDropdown input[value="${value}"]`);
-        if (audCheckbox) audCheckbox.checked = false;
-        updateMultiSelect('audience');
+      if (value === '__all__') {
+        // Remove all audience filters
+        multiSelectState.audience = [];
+        const audienceGrid = document.getElementById('audienceGrid');
+        if (audienceGrid) {
+          audienceGrid.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+            btn.classList.add('border-outline-variant');
+          });
+        }
+        refreshFilterFieldLabel('audience');
+      } else {
+        // Remove single audience filter (legacy)
+        const audIndex = multiSelectState.audience.indexOf(value);
+        if (audIndex > -1) {
+          multiSelectState.audience.splice(audIndex, 1);
+          const audienceGrid = document.getElementById('audienceGrid');
+          const audButton = audienceGrid.querySelector(`button[data-value="${value}"]`);
+          if (audButton) {
+            audButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+            audButton.classList.add('border-outline-variant');
+          }
+          refreshFilterFieldLabel('audience');
+        }
       }
       break;
     case 'time':
-      const timeIndex = multiSelectState.time.indexOf(value);
-      if (timeIndex > -1) {
-        multiSelectState.time.splice(timeIndex, 1);
-        const timeCheckbox = document.querySelector(`#timeDropdown input[value="${value}"]`);
-        if (timeCheckbox) timeCheckbox.checked = false;
-        updateMultiSelect('time');
+      if (value === '__all__') {
+        // Remove all time filters
+        multiSelectState.time = [];
+        const timeGrid = document.getElementById('timeGrid');
+        if (timeGrid) {
+          timeGrid.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+            btn.classList.add('border-outline-variant');
+          });
+        }
+        refreshFilterFieldLabel('time');
+      } else {
+        // Remove single time filter (legacy)
+        const timeIndex = multiSelectState.time.indexOf(value);
+        if (timeIndex > -1) {
+          multiSelectState.time.splice(timeIndex, 1);
+          const timeGrid = document.getElementById('timeGrid');
+          const timeButton = timeGrid.querySelector(`button[data-value="${value}"]`);
+          if (timeButton) {
+            timeButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+            timeButton.classList.add('border-outline-variant');
+          }
+          refreshFilterFieldLabel('time');
+        }
       }
       break;
     case 'free':
