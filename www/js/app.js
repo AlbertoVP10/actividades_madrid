@@ -1311,14 +1311,13 @@ function toggleCategoryButton(button, category) {
   if (isSelected) {
     multiSelectState.category = multiSelectState.category.filter(c => c !== category);
     button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.style.backgroundColor = '';
-    button.style.borderColor = '';
   } else {
     multiSelectState.category.push(category);
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.style.backgroundColor = '';
-    button.style.borderColor = '';
   }
+
+  // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
+  button.blur();
 
   refreshFilterFieldLabel('category');
   applyFilters();
@@ -1327,7 +1326,7 @@ function toggleCategoryButton(button, category) {
 // Toggle time filter button
 function toggleTimeButton(button, time) {
   const isSelected = multiSelectState.time.includes(time);
-  
+
   if (isSelected) {
     multiSelectState.time = multiSelectState.time.filter(t => t !== time);
     button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
@@ -1337,7 +1336,10 @@ function toggleTimeButton(button, time) {
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
     button.classList.remove('border-outline-variant');
   }
-  
+
+  // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
+  button.blur();
+
   refreshFilterFieldLabel('time');
   applyFilters();
 }
@@ -1364,6 +1366,9 @@ function toggleAudienceButton(button, audience) {
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
     button.classList.remove('border-outline-variant');
   }
+
+  // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
+  button.blur();
 
   refreshFilterFieldLabel('audience');
   applyFilters();
