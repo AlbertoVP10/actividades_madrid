@@ -475,6 +475,32 @@
   </div>
 </div>
 
+<!-- Saved Filters Modal -->
+<div id="savedFiltersModal" class="hidden fixed inset-0 bg-black/50 z-[115] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="savedFiltersModalTitle">
+  <div class="bg-surface rounded-t-xl sm:rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-outline-variant">
+      <button onclick="closeSavedFiltersModal()" class="p-2 hover:bg-surface-container-high rounded-full transition-colors" aria-label="Cerrar">
+        <span class="material-symbols-outlined text-on-surface">close</span>
+      </button>
+      <h2 id="savedFiltersModalTitle" class="font-title-lg text-title-lg text-on-surface">Filtros guardados</h2>
+      <div class="w-10"></div>
+    </div>
+    
+    <!-- Saved Filters Options -->
+    <div id="savedFiltersContainer" class="p-4 space-y-1">
+      <!-- Options will be populated by JavaScript -->
+    </div>
+    
+    <!-- Apply Button -->
+    <div class="p-4 mt-auto border-t border-outline-variant">
+      <button onclick="applySavedFilterSelection()" class="w-full bg-primary text-on-primary py-4 rounded-full font-title-md text-title-md font-semibold hover:bg-primary-dark transition-colors">
+        Aplicar
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Location Modal (for adding location when none exists) -->
 <div id="locationModal" class="hidden fixed inset-0 bg-black/50 z-[120] flex items-start sm:items-center justify-center pt-20 sm:pt-0">
   <div style="background-color: #ffffff;" class="rounded-xl sm:rounded-xl w-full max-w-lg p-4 m-4 mt-0 sm:mt-4">
@@ -924,157 +950,230 @@
         </button>
       </div>
 
-      <div class="px-0 py-0 space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="font-title-md text-title-md text-on-surface mb-2">Favoritos</h3>
+          <p class="text-label-sm text-on-surface-variant">Guarda y aplica tus combinaciones de filtros más usadas.</p>
+        </div>
+        <button type="button" onclick="openSaveFiltersModal()" class="save-filters-button inline-flex items-center justify-center rounded-full px-4 py-3 bg-primary text-on-primary font-semibold text-body-md transition hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary/40">
+          <span class="material-symbols-outlined mr-2">save</span>
+          Guardar filtros actuales
+        </button>
+      </div>
 
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <h3 class="font-title-md text-title-md text-on-surface mb-2">Favoritos</h3>
-            <p class="text-label-sm text-on-surface-variant">Guarda y aplica tus combinaciones de filtros más usadas.</p>
+      <button type="button" id="seccion-filtros-favoritos" onclick="openSavedFiltersModal()" class="hidden w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary">bookmark</span>
+          <div class="text-left">
+            <p class="font-label-lg text-label-lg text-on-surface">Filtros guardados</p>
+            <p class="text-label-sm text-on-surface-variant">Aplica tus filtros favoritos</p>
           </div>
-          <button type="button" onclick="openSaveFiltersModal()" class="save-filters-button inline-flex items-center justify-center rounded-full px-4 py-3 bg-primary text-on-primary font-semibold text-body-md transition hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary/40">
-            <span class="material-symbols-outlined mr-2">save</span>
-            Guardar filtros actuales
-          </button>
+        </div>
+        <span class="material-symbols-outlined text-primary">chevron_right</span>
+      </button>
+
+      <div class="space-y-3">
+        <button type="button" onclick="openFilterField('search')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">search</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Buscar</p>
+              <p class="text-label-sm text-on-surface-variant">Título o descripción</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="openFilterField('category')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">category</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Categoría</p>
+              <p class="text-label-sm text-on-surface-variant">Selecciona tus intereses</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="openFilterField('district')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">place</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Distrito</p>
+              <p class="text-label-sm text-on-surface-variant">Busca por zona</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="openFilterField('audience')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">people</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Público</p>
+              <p class="text-label-sm text-on-surface-variant">Elige para quién es</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="openFilterField('date')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">calendar_month</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Fecha</p>
+              <p class="text-label-sm text-on-surface-variant">Hoy, mañana o próximos días</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="openFilterField('time')" class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl hover:bg-surface shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">schedule</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Horario</p>
+              <p class="text-label-sm text-on-surface-variant">Mañana, tarde o noche</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+
+        <div class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">paid</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Solo gratuitas</p>
+              <p class="text-label-sm text-on-surface-variant">Mostrar sólo actividades sin coste</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer ml-2">
+            <input id="freeOnly" type="checkbox" class="sr-only peer" onchange="applyFilters()">
+            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
         </div>
 
-        <div id="seccion-filtros-favoritos" class="hidden border-b border-surface-variant/20 pb-4 mb-4">
-          <label for="savedFiltersSelect" class="text-label-sm text-on-surface-variant mb-2 inline-block">Filtro favorito</label>
-          <select id="savedFiltersSelect" onchange="aplicarFiltroFavorito(this.value)" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-            <option value="">Selecciona un filtro guardado</option>
-          </select>
-        </div>
-
-    <!-- Filter Section -->
-    <div class="border-b border-surface-variant/30 pb-4">
-      <h3 class="font-title-md text-title-md text-on-surface mb-3">Filtrar</h3>
-      <label class="text-label-sm text-on-surface-variant mb-1 block">🔎 Buscar</label>
-      <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
-        <span class="material-symbols-outlined text-on-surface-variant">search</span>
-        <input type="text" id="searchInput" placeholder="Título o descripción..." 
-               class="bg-transparent flex-1 outline-none text-body-md"
-               oninput="applyFilters()">
-      </div>
-    </div>
-    
-    <!-- Categories -->
-    <div>
-      <label class="text-label-sm text-on-surface-variant mb-2 block">🎭 Categoría</label>
-      <div class="multi-select-container relative" id="categoryMultiSelect">
-        <button type="button" onclick="toggleMultiSelect('category')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
-          <span id="categorySelectLabel">Todas</span>
-          <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
-        </button>
-        <div id="categoryDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
-          <!-- Options populated by JS -->
-        </div>
-      </div>
-    </div>
-    
-    <!-- Districts -->
-    <div>
-      <label class="text-label-sm text-on-surface-variant mb-2 block">📍 Distrito</label>
-      <div class="multi-select-container relative" id="districtMultiSelect">
-        <button type="button" onclick="toggleMultiSelect('district')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
-          <span id="districtSelectLabel">Todos</span>
-          <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
-        </button>
-        <div id="districtDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
-          <!-- Options populated by JS -->
-        </div>
-      </div>
-    </div>
-    
-    <!-- Audience / Público -->
-    <div>
-      <label class="text-label-sm text-on-surface-variant mb-2 block">👥 Público</label>
-      <div class="multi-select-container relative" id="audienceMultiSelect">
-        <button type="button" onclick="toggleMultiSelect('audience')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
-          <span id="audienceSelectLabel">Todos</span>
-          <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
-        </button>
-        <div id="audienceDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="Niños" onchange="updateMultiSelect('audience')" class="accent-primary">
-            <span>Niños</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="Familias" onchange="updateMultiSelect('audience')" class="accent-primary">
-            <span>Familias</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="Adultos" onchange="updateMultiSelect('audience')" class="accent-primary">
-            <span>Adultos</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="Mayores" onchange="updateMultiSelect('audience')" class="accent-primary">
-            <span>Mayores</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="Jóvenes" onchange="updateMultiSelect('audience')" class="accent-primary">
-            <span>Jóvenes</span>
+        <div class="w-full flex items-center bg-on-primary justify-between p-4 rounded-3xl shadow-sm shadow-primary/20">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">favorite</span>
+            <div class="text-left">
+              <p class="font-label-lg text-label-lg text-on-surface">Mis favoritos</p>
+              <p class="text-label-sm text-on-surface-variant">Ver sólo actividades guardadas</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer ml-2">
+            <input id="favoritesOnly" type="checkbox" class="sr-only peer" onchange="applyFilters()">
+            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </div>
-      </div>
-    </div>
-    
-    <!-- Date Filter -->
-    <div>
-      <label class="text-label-sm text-on-surface-variant mb-2 block">📅 Fecha</label>
-      <select id="dateSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
-        <option value="all">Todas las fechas</option>
-        <option value="today">Hoy</option>
-        <option value="tomorrow">Mañana</option>
-        <option value="week">Próximos 7 días</option>
-        <option value="month">Próximo mes</option>
-      </select>
-    </div>
-    
-    <!-- Time / Horario -->
-    <div>
-      <label class="text-label-sm text-on-surface-variant mb-2 block">🕐 Horario</label>
-      <div class="multi-select-container relative" id="timeMultiSelect">
-        <button type="button" onclick="toggleMultiSelect('time')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
-          <span id="timeSelectLabel">Todo el día</span>
-          <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
-        </button>
-        <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto">
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="morning" onchange="updateMultiSelect('time')" class="accent-primary">
-            <span>Mañana (6:00 - 12:00)</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="afternoon" onchange="updateMultiSelect('time')" class="accent-primary">
-            <span>Tarde (12:00 - 18:00)</span>
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer">
-            <input type="checkbox" value="evening" onchange="updateMultiSelect('time')" class="accent-primary">
-            <span>Noche (18:00 - 24:00)</span>
-          </label>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Free and Favorites in parallel -->
-    <div class="flex gap-4">
-      <!-- Free Only -->
-      <div class="flex items-center gap-2 flex-1">
-        <input type="checkbox" id="freeOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-        <label for="freeOnly" class="text-body-md">💰 Solo gratuitas</label>
-      </div>
-      
-      <!-- Favorites Only -->
-      <div class="flex items-center gap-2 flex-1">
-        <input type="checkbox" id="favoritesOnly" onchange="applyFilters()" class="w-5 h-5 accent-primary">
-        <label for="favoritesOnly" class="text-body-md">❤️ Mis favoritos</label>
-        <span id="favCount" class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-label-sm">0</span>
-      </div>
-    </div>
       </div>
     </div>
   </div>
-</div>
 
-  <!-- ==================== ASSOCIATED ELEMENTS ==================== -->
+  <div id="filterFieldView" class="hidden pb-4 space-y-4">
+    <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2">
+      <button onclick="openFiltersView()" class="hover:bg-surface-variant rounded-full" aria-label="Volver" style="display:inline-flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined">arrow_back_ios</span>
+      </button>
+      <h2 id="filterFieldTitle" class="font-title-lg text-title-lg">Filtro</h2>
+    </div>
+
+    <div class="bg-white rounded-3xl p-4 space-y-4">
+      <div id="filterFieldContent" class="space-y-4">
+        <div id="filterField_search" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">🔎 Buscar</label>
+          <div class="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-2">
+            <span class="material-symbols-outlined text-on-surface-variant">search</span>
+            <input type="text" id="filterSearchInput" placeholder="Título o descripción..." class="bg-transparent flex-1 outline-none text-body-md" oninput="applyFilters()">
+          </div>
+        </div>
+
+        <div id="filterField_category" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">🎭 Categoría</label>
+          <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
+        </div>
+
+        <div id="filterField_district" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">📍 Distrito</label>
+          <div class="multi-select-container relative" id="districtMultiSelect">
+            <button type="button" onclick="toggleMultiSelect('district')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+              <span id="districtSelectLabel">Todos</span>
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div id="districtDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <div id="filterField_audience" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">👥 Público</label>
+          <div class="multi-select-container relative" id="audienceMultiSelect">
+            <button type="button" onclick="toggleMultiSelect('audience')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+              <span id="audienceSelectLabel">Todos</span>
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div id="audienceDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <div id="filterField_date" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">📅 Fecha</label>
+          <select id="dateSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+            <option value="all">Todas las fechas</option>
+            <option value="today">Hoy</option>
+            <option value="tomorrow">Mañana</option>
+            <option value="week">Próximos 7 días</option>
+            <option value="month">Próximo mes</option>
+          </select>
+        </div>
+
+        <div id="filterField_time" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">🕐 Horario</label>
+          <div class="multi-select-container relative" id="timeMultiSelect">
+            <button type="button" onclick="toggleMultiSelect('time')" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant text-left flex justify-between items-center">
+              <span id="timeSelectLabel">Todo el día</span>
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div id="timeDropdown" class="hidden absolute z-50 w-full mt-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <div id="filterField_freeOnly" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">💰 Solo gratuitas</label>
+          <div class="flex items-center justify-between p-4 rounded-3xl bg-on-primary">
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Solo gratuitas</p>
+              <p class="text-label-sm text-on-surface-variant">Mostrar solo actividades sin coste</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer ml-2">
+              <input id="filterField_freeOnlyCheckbox" type="checkbox" class="sr-only peer" onchange="applyFilters()">
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+
+        <div id="filterField_favoritesOnly" class="field-panel hidden space-y-4">
+          <label class="text-label-sm text-on-surface-variant">❤️ Mis favoritos</label>
+          <div class="flex items-center justify-between p-4 rounded-3xl bg-on-primary">
+            <div>
+              <p class="font-label-lg text-label-lg text-on-surface">Mis favoritos</p>
+              <p class="text-label-sm text-on-surface-variant">Mostrar solo actividades guardadas</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer ml-2">
+              <input id="filterField_favoritesOnlyCheckbox" type="checkbox" class="sr-only peer" onchange="applyFilters()">
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="applyFilters()" class="flex-1 py-3 rounded-xl bg-primary text-white font-medium">Aplicar</button>
+        <button type="button" onclick="resetFilterField()" class="flex-1 py-3 rounded-xl bg-surface-container-high text-on-surface font-medium">Borrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ASSOCIATED ELEMENTS -->
   
   <!-- Pagination -->
   <div id="pagination" class="flex justify-center items-center gap-2 py-4 pb-4">

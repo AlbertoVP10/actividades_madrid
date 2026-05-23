@@ -284,23 +284,15 @@ function cargarFiltrosFavoritos() {
 
 function renderSavedFilterSection() {
   const section = document.getElementById('seccion-filtros-favoritos');
-  const select = document.getElementById('savedFiltersSelect');
-  if (!section || !select) return;
+  if (!section) return;
 
-  select.innerHTML = '<option value="">Selecciona un filtro guardado</option>';
-
+  // Show/hide section based on saved filters count
   if (savedFilters.length === 0) {
     section.classList.add('hidden');
     return;
   }
 
   section.classList.remove('hidden');
-  savedFilters.forEach(filtro => {
-    const option = document.createElement('option');
-    option.value = filtro.id;
-    option.textContent = filtro.nombre_personalizado;
-    select.appendChild(option);
-  });
 }
 
 function openSaveFiltersModal() {
@@ -397,6 +389,73 @@ function aplicarFiltroFavorito(filterId) {
   setFilterInputsFromParameters(params);
   applyFilters();
 }
+
+// Open saved filters modal
+function openSavedFiltersModal() {
+  const modal = document.getElementById('savedFiltersModal');
+  const container = document.getElementById('savedFiltersContainer');
+  if (!modal || !container) return;
+
+  // Populate options
+  container.innerHTML = '';
+  
+  if (savedFilters.length === 0) {
+    container.innerHTML = '<p class="text-center text-on-surface-variant p-4">No tienes filtros guardados aún</p>';
+    modal.classList.remove('hidden');
+    return;
+  }
+
+  savedFilters.forEach(filtro => {
+    const label = document.createElement('label');
+    label.className = 'flex items-center justify-between p-4 hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors';
+    label.innerHTML = `
+      <span class="text-body-lg text-on-surface">${filtro.nombre_personalizado}</span>
+      <div class="w-6 h-6 rounded-full border-2 border-outline flex items-center justify-center saved-filter-check" data-value="${filtro.id}">
+        <span class="material-symbols-outlined text-primary text-sm hidden">check</span>
+      </div>
+      <input type="radio" name="savedFilterOption" value="${filtro.id}" class="hidden">
+    `;
+    container.appendChild(label);
+  });
+
+  modal.classList.remove('hidden');
+}
+
+// Close saved filters modal
+function closeSavedFiltersModal() {
+  const modal = document.getElementById('savedFiltersModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// Apply selected saved filter
+function applySavedFilterSelection() {
+  const selected = document.querySelector('input[name="savedFilterOption"]:checked');
+  if (!selected) return;
+
+  const filterId = selected.value;
+  aplicarFiltroFavorito(filterId);
+  closeSavedFiltersModal();
+  
+  // Close filters view and return to home
+  toggleFilters();
+}
+
+// Handle saved filter radio selection
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'savedFilterOption') {
+    // Update all radio checks
+    document.querySelectorAll('.saved-filter-check').forEach(check => {
+      const icon = check.querySelector('.material-symbols-outlined');
+      if (check.dataset.value === e.target.value) {
+        icon.classList.remove('hidden');
+      } else {
+        icon.classList.add('hidden');
+      }
+    });
+  }
+});
 
 function setFilterInputsFromParameters(params) {
   if (!params || typeof params !== 'object') return;
@@ -770,8 +829,11 @@ function getExpiredFavorites() {
 // Update favorites count badge and KPI
 function updateFavCount() {
   const validFavs = getValidFavorites();
-  document.getElementById('favCount').textContent = validFavs.length;
-  // document.getElementById('kpiFavorites').textContent = validFavs.length;
+  const favCountEl = document.getElementById('favCount');
+  if (favCountEl) {
+    favCountEl.textContent = validFavs.length;
+  }
+  // document.getElementById('kpiFavorites')?.textContent = validFavs.length;
   // updateKPIFavoritesStyle();
 }
 
@@ -828,7 +890,7 @@ async function loadActivities() {
     const response = await fetch('https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json');
     const data = await response.json();
     
-    if (data['@graph']) {
+    if (Array.isArray(data['@graph'])) {
       allActivities = data['@graph'].map(item => ({
         id: item['@id'] || Math.random().toString(),
         title: item.title || 'Sin título',
@@ -860,6 +922,12 @@ async function loadActivities() {
       
       document.getElementById('loadingState').classList.add('hidden');
       document.getElementById('mainContent').classList.remove('hidden');
+    } else {
+      console.error('Unexpected activity payload', data);
+      document.getElementById('loadingState').innerHTML = `
+        <p class="text-error text-body-md">Error cargando datos: formato inesperado</p>
+        <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
+      `;
     }
   } catch (error) {
     console.error('Error loading activities:', error);
@@ -919,14 +987,146 @@ const multiSelectState = {
   time: []
 };
 
+let currentFilterField = null;
+
+function openFilterField(field) {
+  currentFilterField = field;
+  const titles = {
+    search: 'Buscar actividades',
+    category: 'Filtrar por categoría',
+    district: 'Filtrar por distrito',
+    audience: 'Filtrar por público',
+    date: 'Filtrar por fecha',
+    time: 'Filtrar por horario',
+    freeOnly: 'Solo gratuitas',
+    favoritesOnly: 'Mis favoritos'
+  };
+
+  const title = titles[field] || 'Filtro';
+  const titleElement = document.getElementById('filterFieldTitle');
+  if (titleElement) titleElement.textContent = title;
+
+  renderFilterFieldContent(field);
+  showView('filterField');
+  const fieldView = document.getElementById('filterFieldView');
+  if (fieldView) fieldView.scrollTop = 0;
+}
+
+function renderFilterFieldContent(field) {
+  document.querySelectorAll('#filterFieldContent .field-panel').forEach(panel => panel.classList.add('hidden'));
+  const activePanel = document.getElementById(`filterField_${field}`);
+  if (activePanel) activePanel.classList.remove('hidden');
+
+  if (field === 'search') {
+    const searchInput = document.getElementById('filterSearchInput');
+    if (searchInput) searchInput.value = currentFilters.search || '';
+  }
+
+  if (field === 'category') {
+    const grid = document.getElementById('categoryGrid');
+    if (grid) {
+      const selected = multiSelectState.category || [];
+      grid.querySelectorAll('button').forEach(btn => {
+        if (selected.includes(btn.dataset.value)) {
+          btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        } else {
+          btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        }
+      });
+    }
+  }
+
+  if (['district', 'audience', 'time'].includes(field)) {
+    const dropdown = document.getElementById(`${field}Dropdown`);
+    if (dropdown) {
+      const selectedValues = multiSelectState[field] || [];
+      dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = selectedValues.includes(cb.value);
+      });
+    }
+    refreshFilterFieldLabel(field);
+  }
+}
+
+function refreshFilterFieldLabel(type) {
+  const label = document.getElementById(`${type}SelectLabel`);
+  if (!label) return;
+  const selected = multiSelectState[type] || [];
+  
+  let allOptions = [];
+  
+  if (type === 'category') {
+    const grid = document.getElementById('categoryGrid');
+    allOptions = grid ? Array.from(grid.querySelectorAll('button')).map(btn => btn.dataset.value) : [];
+  } else {
+    const dropdown = document.getElementById(`${type}Dropdown`);
+    allOptions = dropdown ? Array.from(dropdown.querySelectorAll('input[type="checkbox"]')).map(cb => cb.value) : [];
+  }
+  
+  const defaults = {
+    category: 'Todas',
+    district: 'Todos',
+    audience: 'Todos',
+    time: 'Todo el día'
+  };
+
+  if (selected.length === 0 || selected.length === allOptions.length) {
+    label.textContent = defaults[type];
+  } else if (selected.length === 1) {
+    label.textContent = selected[0];
+  } else {
+    label.textContent = `${selected.length} seleccionados`;
+  }
+  
+  applyFilters();
+}
+
+function resetFilterField() {
+  if (!currentFilterField) return;
+
+  if (currentFilterField === 'search') {
+    const searchInput = document.getElementById('filterSearchInput');
+    if (searchInput) searchInput.value = '';
+  } else if (currentFilterField === 'date') {
+    const dateSelect = document.getElementById('dateSelect');
+    if (dateSelect) dateSelect.value = 'all';
+  } else if (['freeOnly', 'favoritesOnly'].includes(currentFilterField)) {
+    const checkbox = document.getElementById(currentFilterField);
+    if (checkbox) checkbox.checked = false;
+  } else if (currentFilterField === 'category') {
+    multiSelectState.category = [];
+    const grid = document.getElementById('categoryGrid');
+    if (grid) {
+      grid.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      });
+    }
+    refreshFilterFieldLabel('category');
+  } else if (['district', 'audience', 'time'].includes(currentFilterField)) {
+    multiSelectState[currentFilterField] = [];
+    const dropdown = document.getElementById(`${currentFilterField}Dropdown`);
+    if (dropdown) {
+      dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+    refreshFilterFieldLabel(currentFilterField);
+  }
+
+  applyFilters();
+}
+
 // Toggle multi-select dropdown
 function toggleMultiSelect(type) {
   const dropdown = document.getElementById(type + 'Dropdown');
+  if (!dropdown) return; // Exit early if dropdown doesn't exist
+  
   const isHidden = dropdown.classList.contains('hidden');
   
   // Close all other dropdowns
   ['category', 'district', 'audience', 'time'].forEach(t => {
-    document.getElementById(t + 'Dropdown').classList.add('hidden');
+    const el = document.getElementById(t + 'Dropdown');
+    if (el) {
+      el.classList.add('hidden');
+    }
   });
   
   // Toggle current
@@ -939,7 +1139,10 @@ function toggleMultiSelect(type) {
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.multi-select-container')) {
     ['category', 'district', 'audience', 'time'].forEach(type => {
-      document.getElementById(type + 'Dropdown').classList.add('hidden');
+      const dropdown = document.getElementById(type + 'Dropdown');
+      if (dropdown) {
+        dropdown.classList.add('hidden');
+      }
     });
   }
 });
@@ -947,6 +1150,8 @@ document.addEventListener('click', function(e) {
 // Update multi-select state and label
 function updateMultiSelect(type) {
   const dropdown = document.getElementById(type + 'Dropdown');
+  if (!dropdown) return; // Exit early if dropdown doesn't exist
+  
   const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
   const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
   
@@ -954,6 +1159,8 @@ function updateMultiSelect(type) {
   
   // Update label
   const label = document.getElementById(type + 'SelectLabel');
+  if (!label) return; // Exit early if label doesn't exist
+  
   const allOptions = Array.from(checkboxes).map(cb => cb.value);
   
   if (selected.length === 0 || selected.length === allOptions.length) {
@@ -976,17 +1183,20 @@ function updateMultiSelect(type) {
 
 // Populate filter options
 function populateFilters() {
-  // Categories
+  // Categories as grid buttons
   const categories = [...new Set(allActivities.map(a => a.category))].sort();
-  const categoryDropdown = document.getElementById('categoryDropdown');
+  const categoryGrid = document.getElementById('categoryGrid');
+  categoryGrid.innerHTML = '';
+  
   categories.forEach(cat => {
-    const label = document.createElement('label');
-    label.className = 'flex items-center gap-2 px-3 py-2 hover:bg-surface-container cursor-pointer';
-    label.innerHTML = `
-      <input type="checkbox" value="${cat}" onchange="updateMultiSelect('category')" class="accent-primary">
-      <span>${cat}</span>
-    `;
-    categoryDropdown.appendChild(label);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'px-3 py-2 rounded-lg border-2 border-outline-variant text-center text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    button.textContent = cat;
+    button.dataset.value = cat;
+    button.dataset.type = 'category';
+    button.onclick = () => toggleCategoryButton(button, cat);
+    categoryGrid.appendChild(button);
   });
   
   // Districts
@@ -1005,11 +1215,30 @@ function populateFilters() {
   });
 }
 
+function toggleCategoryButton(button, category) {
+  const isSelected = multiSelectState.category.includes(category);
+  
+  if (isSelected) {
+    multiSelectState.category = multiSelectState.category.filter(c => c !== category);
+    button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+  } else {
+    multiSelectState.category.push(category);
+    button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+  }
+  
+  refreshFilterFieldLabel('category');
+  applyFilters();
+}
+
 // Toggle filters panel
 function openFiltersView() {
   const filtersView = document.getElementById('filtersView');
   if (!filtersView) return;
-  filtersView.dataset.previousView = currentView;
+  
+  // Guarda el tab activo de la navbar (no la vista anterior)
+  const activeTab = document.querySelector('.bottom-tab.bg-primary-container');
+  filtersView.dataset.activeTab = activeTab ? activeTab.dataset.tab : 'home';
+  
   showView('filters');
   filtersView.scrollTop = 0;
 }
@@ -1017,16 +1246,11 @@ function openFiltersView() {
 function closeFiltersView() {
   const filtersView = document.getElementById('filtersView');
   if (!filtersView) return;
-  const previousView = filtersView.dataset.previousView || 'list';
-  showView(previousView);
+  
+  // Restaura el tab activo guardado
+  const activeTab = filtersView.dataset.activeTab || 'home';
+  setBottomTab(activeTab);
   applyFilters();
-
-  if (previousView === 'nearby' && !userLocation) {
-    setTimeout(() => {
-      setMainTab('recent');
-      applyFilters();
-    }, 0);
-  }
 }
 
 function toggleFilters() {
@@ -1479,11 +1703,13 @@ function applyKPIFilter(type) {
       // For featured, we use multi-select category
       if (!multiSelectState.category.includes('Destacada')) {
         multiSelectState.category.push('Destacada');
-        // Update the checkbox in dropdown
-        const categoryDropdown = document.getElementById('categoryDropdown');
-        const checkbox = categoryDropdown.querySelector('input[value="Destacada"]');
-        if (checkbox) checkbox.checked = true;
-        updateMultiSelect('category');
+        // Update the button in grid
+        const categoryGrid = document.getElementById('categoryGrid');
+        const destButton = categoryGrid.querySelector('button[data-value="Destacada"]');
+        if (destButton) {
+          destButton.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        }
+        refreshFilterFieldLabel('category');
       }
       break;
     case 'near':
@@ -1531,10 +1757,12 @@ function clearKPIFilter(filterToClear) {
       const catIndex = multiSelectState.category.indexOf('Destacada');
       if (catIndex > -1) {
         multiSelectState.category.splice(catIndex, 1);
-        const categoryDropdown = document.getElementById('categoryDropdown');
-        const checkbox = categoryDropdown.querySelector('input[value="Destacada"]');
-        if (checkbox) checkbox.checked = false;
-        updateMultiSelect('category');
+        const categoryGrid = document.getElementById('categoryGrid');
+        const destButton = categoryGrid.querySelector('button[data-value="Destacada"]');
+        if (destButton) {
+          destButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        }
+        refreshFilterFieldLabel('category');
       }
       break;
     case 'near':
@@ -1677,7 +1905,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Apply filters
 function applyFilters() {
-  currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
+  const searchField = document.getElementById('filterSearchInput') || document.getElementById('searchInput');
+  currentFilters.search = searchField?.value.toLowerCase() || '';
   // Multi-select filters - use multiSelectState
   currentFilters.category = multiSelectState.category;
   currentFilters.district = multiSelectState.district;
@@ -2180,9 +2409,12 @@ function removeFilterChip(type, value) {
       const catIndex = multiSelectState.category.indexOf(value);
       if (catIndex > -1) {
         multiSelectState.category.splice(catIndex, 1);
-        const catCheckbox = document.querySelector(`#categoryDropdown input[value="${value}"]`);
-        if (catCheckbox) catCheckbox.checked = false;
-        updateMultiSelect('category');
+        const categoryGrid = document.getElementById('categoryGrid');
+        const catButton = categoryGrid.querySelector(`button[data-value="${value}"]`);
+        if (catButton) {
+          catButton.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        }
+        refreshFilterFieldLabel('category');
       }
       break;
     case 'district':
@@ -3039,6 +3271,7 @@ function showView(view) {
   document.getElementById('profileSettingsView').classList.toggle('hidden', view !== 'profileSettings');
   document.getElementById('detailView').classList.toggle('hidden', view !== 'detail');
   document.getElementById('filtersView').classList.toggle('hidden', view !== 'filters');
+  document.getElementById('filterFieldView').classList.toggle('hidden', view !== 'filterField');
   document.getElementById('infoView').classList.toggle('hidden', view !== 'info');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
@@ -3061,11 +3294,11 @@ function showView(view) {
 
   // Mostrar/ocultar bottom nav según la vista
   if (bottomNav) {
-    bottomNav.classList.toggle('hidden', view === 'detail');
+    bottomNav.classList.toggle('hidden', view === 'detail' || view === 'filterField');
   }
 
   // if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile');
-  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail'|| view === 'info' || view === 'filters');
+  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail' || view === 'info' || view === 'filters' || view === 'filterField');
   if (profileDonateFooter) profileDonateFooter.classList.toggle('hidden', view !== 'profile');
 
   if (view === 'map') {
@@ -3377,11 +3610,13 @@ function clearFilters() {
   multiSelectState.audience = [];
   multiSelectState.time = [];
 
-  // Uncheck all multi-select checkboxes
+  // Uncheck all multi-select checkboxes with validation
   ['category', 'district', 'audience', 'time'].forEach(type => {
     const dropdown = document.getElementById(type + 'Dropdown');
-    const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => cb.checked = false);
+    if (dropdown) {
+      const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = false);
+    }
     
     // Reset labels
     const defaults = {
@@ -3390,7 +3625,10 @@ function clearFilters() {
       audience: 'Todos',
       time: 'Todo el día'
     };
-    document.getElementById(type + 'SelectLabel').textContent = defaults[type];
+    const labelEl = document.getElementById(type + 'SelectLabel');
+    if (labelEl) {
+      labelEl.textContent = defaults[type];
+    }
   });
 
   currentFilters = {
@@ -3409,11 +3647,19 @@ function clearFilters() {
     sort: 'recent'
   };
 
-  document.getElementById('searchInput').value = '';
-  document.getElementById('dateSelect').value = 'all';
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.value = '';
+  
+  const dateSelect = document.getElementById('dateSelect');
+  if (dateSelect) dateSelect.value = 'all';
+  
   setSortState('recent');
-  document.getElementById('freeOnly').checked = false;
-  document.getElementById('favoritesOnly').checked = false;
+  
+  const freeCheckbox = document.getElementById('freeOnly');
+  if (freeCheckbox) freeCheckbox.checked = false;
+  
+  const favCheckbox = document.getElementById('favoritesOnly');
+  if (favCheckbox) favCheckbox.checked = false;
 
   const locationInput = document.getElementById('locationInput');
   if (locationInput) {
@@ -3424,6 +3670,9 @@ function clearFilters() {
   setMainTab('recent');
 
   applyFilters();
+  
+  // Force update of active filter chips to ensure bar is hidden when empty
+  updateActiveFilterChips();
 }
 
 // Close sort modal on outside click
@@ -3433,12 +3682,23 @@ document.getElementById('sortModal').addEventListener('click', function(e) {
   }
 });
 
-// Close login modal on Enter key
-document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    checkPassword();
+// Close saved filters modal on outside click
+document.addEventListener('click', function(e) {
+  const savedFiltersModal = document.getElementById('savedFiltersModal');
+  if (savedFiltersModal && e.target === savedFiltersModal) {
+    closeSavedFiltersModal();
   }
 });
+
+// Close login modal on Enter key
+const passwordInput = document.getElementById('passwordInput');
+if (passwordInput) {
+  passwordInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      checkPassword();
+    }
+  });
+}
 
 // Manejar navegación con botón atrás (popstate) - solo en app
 window.addEventListener('popstate', function(e) {
