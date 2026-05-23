@@ -1254,8 +1254,11 @@ function populateFilters() {
   categories.forEach(cat => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'px-3 py-2 rounded-lg border-2 border-outline-variant text-center text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
-    button.textContent = cat;
+    button.className = 'px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    const span = document.createElement('span');
+    span.className = 'font-label-lg text-label-lg text-on-surface';
+    span.textContent = cat;
+    button.appendChild(span);
     button.dataset.value = cat;
     button.dataset.type = 'category';
     button.onclick = () => toggleCategoryButton(button, cat);
