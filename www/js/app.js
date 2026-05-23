@@ -2623,8 +2623,11 @@ function updateActiveFilterChips() {
     chips.push({ label: '📍Ubicación', type: 'location', value: 'key' });
   }
 
-  // Show/hide the filters bar
-  if (chips.length > 0) {
+  // Show/hide the filters bar (ocultar si estamos en filterFieldView)
+  const filterFieldView = document.getElementById('filterFieldView');
+  const isFilterFieldVisible = filterFieldView && !filterFieldView.classList.contains('hidden');
+  
+  if (chips.length > 0 && !isFilterFieldVisible) {
     filtersBar.classList.remove('hidden');
   } else {
     filtersBar.classList.add('hidden');
