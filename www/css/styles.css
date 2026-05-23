@@ -98,6 +98,18 @@ body { min-height: max(884px, 100dvh); }
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* Filter Grid Container - Máximo 2 columnas, responsive y modular */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+/* Los botones dentro del grid ocupan todo el ancho */
+.filter-grid > * {
+  width: 100%;
+}
+
 /* Hide scrollbar for active filter chips */
 .scrollbar-hide {
   -ms-overflow-style: none;

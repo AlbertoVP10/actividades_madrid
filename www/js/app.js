@@ -1270,7 +1270,7 @@ function populateFilters() {
   categories.forEach(cat => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container min-w-[100px]';
+    button.className = 'flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
     
     // Add icon
     const iconSpan = document.createElement('span');
