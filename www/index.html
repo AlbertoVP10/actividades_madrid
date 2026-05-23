@@ -1127,35 +1127,27 @@
         </div>
 
         <div id="filterField_time" class="field-panel hidden space-y-4">
-          <label class="text-label-sm text-on-surface-variant mb-4 block">🕐 Selecciona horario</label>
-          <div class="grid grid-cols-3 gap-3">
+          <label class="text-label-sm text-on-surface-variant">🕐 Horario</label>
+          <div id="timeGrid" class="grid grid-cols-2 gap-2">
             <!-- Mañana -->
-            <button type="button" onclick="toggleTimeFilter('morning')" id="timeBtn_morning" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all border-2 border-transparent">
-              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl text-amber-800">wb_sunny</span>
-              </div>
-              <span class="text-label-sm font-medium text-center">Mañana<br><span class="text-xs text-on-surface-variant">6-12h</span></span>
+            <button type="button" onclick="toggleTimeButton(this, 'morning')" data-value="morning" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">wb_sunny</span>
+              <span>Mañana (6-12h)</span>
             </button>
             <!-- Tarde -->
-            <button type="button" onclick="toggleTimeFilter('afternoon')" id="timeBtn_afternoon" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all border-2 border-transparent">
-              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl text-orange-900">wb_twilight</span>
-              </div>
-              <span class="text-label-sm font-medium text-center">Tarde<br><span class="text-xs text-on-surface-variant">12-18h</span></span>
+            <button type="button" onclick="toggleTimeButton(this, 'afternoon')" data-value="afternoon" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">wb_twilight</span>
+              <span>Tarde (12-18h)</span>
             </button>
             <!-- Noche -->
-            <button type="button" onclick="toggleTimeFilter('evening')" id="timeBtn_evening" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all border-2 border-transparent">
-              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl text-white">dark_mode</span>
-              </div>
-              <span class="text-label-sm font-medium text-center">Noche<br><span class="text-xs text-on-surface-variant">18-24h</span></span>
+            <button type="button" onclick="toggleTimeButton(this, 'evening')" data-value="evening" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">dark_mode</span>
+              <span>Noche (18-24h)</span>
             </button>
             <!-- Sin especificar -->
-            <button type="button" onclick="toggleTimeFilter('unspecified')" id="timeBtn_unspecified" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all border-2 border-transparent col-span-3">
-              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl text-white">help_outline</span>
-              </div>
-              <span class="text-label-sm font-medium text-center">Sin especificar</span>
+            <button type="button" onclick="toggleTimeButton(this, 'unspecified')" data-value="unspecified" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-body-sm cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">help_outline</span>
+              <span>Sin especificar</span>
             </button>
           </div>
         </div>

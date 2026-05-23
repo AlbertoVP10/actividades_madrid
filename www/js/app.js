@@ -1049,16 +1049,15 @@ function renderFilterFieldContent(field) {
 
   if (field === 'time') {
     const selectedValues = multiSelectState.time || [];
-    ['morning', 'afternoon', 'evening', 'unspecified'].forEach(time => {
-      const btn = document.getElementById(`timeBtn_${time}`);
-      if (btn) {
-        if (selectedValues.includes(time)) {
-          btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-          btn.classList.remove('border-transparent');
-        } else {
-          btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-          btn.classList.add('border-transparent');
-        }
+    const buttons = document.querySelectorAll('#timeGrid button[data-type="time"]');
+    buttons.forEach(btn => {
+      const time = btn.dataset.value;
+      if (selectedValues.includes(time)) {
+        btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.remove('border-outline-variant');
+      } else {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
       }
     });
     refreshFilterFieldLabel('time');
@@ -1256,24 +1255,30 @@ function toggleCategoryButton(button, category) {
 }
 
 // Toggle time filter button
-function toggleTimeFilter(time) {
-  const button = document.getElementById(`timeBtn_${time}`);
-  if (!button) return;
-  
+function toggleTimeButton(button, time) {
   const isSelected = multiSelectState.time.includes(time);
   
   if (isSelected) {
     multiSelectState.time = multiSelectState.time.filter(t => t !== time);
     button.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.classList.add('border-transparent');
+    button.classList.add('border-outline-variant');
   } else {
     multiSelectState.time.push(time);
     button.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-    button.classList.remove('border-transparent');
+    button.classList.remove('border-outline-variant');
   }
   
   refreshFilterFieldLabel('time');
   applyFilters();
+}
+
+// Legacy function for backward compatibility
+function toggleTimeFilter(time) {
+  const buttons = document.querySelectorAll('#timeGrid button[data-type="time"]');
+  const button = Array.from(buttons).find(btn => btn.dataset.value === time);
+  if (button) {
+    toggleTimeButton(button, time);
+  }
 }
 
 // Toggle filters panel
