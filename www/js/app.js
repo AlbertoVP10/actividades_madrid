@@ -1027,6 +1027,10 @@ function openFilterField(field) {
   showView('filterField');
   const fieldView = document.getElementById('filterFieldView');
   if (fieldView) fieldView.scrollTop = 0;
+  
+  // Ocultar activeFiltersBar cuando se abre filterFieldView
+  const filtersBar = document.getElementById('activeFiltersBar');
+  if (filtersBar) filtersBar.classList.add('hidden');
 }
 
 function renderFilterFieldContent(field) {
@@ -1482,6 +1486,9 @@ function openFiltersView() {
   
   showView('filters');
   filtersView.scrollTop = 0;
+  
+  // Mostrar activeFiltersBar si hay filtros activos
+  updateActiveFilterChips();
 }
 
 function closeFiltersView() {
