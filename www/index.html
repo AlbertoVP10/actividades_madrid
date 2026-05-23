@@ -1090,7 +1090,7 @@
 
         <div id="filterField_category" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">🎭 Categoría</label>
-          <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
+          <div id="categoryGrid" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div id="filterField_district" class="field-panel hidden space-y-4">
@@ -1106,7 +1106,7 @@
 
         <div id="filterField_audience" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">👥 Público</label>
-          <div id="audienceGrid" class="grid grid-cols-2 gap-2">
+          <div id="audienceGrid" class="flex flex-wrap gap-2">
             <!-- Niños -->
             <button type="button" onclick="toggleAudienceButton(this, 'Niños')" data-value="Niños" data-type="audience" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
               <span class="material-symbols-outlined text-primary">child_care</span>
@@ -1148,7 +1148,7 @@
 
         <div id="filterField_time" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">🕐 Horario</label>
-          <div id="timeGrid" class="grid grid-cols-2 gap-2">
+          <div id="timeGrid" class="flex flex-wrap gap-2">
             <!-- Mañana -->
             <button type="button" onclick="toggleTimeButton(this, 'morning')" data-value="morning" data-type="time" class="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
               <span class="material-symbols-outlined text-primary">wb_twilight</span>

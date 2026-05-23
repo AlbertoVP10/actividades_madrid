@@ -1244,6 +1244,22 @@ function updateMultiSelect(type) {
   applyFilters();
 }
 
+// Icon mapping for categories
+const categoryIcons = {
+  'Campamentos': 'camping',
+  'Cine': 'movie',
+  'Conferencias': 'co_present',
+  'Danza': 'accessibility_new',
+  'Destacada': 'star',
+  'Excursiones': 'hiking',
+  'Exposiciones': 'museum',
+  'Fiestas': 'celebration',
+  'Infantil': 'child_care',
+  'Música': 'music_note',
+  'Otras': 'category',
+  'Talleres': 'palette'
+};
+
 // Populate filter options
 function populateFilters() {
   // Categories as grid buttons
@@ -1254,11 +1270,19 @@ function populateFilters() {
   categories.forEach(cat => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
-    const span = document.createElement('span');
-    span.className = 'font-label-lg text-label-lg text-on-surface';
-    span.textContent = cat;
-    button.appendChild(span);
+    button.className = 'flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    
+    // Add icon
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'material-symbols-outlined text-primary';
+    iconSpan.textContent = categoryIcons[cat] || 'category';
+    button.appendChild(iconSpan);
+    
+    const textSpan = document.createElement('span');
+    textSpan.className = 'font-label-lg text-label-lg text-on-surface';
+    textSpan.textContent = cat;
+    button.appendChild(textSpan);
+    
     button.dataset.value = cat;
     button.dataset.type = 'category';
     button.onclick = () => toggleCategoryButton(button, cat);
