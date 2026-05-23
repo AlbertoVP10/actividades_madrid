@@ -1318,6 +1318,9 @@ function toggleCategoryButton(button, category) {
 
   // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
   button.blur();
+  if (document.activeElement === button) {
+    document.activeElement.blur();
+  }
 
   refreshFilterFieldLabel('category');
   applyFilters();
@@ -1339,6 +1342,9 @@ function toggleTimeButton(button, time) {
 
   // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
   button.blur();
+  if (document.activeElement === button) {
+    document.activeElement.blur();
+  }
 
   refreshFilterFieldLabel('time');
   applyFilters();
@@ -1369,6 +1375,9 @@ function toggleAudienceButton(button, audience) {
 
   // Quitar foco del botón para evitar que el navegador móvil mantenga el estado :active/:focus
   button.blur();
+  if (document.activeElement === button) {
+    document.activeElement.blur();
+  }
 
   refreshFilterFieldLabel('audience');
   applyFilters();

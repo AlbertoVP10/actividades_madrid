@@ -110,6 +110,20 @@ body { min-height: max(884px, 100dvh); }
   width: 100%;
 }
 
+/* Quitar outline/focus visual en botones de filtros después de hacer clic */
+.filter-grid button:focus,
+.filter-grid button:focus-visible,
+.filter-grid button:active {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Asegurar que los botones no mantengan el estado de foco en móviles */
+.filter-grid button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 /* Hide scrollbar for active filter chips */
 .scrollbar-hide {
   -ms-overflow-style: none;
