@@ -85,9 +85,38 @@ En el script `update_activities.py`:
 - `MAX_IMAGENES`: Límite de imágenes nuevas por ejecución (default: 50)
 - `SLEEP`: Segundos entre requests (default: 2)
 
-## Notas
+## Notas Importantes
 
-- El script procesa máximo 50 imágenes nuevas por ejecución para evitar sobrecargar el servidor de Madrid
-- Las ejecuciones posteriores continuarán desde donde lo dejaron
-- Los archivos se guardan incrementalmente para no perder progreso
+### Extracción de imágenes
+
+El servidor de Madrid bloquea peticiones desde servidores cloud (GitHub Actions da error 403). Por eso:
+
+- **GitHub Actions**: Solo actualiza actividades, NO extrae imágenes
+- **Local**: Puedes extraer imágenes ejecutando el script en tu máquina
+
+### Flujo recomendado
+
+1. **GitHub Actions** (automático, diario):
+   - Descarga y procesa actividades
+   - Sube `actividades_procesadas.json` a Firebase
+   - NO extrae imágenes (evita error 403)
+
+2. **Ejecución local** (manual, 1-2 veces por semana):
+   - Extrae imágenes de las páginas de detalle
+   - Sube `imagenes.json` actualizado a Firebase
+
+### Ejecutar localmente para extraer imágenes
+
+```bash
+# Asegúrate de tener las variables de entorno en .env
+export $(cat .env | xargs)
+
+# Ejecutar script (extraerá imágenes porque no está en GitHub Actions)
+python scripts/update_activities.py
+```
+
+### Variables de configuración
+
+- `MAX_IMAGENES`: Límite de imágenes nuevas por ejecución (default: 50)
+- `SLEEP`: Segundos entre requests (default: 2)
 - GitHub Actions mantiene logs de cada ejecución por 90 días

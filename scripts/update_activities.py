@@ -258,8 +258,20 @@ def extraer_imagen(url, div_class, url_base):
         print(f"   ❌ Error: {e}")
         return None
 
-def procesar_imagenes(actividades, imagenes_existentes, max_imagenes=50):
+def procesar_imagenes(actividades, imagenes_existentes, max_imagenes=50, skip_extraccion=False):
+    """
+    Procesa las imágenes de las actividades.
+    - skip_extraccion: Si es True, solo descarga el JSON existente sin extraer nuevas imágenes.
+                       Útil para ejecutar en GitHub Actions donde el servidor bloquea requests.
+    """
     imagenes_map = imagenes_existentes.copy()
+    
+    # Si estamos en GitHub Actions (detectado por variable de entorno), saltar extracción
+    if skip_extraccion or os.getenv('GITHUB_ACTIONS') == 'true':
+        print("\n🖼️  Modo GitHub Actions: Saltando extracción de imágenes (servidor bloquea requests)")
+        print(f"   📊 Imágenes existentes en Firebase: {len(imagenes_map)}")
+        return imagenes_map
+    
     obtained = 0
     total_new = 0
     
@@ -361,11 +373,17 @@ def main():
         imagenes_existentes = download_from_firebase(bucket_name, "imagenes.json") or {}
         print(f"✅ Imágenes existentes: {len(imagenes_existentes)}")
     
+    # Detectar si estamos en GitHub Actions
+    en_github_actions = os.getenv('GITHUB_ACTIONS') == 'true'
+    
     imagenes_map = procesar_imagenes(actividades, imagenes_existentes, max_imagenes=MAX_IMAGENES)
     
     if storage:
         print("\n☁️  Subiendo imágenes...")
-        upload_to_firebase(storage, ARCHIVO_IMAGENES, "imagenes.json")
+        if en_github_actions:
+            print("   ℹ️  En GitHub Actions: No se suben imágenes (no se extrajeron nuevas)")
+        else:
+            upload_to_firebase(storage, ARCHIVO_IMAGENES, "imagenes.json")
     
     print()
     print("=" * 60)
