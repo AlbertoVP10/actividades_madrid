@@ -901,38 +901,54 @@ function checkPassword() {
   }
 }
 
-// Load activities from API
+// Configuración de Firebase Storage
+const FIREBASE_CONFIG = {
+  storageBucket: 'actividades-madrid-2dbb6.firebasestorage.app'
+};
+
+// URL del JSON de actividades procesadas en Firebase Storage
+const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_procesadas.json?alt=media`;
+
+// Load activities from Firebase Storage
 async function loadActivities() {
   try {
-    const response = await fetch('https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json');
+    console.log('📥 Cargando actividades desde Firebase...');
+    const response = await fetch(FIREBASE_ACTIVIDADES_URL);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
     
-    if (Array.isArray(data['@graph'])) {
-      allActivities = data['@graph'].map(item => ({
-        id: item['@id'] || Math.random().toString(),
+    // El JSON de Firebase ya viene procesado (es un array de actividades)
+    if (Array.isArray(data)) {
+      allActivities = data.map(item => ({
+        id: item.id || item.app_id || Math.random().toString(),
         title: item.title || 'Sin título',
         description: item.description || '',
-        category: extractCategory(item['@type']),
-        location: item['event-location'] || '',
-        district: extractDistrict(item['address']?.district?.['@id']),
-        lat: parseFloat(item.location?.latitude),
-        lon: parseFloat(item.location?.longitude),
-        date: item.dtstart ? new Date(item.dtstart) : null,
-        endDate: item.dtend ? new Date(item.dtend) : null,
+        category: item.category || 'Otras',
+        location: item.location || '',
+        district: item.district || 'Desconocido',
+        lat: item.lat ? parseFloat(item.lat) : null,
+        lon: item.lon ? parseFloat(item.lon) : null,
+        date: item.date ? new Date(item.date) : null,
+        endDate: item.endDate ? new Date(item.endDate) : null,
         time: item.time || '',
-        free: item.free === 1 || item.free === true,
+        free: item.free === true,
         price: item.price || '',
         audience: item.audience || '',
         link: item.link || '',
-        street: item.address?.area?.['street-address'] || ''
+        street: item.street || '',
+        duration: item.duration || '1 día'
       }));
       
       // Filter out past activities
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      allActivities = allActivities.filter(a => !a.date || a.date >= today 
-                      // || (a.endDate && a.endDate >= today)
-                  );
+      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      
+      console.log(`✅ ${allActivities.length} actividades cargadas desde Firebase`);
       
       populateFilters();
       applyFilters();
@@ -947,9 +963,10 @@ async function loadActivities() {
       `;
     }
   } catch (error) {
-    console.error('Error loading activities:', error);
+    console.error('Error loading activities from Firebase:', error);
     document.getElementById('loadingState').innerHTML = `
-      <p class="text-error text-body-md">Error cargando datos</p>
+      <p class="text-error text-body-md">Error cargando datos desde Firebase</p>
+      <p class="text-body-sm text-on-surface-variant mt-2">${error.message}</p>
       <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
     `;
   }
