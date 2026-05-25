@@ -909,19 +909,31 @@ const FIREBASE_CONFIG = {
 // URL del JSON de actividades procesadas en Firebase Storage
 const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_procesadas.json?alt=media`;
 
-// Load activities from Firebase Storage
+// URL de fallback (datos.madrid.es)
+const MADRID_API_URL = 'https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json';
+
+// Load activities from Firebase Storage con fallback a datos.madrid.es
 async function loadActivities() {
+  // Intentar cargar desde Firebase primero
   try {
-    console.log('📥 Cargando actividades desde Firebase...');
-    const response = await fetch(FIREBASE_ACTIVIDADES_URL);
+    console.log('📥 Intentando cargar desde Firebase...');
+    console.log('URL:', FIREBASE_ACTIVIDADES_URL);
+    
+    const response = await fetch(FIREBASE_ACTIVIDADES_URL, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}`);
     }
     
     const data = await response.json();
     
-    // El JSON de Firebase ya viene procesado (es un array de actividades)
     if (Array.isArray(data)) {
       allActivities = data.map(item => ({
         id: item.id || item.app_id || Math.random().toString(),
@@ -955,17 +967,59 @@ async function loadActivities() {
       
       document.getElementById('loadingState').classList.add('hidden');
       document.getElementById('mainContent').classList.remove('hidden');
+      return; // Éxito, salimos de la función
     } else {
-      console.error('Unexpected activity payload', data);
-      document.getElementById('loadingState').innerHTML = `
-        <p class="text-error text-body-md">Error cargando datos: formato inesperado</p>
-        <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
-      `;
+      throw new Error('Formato inesperado');
+    }
+  } catch (firebaseError) {
+    console.warn('⚠️ Error cargando desde Firebase:', firebaseError.message);
+    console.log('🔄 Intentando fallback a datos.madrid.es...');
+  }
+  
+  // Fallback: cargar desde datos.madrid.es
+  try {
+    const response = await fetch(MADRID_API_URL);
+    const data = await response.json();
+    
+    if (Array.isArray(data['@graph'])) {
+      allActivities = data['@graph'].map(item => ({
+        id: item['@id'] || Math.random().toString(),
+        title: item.title || 'Sin título',
+        description: item.description || '',
+        category: extractCategory(item['@type']),
+        location: item['event-location'] || '',
+        district: extractDistrict(item['address']?.district?.['@id']),
+        lat: parseFloat(item.location?.latitude),
+        lon: parseFloat(item.location?.longitude),
+        date: item.dtstart ? new Date(item.dtstart) : null,
+        endDate: item.dtend ? new Date(item.dtend) : null,
+        time: item.time || '',
+        free: item.free === 1 || item.free === true,
+        price: item.price || '',
+        audience: item.audience || '',
+        link: item.link || '',
+        street: item.address?.area?.['street-address'] || ''
+      }));
+      
+      // Filter out past activities
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      
+      console.log(`✅ ${allActivities.length} actividades cargadas desde datos.madrid.es (fallback)`);
+      
+      populateFilters();
+      applyFilters();
+      
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+    } else {
+      throw new Error('Formato inesperado');
     }
   } catch (error) {
-    console.error('Error loading activities from Firebase:', error);
+    console.error('Error loading activities:', error);
     document.getElementById('loadingState').innerHTML = `
-      <p class="text-error text-body-md">Error cargando datos desde Firebase</p>
+      <p class="text-error text-body-md">Error cargando datos</p>
       <p class="text-body-sm text-on-surface-variant mt-2">${error.message}</p>
       <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
     `;
