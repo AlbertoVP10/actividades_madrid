@@ -213,21 +213,42 @@ def process_activities(raw_data):
 def extraer_imagen(url, div_class, url_base):
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
+        print(f"   🔍 Accediendo a: {url[:80]}...")
         respuesta = requests.get(url, headers=headers, timeout=30)
+        print(f"   📡 Status: {respuesta.status_code}")
+        
         if respuesta.status_code != 200:
+            print(f"   ❌ Error HTTP {respuesta.status_code}")
             return None
+            
         soup = BeautifulSoup(respuesta.text, "html.parser")
         contenedor = soup.find("div", class_=div_class)
+        
         if not contenedor:
+            print(f"   ❌ No se encontró div con clase '{div_class}'")
+            # Buscar alternativas
+            divs = soup.find_all("div", class_=lambda x: x and "image" in str(x).lower())
+            if divs:
+                print(f"   ℹ️  Divs con 'image' encontrados: {len(divs)}")
+                for d in divs[:3]:
+                    print(f"      - {d.get('class')}")
             return None
+            
         etiqueta_img = contenedor.find("img")
         if not etiqueta_img:
+            print(f"   ❌ No se encontró img dentro del div")
             return None
+            
         url_imagen = etiqueta_img.get("src")
+        print(f"   📷 Src encontrado: {url_imagen[:80] if url_imagen else 'None'}...")
+        
         if url_imagen and not url_imagen.startswith(("http://", "https://")):
             url_imagen = urljoin(url_base, url_imagen)
+            print(f"   🔗 URL completa: {url_imagen[:80]}...")
+            
         return url_imagen
     except Exception as e:
+        print(f"   ❌ Error: {e}")
         return None
 
 def procesar_imagenes(actividades, imagenes_existentes, max_imagenes=50):
