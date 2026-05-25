@@ -906,8 +906,8 @@ const FIREBASE_CONFIG = {
   storageBucket: 'actividades-madrid-2dbb6.firebasestorage.app'
 };
 
-// URL del JSON de actividades procesadas en Firebase Storage
-const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_procesadas.json?alt=media`;
+// URL del JSON de actividades en Firebase Storage (actividades_orig.json)
+const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_orig.json?alt=media`;
 
 // URL de fallback (datos.madrid.es)
 const MADRID_API_URL = 'https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json';
