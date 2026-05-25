@@ -679,6 +679,7 @@ function handleSwipe() {
 let allActivities = [];
 let filteredActivities = [];
 let favorites = (JSON.parse(localStorage.getItem('madridFavorites') || '[]') || []).map(String);
+let dataSource = 'Madrid'; // 'Firebase' o 'Madrid' - se actualiza al cargar
 let currentPage = 0;
 let itemsPerPage = 10;
 let userLocation = null;
@@ -912,17 +913,13 @@ const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${
 // URL de fallback (datos.madrid.es)
 const MADRID_API_URL = 'https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json';
 
-// Función para mostrar mensaje de origen de datos
-function showSourceMessage(source) {
-  const loadingState = document.getElementById('loadingState');
-  if (!loadingState) return;
-  
-  loadingState.innerHTML = `
-    <div class="flex flex-col items-center justify-center p-4">
-      <p class="text-body-lg text-primary font-semibold mb-2">Cargado desde ${source}</p>
-      <p class="text-body-sm text-on-surface-variant">${allActivities.length} actividades encontradas</p>
-    </div>
-  `;
+// Función para actualizar el label de fuente en el home
+function updateHomeSourceLabel() {
+  const sourceLabel = document.getElementById('homeSourceLabel');
+  if (sourceLabel) {
+    const icon = dataSource === 'Firebase' ? '☁️' : '🏛️';
+    sourceLabel.textContent = `${icon} ${dataSource}`;
+  }
 }
 
 // Load activities from Firebase Storage con fallback a datos.madrid.es
@@ -975,8 +972,9 @@ async function loadActivities() {
       
       console.log(`✅ ${allActivities.length} actividades cargadas desde Firebase`);
       
-      // Mostrar mensaje de origen y cerrar después de 1 segundo
-      showSourceMessage('Firebase ☁️');
+      // Guardar fuente de datos
+      dataSource = 'Firebase';
+      updateHomeSourceLabel();
       
       populateFilters();
       applyFilters();
@@ -1024,8 +1022,9 @@ async function loadActivities() {
       
       console.log(`✅ ${allActivities.length} actividades cargadas desde datos.madrid.es (fallback)`);
       
-      // Mostrar mensaje de origen y cerrar después de 1 segundo
-      showSourceMessage('Madrid 🏛️');
+      // Guardar fuente de datos
+      dataSource = 'Madrid';
+      updateHomeSourceLabel();
       
       populateFilters();
       applyFilters();
