@@ -901,10 +901,100 @@ function checkPassword() {
   }
 }
 
-// Load activities from API
+// Configuración de Firebase Storage
+const FIREBASE_CONFIG = {
+  storageBucket: 'actividades-madrid-2dbb6.firebasestorage.app'
+};
+
+// URL del JSON de actividades en Firebase Storage (actividades_orig.json)
+const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_orig.json?alt=media`;
+
+// URL de fallback (datos.madrid.es)
+const MADRID_API_URL = 'https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json';
+
+// Función para mostrar mensaje de origen de datos
+function showSourceMessage(source) {
+  const loadingState = document.getElementById('loadingState');
+  if (!loadingState) return;
+  
+  loadingState.innerHTML = `
+    <div class="flex flex-col items-center justify-center p-4">
+      <p class="text-body-lg text-primary font-semibold mb-2">Cargado desde ${source}</p>
+      <p class="text-body-sm text-on-surface-variant">${allActivities.length} actividades encontradas</p>
+    </div>
+  `;
+}
+
+// Load activities from Firebase Storage con fallback a datos.madrid.es
 async function loadActivities() {
+  // Intentar cargar desde Firebase primero
   try {
-    const response = await fetch('https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json');
+    console.log('📥 Intentando cargar desde Firebase...');
+    console.log('URL:', FIREBASE_ACTIVIDADES_URL);
+    
+    const response = await fetch(FIREBASE_ACTIVIDADES_URL, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (Array.isArray(data)) {
+      allActivities = data.map(item => ({
+        id: item.id || item.app_id || Math.random().toString(),
+        title: item.title || 'Sin título',
+        description: item.description || '',
+        category: item.category || 'Otras',
+        location: item.location || '',
+        district: item.district || 'Desconocido',
+        lat: item.lat ? parseFloat(item.lat) : null,
+        lon: item.lon ? parseFloat(item.lon) : null,
+        date: item.date ? new Date(item.date) : null,
+        endDate: item.endDate ? new Date(item.endDate) : null,
+        time: item.time || '',
+        free: item.free === true,
+        price: item.price || '',
+        audience: item.audience || '',
+        link: item.link || '',
+        street: item.street || '',
+        duration: item.duration || '1 día'
+      }));
+      
+      // Filter out past activities
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      
+      console.log(`✅ ${allActivities.length} actividades cargadas desde Firebase`);
+      
+      // Mostrar mensaje de origen y cerrar después de 1 segundo
+      showSourceMessage('Firebase ☁️');
+      
+      populateFilters();
+      applyFilters();
+      
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+      return; // Éxito, salimos de la función
+    } else {
+      throw new Error('Formato inesperado');
+    }
+  } catch (firebaseError) {
+    console.warn('⚠️ Error cargando desde Firebase:', firebaseError.message);
+    console.log('🔄 Intentando fallback a datos.madrid.es...');
+  }
+  
+  // Fallback: cargar desde datos.madrid.es
+  try {
+    const response = await fetch(MADRID_API_URL);
     const data = await response.json();
     
     if (Array.isArray(data['@graph'])) {
@@ -930,9 +1020,12 @@ async function loadActivities() {
       // Filter out past activities
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      allActivities = allActivities.filter(a => !a.date || a.date >= today 
-                      // || (a.endDate && a.endDate >= today)
-                  );
+      allActivities = allActivities.filter(a => !a.date || a.date >= today);
+      
+      console.log(`✅ ${allActivities.length} actividades cargadas desde datos.madrid.es (fallback)`);
+      
+      // Mostrar mensaje de origen y cerrar después de 1 segundo
+      showSourceMessage('Madrid 🏛️');
       
       populateFilters();
       applyFilters();
@@ -940,16 +1033,13 @@ async function loadActivities() {
       document.getElementById('loadingState').classList.add('hidden');
       document.getElementById('mainContent').classList.remove('hidden');
     } else {
-      console.error('Unexpected activity payload', data);
-      document.getElementById('loadingState').innerHTML = `
-        <p class="text-error text-body-md">Error cargando datos: formato inesperado</p>
-        <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
-      `;
+      throw new Error('Formato inesperado');
     }
   } catch (error) {
     console.error('Error loading activities:', error);
     document.getElementById('loadingState').innerHTML = `
       <p class="text-error text-body-md">Error cargando datos</p>
+      <p class="text-body-sm text-on-surface-variant mt-2">${error.message}</p>
       <button onclick="loadActivities()" class="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg">Reintentar</button>
     `;
   }
