@@ -1,0 +1,40 @@
+name: Actualización Diaria de Actividades
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-activities:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Instalar dependencias
+      run: |
+        pip install requests beautifulsoup4 python-dotenv pyrebase4
+    
+    - run: mkdir -p data
+    
+    - name: Ejecutar script
+      env:
+        FIREBASE_apiKey: ${{ secrets.FIREBASE_APIKEY }}
+        FIREBASE_authDomain: ${{ secrets.FIREBASE_AUTHDOMAIN }}
+        FIREBASE_projectId: ${{ secrets.FIREBASE_PROJECTID }}
+        FIREBASE_storageBucket: ${{ secrets.FIREBASE_STORAGEBUCKET }}
+        FIREBASE_messagingSenderId: ${{ secrets.FIREBASE_MESSAGINGSENDERID }}
+        FIREBASE_appId: ${{ secrets.FIREBASE_APPID }}
+      run: python scripts/update_activities.py
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: actividades-generadas
+        path: data/
+        retention-days: 7
