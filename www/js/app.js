@@ -976,7 +976,8 @@ async function loadActivities() {
     
     if (Array.isArray(data)) {
       allActivities = data.map(item => ({
-        id: item.id || item.app_id || Math.random().toString(),
+        id: item.id || Math.random().toString(),
+        app_id: item.app_id || Math.random().toString(),
         title: item.title || 'Sin título',
         description: item.description || '',
         category: item.category || 'Otras',
@@ -3166,7 +3167,7 @@ function showDetail(id, isNavigation = false) {
   const defaultImageUrl = 'https://st3.depositphotos.com/1594308/13059/i/450/depositphotos_130595028-stock-photo-dynamic-friends-enjoying-party-and.jpg';
   
   // Buscar imagen en el mapa de Firebase (usando app_id o id)
-  const activityId = activity.app_id || activity.id;
+  const activityId = activity.app_id;
   const firebaseImageUrl = imagenesMap[activityId];
   
   // Usar imagen de Firebase si existe, sino la default
