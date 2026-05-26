@@ -4163,6 +4163,9 @@ function clearFilters() {
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = '';
   
+  const filterSearchInput = document.getElementById('filterSearchInput');
+  if (filterSearchInput) filterSearchInput.value = '';
+  
   const dateSelect = document.getElementById('dateSelect');
   if (dateSelect) dateSelect.value = 'all';
   
