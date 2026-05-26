@@ -1272,6 +1272,15 @@ function refreshFilterFieldLabel(type) {
   applyFilters();
 }
 
+// Función para el botón "Aplicar" dentro de filterFieldView
+function applyFilterField() {
+  // Aplicar los filtros
+  applyFilters();
+  // Volver a la vista de filtros principal
+  openFiltersView();
+}
+
+// Función para el botón "Borrar" dentro de filterFieldView (limpia pero no cierra)
 function resetFilterField() {
   if (!currentFilterField) return;
 
