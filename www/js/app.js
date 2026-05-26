@@ -1324,9 +1324,12 @@ function resetFilterField() {
     refreshFilterFieldLabel('audience');
   } else if (currentFilterField === 'district') {
     multiSelectState.district = [];
-    const dropdown = document.getElementById('districtDropdown');
-    if (dropdown) {
-      dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    const grid = document.getElementById('districtGrid');
+    if (grid) {
+      grid.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      });
     }
     refreshFilterFieldLabel('district');
   }
