@@ -263,7 +263,9 @@ function getCurrentFilterParameters() {
     freeOnly: document.getElementById('freeOnly')?.checked || false,
     favoritesOnly: document.getElementById('favoritesOnly')?.checked || false,
     sort: currentFilters.sort || 'recent',
-    locationKey: currentFilters.locationKey || null
+    locationKey: currentFilters.locationKey || null,
+    durationMin: durationFilterState.min || 1,
+    durationMax: durationFilterState.max || 30
   };
 }
 
@@ -496,6 +498,14 @@ function setFilterInputsFromParameters(params) {
   if (params.sort) {
     setSortState(params.sort);
   }
+  
+  // Duration filter
+  if (params.durationMin !== undefined && params.durationMax !== undefined) {
+    durationFilterState.min = params.durationMin;
+    durationFilterState.max = params.durationMax;
+    currentFilters.durationMin = params.durationMin;
+    currentFilters.durationMax = params.durationMax;
+  }
 
   updateMultiSelectLabels();
 }
@@ -702,7 +712,9 @@ let currentFilters = {
   location: null,
   locationCoords: null,
   locationKey: null,
-  sort: 'recent'
+  sort: 'recent',
+  durationMin: 1,
+  durationMax: 30
 };
 
 const SAVED_FILTERS_STORAGE_KEY = 'madridSavedFilterPresets';
@@ -993,7 +1005,8 @@ async function loadActivities() {
         audience: item.audience || '',
         link: item.link || '',
         street: item.street || '',
-        duration: item.duration || '1 día'
+        duration: item.duration || '1 día',
+        date_diff: item.date_diff !== null && item.date_diff !== undefined ? item.date_diff : 1
       }));
       
       // Filter out past activities
@@ -1124,6 +1137,12 @@ const multiSelectState = {
   time: []
 };
 
+// Duration filter state (min/max days)
+let durationFilterState = {
+  min: 1,
+  max: 30
+};
+
 let currentFilterField = null;
 
 function openFilterField(field) {
@@ -1135,6 +1154,7 @@ function openFilterField(field) {
     audience: 'Filtrar por público',
     date: 'Filtrar por fecha',
     time: 'Filtrar por horario',
+    duration: 'Filtrar por duración',
     freeOnly: 'Solo gratuitas',
     favoritesOnly: 'Mis favoritos'
   };
@@ -1223,6 +1243,84 @@ function renderFilterFieldContent(field) {
     });
     refreshFilterFieldLabel('time');
   }
+
+  if (field === 'duration') {
+    // Actualizar sliders con valores actuales
+    const minSlider = document.getElementById('durationMinSlider');
+    const maxSlider = document.getElementById('durationMaxSlider');
+    if (minSlider) minSlider.value = durationFilterState.min;
+    if (maxSlider) maxSlider.value = durationFilterState.max;
+    updateDurationSlider();
+    
+    // Actualizar estado visual de los atajos
+    updateDurationShortcutStyles();
+  }
+}
+
+function updateDurationSlider() {
+  const minSlider = document.getElementById('durationMinSlider');
+  const maxSlider = document.getElementById('durationMaxSlider');
+  const minValueEl = document.getElementById('durationMinValue');
+  const maxValueEl = document.getElementById('durationMaxValue');
+  const rangeLabel = document.getElementById('durationRangeLabel');
+  
+  if (!minSlider || !maxSlider) return;
+  
+  let minVal = parseInt(minSlider.value);
+  let maxVal = parseInt(maxSlider.value);
+  
+  // Asegurar que min no sea mayor que max
+  if (minVal > maxVal) {
+    minVal = maxVal;
+    minSlider.value = minVal;
+  }
+  
+  // Actualizar estado
+  durationFilterState.min = minVal;
+  durationFilterState.max = maxVal;
+  
+  // Actualizar labels
+  if (minValueEl) minValueEl.textContent = minVal;
+  if (maxValueEl) maxValueEl.textContent = maxVal >= 30 ? '30+' : maxVal;
+  if (rangeLabel) {
+    const maxText = maxVal >= 30 ? '30+' : maxVal;
+    rangeLabel.textContent = `${minVal} - ${maxText} días`;
+  }
+  
+  // Actualizar estilo de atajos
+  updateDurationShortcutStyles();
+}
+
+function updateDurationShortcutStyles() {
+  const shortcuts = document.querySelectorAll('.duration-shortcut');
+  shortcuts.forEach(btn => {
+    const btnMin = parseInt(btn.dataset.min);
+    const btnMax = parseInt(btn.dataset.max);
+    
+    // El atajo está activo si coincide exactamente con el rango actual
+    const isActive = durationFilterState.min === btnMin && durationFilterState.max === btnMax;
+    
+    if (isActive) {
+      btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.remove('border-outline-variant');
+    } else {
+      btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.add('border-outline-variant');
+    }
+  });
+}
+
+function setDurationShortcut(min, max) {
+  durationFilterState.min = min;
+  durationFilterState.max = max;
+  
+  // Actualizar sliders
+  const minSlider = document.getElementById('durationMinSlider');
+  const maxSlider = document.getElementById('durationMaxSlider');
+  if (minSlider) minSlider.value = min;
+  if (maxSlider) maxSlider.value = max;
+  
+  updateDurationSlider();
 }
 
 function refreshFilterFieldLabel(type) {
@@ -1332,6 +1430,13 @@ function resetFilterField() {
       });
     }
     refreshFilterFieldLabel('district');
+  } else if (currentFilterField === 'duration') {
+    durationFilterState = { min: 1, max: 30 };
+    const minSlider = document.getElementById('durationMinSlider');
+    const maxSlider = document.getElementById('durationMaxSlider');
+    if (minSlider) minSlider.value = 1;
+    if (maxSlider) maxSlider.value = 30;
+    updateDurationSlider();
   }
 
   applyFilters();
@@ -2322,6 +2427,10 @@ function applyFilters() {
   currentFilters.freeOnly = document.getElementById('freeOnly').checked;
   currentFilters.favoritesOnly = document.getElementById('favoritesOnly').checked;
   currentFilters.sort = currentFilters.sort || 'recent';
+  
+  // Duration filter
+  currentFilters.durationMin = durationFilterState.min;
+  currentFilters.durationMax = durationFilterState.max;
 
   // Show/hide location input only if the element exists
   const locationInput = document.getElementById('locationInput');
@@ -2448,6 +2557,18 @@ function applyFilters() {
     if (currentFilters.search) {
       const searchIn = (activity.title + ' ' + activity.description).toLowerCase();
       if (!searchIn.includes(currentFilters.search)) return false;
+    }
+
+    // Duration filter
+    const durationMin = currentFilters.durationMin || 1;
+    const durationMax = currentFilters.durationMax || 30;
+    const activityDuration = activity.date_diff || 1;
+    
+    // Si max es 30, consideramos "30+" como sin límite superior
+    const effectiveMax = durationMax >= 30 ? Infinity : durationMax;
+    
+    if (activityDuration < durationMin || activityDuration > effectiveMax) {
+      return false;
     }
 
     // Location filter (from map popup) - filter by exact location key
@@ -2775,6 +2896,15 @@ function updateActiveFilterChips() {
   if (currentFilters.search) {
     chips.push({ label: `Buscar: "${currentFilters.search}"`, type: 'search', value: currentFilters.search });
   }
+  
+  // Duration filter
+  const durationMin = currentFilters.durationMin || 1;
+  const durationMax = currentFilters.durationMax || 30;
+  // Solo mostrar chip si no es el rango por defecto (1-30+)
+  if (durationMin > 1 || durationMax < 30) {
+    const maxLabel = durationMax >= 30 ? '30+' : durationMax;
+    chips.push({ label: `Duración: ${durationMin}-${maxLabel} días`, type: 'duration', value: `${durationMin}-${durationMax}` });
+  }
 
   // Location filter (from map)
   if (currentFilters.locationKey) {
@@ -2960,6 +3090,11 @@ function removeFilterChip(type, value) {
       const filterSearchInput = document.getElementById('filterSearchInput');
       if (headerSearchInput) headerSearchInput.value = '';
       if (filterSearchInput) filterSearchInput.value = '';
+      break;
+    case 'duration':
+      durationFilterState = { min: 1, max: 30 };
+      currentFilters.durationMin = 1;
+      currentFilters.durationMax = 30;
       break;
     case 'location':
       currentFilters.locationKey = null;
@@ -4168,8 +4303,13 @@ function clearFilters() {
     location: null,
     locationCoords: null,
     locationKey: null,
-    sort: 'recent'
+    sort: 'recent',
+    durationMin: 1,
+    durationMax: 30
   };
+  
+  // Reset duration filter state
+  durationFilterState = { min: 1, max: 30 };
 
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = '';
