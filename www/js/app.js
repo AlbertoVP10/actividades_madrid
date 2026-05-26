@@ -680,6 +680,7 @@ let allActivities = [];
 let filteredActivities = [];
 let favorites = (JSON.parse(localStorage.getItem('madridFavorites') || '[]') || []).map(String);
 let dataSource = 'Madrid'; // 'Firebase' o 'Madrid' - se actualiza al cargar
+let imagenesMap = {}; // Mapa de app_id -> url_imagen
 let currentPage = 0;
 let itemsPerPage = 10;
 let userLocation = null;
@@ -881,6 +882,7 @@ async function init() {
   loadProfileSettings();
   cargarFiltrosFavoritos();
   updateFavCount();
+  await loadImagenesMap(); // Cargar imágenes primero
   await loadActivities();
   setBottomTab('home');
   // Set default tab to 'recent'
@@ -907,8 +909,11 @@ const FIREBASE_CONFIG = {
   storageBucket: 'actividades-madrid-2dbb6.firebasestorage.app'
 };
 
-// URL del JSON de actividades en Firebase Storage (actividades_orig.json)
-const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_orig.json?alt=media`;
+// URL del JSON de actividades procesadas en Firebase Storage
+const FIREBASE_ACTIVIDADES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/actividades_procesadas.json?alt=media`;
+
+// URL del JSON de imágenes en Firebase Storage
+const FIREBASE_IMAGENES_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_CONFIG.storageBucket}/o/imagenes.json?alt=media`;
 
 // URL de fallback (datos.madrid.es)
 const MADRID_API_URL = 'https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json';
@@ -919,6 +924,31 @@ function updateHomeSourceLabel() {
   if (sourceLabel) {
     const icon = dataSource === 'Firebase' ? '☁️' : '🏛️';
     sourceLabel.textContent = `${icon} ${dataSource}`;
+  }
+}
+
+// Función para cargar el mapa de imágenes desde Firebase
+async function loadImagenesMap() {
+  try {
+    console.log('📥 Cargando imágenes desde Firebase...');
+    const response = await fetch(FIREBASE_IMAGENES_URL, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    imagenesMap = await response.json();
+    console.log(`✅ ${Object.keys(imagenesMap).length} imágenes cargadas`);
+  } catch (error) {
+    console.warn('⚠️ Error cargando imágenes:', error.message);
+    imagenesMap = {};
   }
 }
 
@@ -3132,11 +3162,25 @@ function showDetail(id, isNavigation = false) {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < filteredActivities.length - 1;
 
-  // Set image
+  // Set image - primero buscar en imagenesMap de Firebase, luego usar default
   const defaultImageUrl = 'https://st3.depositphotos.com/1594308/13059/i/450/depositphotos_130595028-stock-photo-dynamic-friends-enjoying-party-and.jpg';
-  document.getElementById('detailImage').src = defaultImageUrl;
+  
+  // Buscar imagen en el mapa de Firebase (usando app_id o id)
+  const activityId = activity.app_id || activity.id;
+  const firebaseImageUrl = imagenesMap[activityId];
+  
+  // Usar imagen de Firebase si existe, sino la default
+  const imageUrlToUse = firebaseImageUrl || defaultImageUrl;
+  
+  if (firebaseImageUrl) {
+    console.log(`🖼️ Usando imagen de Firebase para ${activityId}`);
+  } else {
+    console.log(`🖼️ Usando imagen default para ${activityId}`);
+  }
+  
+  document.getElementById('detailImage').src = imageUrlToUse;
   document.getElementById('detailImage').alt = activity.title;
-  document.getElementById('fullscreenImage').src = defaultImageUrl;
+  document.getElementById('fullscreenImage').src = imageUrlToUse;
   const detailImage = document.getElementById('detailImage');
   
   // Reset image height on open
