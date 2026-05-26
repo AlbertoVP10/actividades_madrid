@@ -2285,8 +2285,23 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Apply filters
 function applyFilters() {
-  const searchField = document.getElementById('filterSearchInput') || document.getElementById('searchInput');
-  currentFilters.search = searchField?.value.toLowerCase() || '';
+  // Sincronizar ambos campos de búsqueda y usar el valor del que tenga contenido
+  const headerSearchInput = document.getElementById('searchInput');
+  const filterSearchInput = document.getElementById('filterSearchInput');
+  
+  // Usar el valor del input que tenga contenido, o el de la cabecera por defecto
+  let searchValue = '';
+  if (headerSearchInput && headerSearchInput.value.trim()) {
+    searchValue = headerSearchInput.value.trim();
+  } else if (filterSearchInput && filterSearchInput.value.trim()) {
+    searchValue = filterSearchInput.value.trim();
+  }
+  
+  // Sincronizar ambos inputs
+  if (headerSearchInput) headerSearchInput.value = searchValue;
+  if (filterSearchInput) filterSearchInput.value = searchValue;
+  
+  currentFilters.search = searchValue.toLowerCase();
   // Multi-select filters - use multiSelectState
   currentFilters.category = multiSelectState.category;
   currentFilters.district = multiSelectState.district;
@@ -2930,7 +2945,10 @@ function removeFilterChip(type, value) {
       break;
     case 'search':
       currentFilters.search = '';
-      document.getElementById('searchInput').value = '';
+      const headerSearchInput = document.getElementById('searchInput');
+      const filterSearchInput = document.getElementById('filterSearchInput');
+      if (headerSearchInput) headerSearchInput.value = '';
+      if (filterSearchInput) filterSearchInput.value = '';
       break;
     case 'location':
       currentFilters.locationKey = null;
