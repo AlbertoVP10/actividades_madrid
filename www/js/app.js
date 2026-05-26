@@ -2285,16 +2285,27 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Apply filters
 function applyFilters() {
-  // Sincronizar ambos campos de búsqueda y usar el valor del que tenga contenido
+  // Sincronizar ambos campos de búsqueda
   const headerSearchInput = document.getElementById('searchInput');
   const filterSearchInput = document.getElementById('filterSearchInput');
   
-  // Usar el valor del input que tenga contenido, o el de la cabecera por defecto
+  // Detectar qué input tiene el foco para priorizar su valor
+  const activeElement = document.activeElement;
   let searchValue = '';
-  if (headerSearchInput && headerSearchInput.value.trim()) {
-    searchValue = headerSearchInput.value.trim();
-  } else if (filterSearchInput && filterSearchInput.value.trim()) {
+  
+  if (activeElement === filterSearchInput && filterSearchInput) {
+    // El usuario está escribiendo en el input de filtros
     searchValue = filterSearchInput.value.trim();
+  } else if (activeElement === headerSearchInput && headerSearchInput) {
+    // El usuario está escribiendo en el input de la cabecera
+    searchValue = headerSearchInput.value.trim();
+  } else {
+    // Ninguno tiene foco, usar el valor que tenga contenido o mantener el actual
+    if (headerSearchInput && headerSearchInput.value.trim()) {
+      searchValue = headerSearchInput.value.trim();
+    } else if (filterSearchInput && filterSearchInput.value.trim()) {
+      searchValue = filterSearchInput.value.trim();
+    }
   }
   
   // Sincronizar ambos inputs
