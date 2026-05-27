@@ -1630,7 +1630,6 @@ function handleCalendarDayClick(day) {
 function updateCalendarInfo() {
   const info = document.getElementById('calendarInfo');
   const text = document.getElementById('calendarRangeText');
-  const clearBtn = document.getElementById('clearDateFilterBtn');
   
   if (!info || !text) return;
   
@@ -1649,10 +1648,8 @@ function updateCalendarInfo() {
     }
     
     info.classList.remove('hidden');
-    if (clearBtn) clearBtn.classList.remove('hidden');
   } else {
     info.classList.add('hidden');
-    if (clearBtn) clearBtn.classList.add('hidden');
   }
 }
 
@@ -1815,8 +1812,7 @@ function resetFilterField() {
     const searchInput = document.getElementById('filterSearchInput');
     if (searchInput) searchInput.value = '';
   } else if (currentFilterField === 'date') {
-    const dateSelect = document.getElementById('dateSelect');
-    if (dateSelect) dateSelect.value = 'all';
+    clearDateFilter();
   } else if (['freeOnly', 'favoritesOnly'].includes(currentFilterField)) {
     const checkbox = document.getElementById(currentFilterField);
     if (checkbox) checkbox.checked = false;
