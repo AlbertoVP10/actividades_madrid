@@ -4752,6 +4752,13 @@ function clearFilters() {
   
   // Reset duration filter state
   durationFilterState = { min: 1, max: 30 };
+  
+  // Reset date filter state (without rendering calendar since we're clearing all)
+  dateFilterState.mode = 'shortcut';
+  dateFilterState.shortcut = 'all';
+  dateFilterState.pickerStart = null;
+  dateFilterState.pickerEnd = null;
+  calendarState.selecting = false;
 
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = '';
