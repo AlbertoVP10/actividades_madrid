@@ -1116,7 +1116,52 @@
 
         <div id="filterField_date" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">📅 Fecha</label>
-          <select id="dateSelect" onchange="applyFilters()" class="w-full bg-surface-container-low rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant">
+          
+          <!-- Atajos horizontales -->
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button type="button" onclick="setDateShortcut('today')" data-shortcut="today" class="date-shortcut px-4 py-2 rounded-full border border-outline-variant text-label-md transition-all whitespace-nowrap bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+              Hoy
+            </button>
+            <button type="button" onclick="setDateShortcut('tomorrow')" data-shortcut="tomorrow" class="date-shortcut px-4 py-2 rounded-full border border-outline-variant text-label-md transition-all whitespace-nowrap bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+              Mañana
+            </button>
+            <button type="button" onclick="setDateShortcut('weekend')" data-shortcut="weekend" class="date-shortcut px-4 py-2 rounded-full border border-outline-variant text-label-md transition-all whitespace-nowrap bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+              Este finde
+            </button>
+            <button type="button" onclick="setDateShortcut('7days')" data-shortcut="7days" class="date-shortcut px-4 py-2 rounded-full border border-outline-variant text-label-md transition-all whitespace-nowrap bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+              7 días
+            </button>
+          </div>
+          
+          <!-- Calendario nativo -->
+          <div class="mt-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant space-y-3">
+            <p class="text-label-sm text-on-surface-variant">O selecciona una fecha:</p>
+            
+            <!-- Input fecha inicio -->
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-on-surface-variant">event</span>
+              <input type="date" id="datePickerStart" onchange="handleDatePickerChange()"
+                     class="flex-1 bg-surface-container-high rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant focus:border-primary">
+            </div>
+            
+            <!-- Input fecha fin (aparece cuando hay inicio) -->
+            <div id="datePickerEndContainer" class="flex items-center gap-2 hidden">
+              <span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+              <input type="date" id="datePickerEnd" onchange="handleDatePickerChange()"
+                     class="flex-1 bg-surface-container-high rounded-lg px-3 py-2 text-body-md outline-none border border-outline-variant focus:border-primary">
+            </div>
+            
+            <!-- Info del rango seleccionado -->
+            <p id="dateRangeInfo" class="text-label-sm text-primary text-center hidden"></p>
+            
+            <!-- Botón limpiar -->
+            <button type="button" onclick="clearDatePicker()" id="clearDateBtn" class="w-full py-2 rounded-lg bg-surface-container-high text-on-surface-variant text-label-md hover:bg-error-container hover:text-on-error-container transition-colors hidden">
+              Limpiar fechas
+            </button>
+          </div>
+          
+          <!-- Select legacy oculto (para compatibilidad con filtros guardados) -->
+          <select id="dateSelect" onchange="applyFilters()" class="hidden">
             <option value="all">Todas las fechas</option>
             <option value="today">Hoy</option>
             <option value="tomorrow">Mañana</option>

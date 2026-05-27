@@ -265,7 +265,11 @@ function getCurrentFilterParameters() {
     sort: currentFilters.sort || 'recent',
     locationKey: currentFilters.locationKey || null,
     durationMin: durationFilterState.min || 1,
-    durationMax: durationFilterState.max || 30
+    durationMax: durationFilterState.max || 30,
+    dateFilterMode: dateFilterState.mode,
+    dateFilterShortcut: dateFilterState.shortcut,
+    dateFilterPickerStart: dateFilterState.pickerStart ? dateFilterState.pickerStart.toISOString() : null,
+    dateFilterPickerEnd: dateFilterState.pickerEnd ? dateFilterState.pickerEnd.toISOString() : null
   };
 }
 
@@ -505,6 +509,35 @@ function setFilterInputsFromParameters(params) {
     durationFilterState.max = params.durationMax;
     currentFilters.durationMin = params.durationMin;
     currentFilters.durationMax = params.durationMax;
+  }
+
+  // Date filter (hybrid)
+  if (params.dateFilterMode) {
+    dateFilterState.mode = params.dateFilterMode;
+    dateFilterState.shortcut = params.dateFilterShortcut || 'all';
+    
+    if (params.dateFilterPickerStart) {
+      dateFilterState.pickerStart = new Date(params.dateFilterPickerStart);
+    }
+    if (params.dateFilterPickerEnd) {
+      dateFilterState.pickerEnd = new Date(params.dateFilterPickerEnd);
+    }
+    
+    // Actualizar select legacy para compatibilidad
+    const dateSelect = document.getElementById('dateSelect');
+    if (dateSelect) {
+      if (dateFilterState.mode === 'shortcut') {
+        const legacyMap = {
+          'all': 'all',
+          'today': 'today',
+          'tomorrow': 'tomorrow',
+          '7days': 'week'
+        };
+        dateSelect.value = legacyMap[dateFilterState.shortcut] || 'all';
+      } else {
+        dateSelect.value = 'all';
+      }
+    }
   }
 
   updateMultiSelectLabels();
@@ -1143,6 +1176,14 @@ let durationFilterState = {
   max: 30
 };
 
+// Date filter state (hybrid: shortcuts + picker)
+let dateFilterState = {
+  mode: 'shortcut',      // 'shortcut' | 'picker'
+  shortcut: 'all',       // 'all' | 'today' | 'tomorrow' | 'weekend' | '7days'
+  pickerStart: null,     // Date | null
+  pickerEnd: null        // Date | null
+};
+
 let currentFilterField = null;
 
 function openFilterField(field) {
@@ -1255,6 +1296,41 @@ function renderFilterFieldContent(field) {
     // Actualizar estado visual de los atajos
     updateDurationShortcutStyles();
   }
+
+  if (field === 'date') {
+    // Actualizar estado visual de los atajos de fecha
+    updateDateShortcutStyles();
+    
+    // Actualizar inputs del picker
+    const startInput = document.getElementById('datePickerStart');
+    const endInput = document.getElementById('datePickerEnd');
+    const endContainer = document.getElementById('datePickerEndContainer');
+    const rangeInfo = document.getElementById('dateRangeInfo');
+    const clearBtn = document.getElementById('clearDateBtn');
+    
+    if (dateFilterState.mode === 'picker') {
+      if (startInput && dateFilterState.pickerStart) {
+        startInput.value = formatDateForInput(dateFilterState.pickerStart);
+      }
+      if (endInput && dateFilterState.pickerEnd) {
+        endInput.value = formatDateForInput(dateFilterState.pickerEnd);
+      }
+      if (endContainer) {
+        endContainer.classList.toggle('hidden', !dateFilterState.pickerStart);
+      }
+      if (clearBtn) {
+        clearBtn.classList.remove('hidden');
+      }
+      updateDateRangeInfo();
+    } else {
+      // Modo shortcut - limpiar inputs
+      if (startInput) startInput.value = '';
+      if (endInput) endInput.value = '';
+      if (endContainer) endContainer.classList.add('hidden');
+      if (rangeInfo) rangeInfo.classList.add('hidden');
+      if (clearBtn) clearBtn.classList.add('hidden');
+    }
+  }
 }
 
 function updateDurationSlider() {
@@ -1321,6 +1397,223 @@ function setDurationShortcut(min, max) {
   if (maxSlider) maxSlider.value = max;
   
   updateDurationSlider();
+}
+
+// ==================== DATE FILTER FUNCTIONS ====================
+
+function formatDateForInput(date) {
+  if (!date) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseInputDate(value) {
+  if (!value) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function setDateShortcut(shortcut) {
+  // Cambiar a modo shortcut y limpiar picker
+  dateFilterState.mode = 'shortcut';
+  dateFilterState.shortcut = shortcut;
+  dateFilterState.pickerStart = null;
+  dateFilterState.pickerEnd = null;
+  
+  // Actualizar select legacy para compatibilidad
+  const dateSelect = document.getElementById('dateSelect');
+  if (dateSelect) {
+    const legacyMap = {
+      'all': 'all',
+      'today': 'today',
+      'tomorrow': 'tomorrow',
+      '7days': 'week',
+      'weekend': 'all' // No hay equivalente legacy
+    };
+    dateSelect.value = legacyMap[shortcut] || 'all';
+  }
+  
+  // Limpiar inputs visuales
+  const startInput = document.getElementById('datePickerStart');
+  const endInput = document.getElementById('datePickerEnd');
+  const endContainer = document.getElementById('datePickerEndContainer');
+  const rangeInfo = document.getElementById('dateRangeInfo');
+  const clearBtn = document.getElementById('clearDateBtn');
+  
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+  if (endContainer) endContainer.classList.add('hidden');
+  if (rangeInfo) rangeInfo.classList.add('hidden');
+  if (clearBtn) clearBtn.classList.add('hidden');
+  
+  updateDateShortcutStyles();
+  applyFilters();
+}
+
+function handleDatePickerChange() {
+  const startInput = document.getElementById('datePickerStart');
+  const endInput = document.getElementById('datePickerEnd');
+  const endContainer = document.getElementById('datePickerEndContainer');
+  const clearBtn = document.getElementById('clearDateBtn');
+  
+  const startValue = startInput ? startInput.value : '';
+  const endValue = endInput ? endInput.value : '';
+  
+  // Cambiar a modo picker
+  dateFilterState.mode = 'picker';
+  
+  if (startValue) {
+    dateFilterState.pickerStart = parseInputDate(startValue);
+    
+    // Mostrar input de fin y botón limpiar
+    if (endContainer) endContainer.classList.remove('hidden');
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    
+    if (endValue) {
+      dateFilterState.pickerEnd = parseInputDate(endValue);
+    } else {
+      // Si solo hay inicio, fin = inicio (un día)
+      dateFilterState.pickerEnd = new Date(dateFilterState.pickerStart);
+    }
+  } else {
+    // No hay fecha de inicio, limpiar todo
+    dateFilterState.pickerStart = null;
+    dateFilterState.pickerEnd = null;
+    if (endContainer) endContainer.classList.add('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+  }
+  
+  // Desactivar atajos visuales
+  updateDateShortcutStyles();
+  updateDateRangeInfo();
+  applyFilters();
+}
+
+function clearDatePicker() {
+  dateFilterState.mode = 'shortcut';
+  dateFilterState.shortcut = 'all';
+  dateFilterState.pickerStart = null;
+  dateFilterState.pickerEnd = null;
+  
+  const startInput = document.getElementById('datePickerStart');
+  const endInput = document.getElementById('datePickerEnd');
+  const endContainer = document.getElementById('datePickerEndContainer');
+  const rangeInfo = document.getElementById('dateRangeInfo');
+  const clearBtn = document.getElementById('clearDateBtn');
+  
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+  if (endContainer) endContainer.classList.add('hidden');
+  if (rangeInfo) rangeInfo.classList.add('hidden');
+  if (clearBtn) clearBtn.classList.add('hidden');
+  
+  // Actualizar select legacy
+  const dateSelect = document.getElementById('dateSelect');
+  if (dateSelect) dateSelect.value = 'all';
+  
+  updateDateShortcutStyles();
+  applyFilters();
+}
+
+function updateDateShortcutStyles() {
+  const shortcuts = document.querySelectorAll('.date-shortcut');
+  shortcuts.forEach(btn => {
+    const shortcut = btn.dataset.shortcut;
+    const isActive = dateFilterState.mode === 'shortcut' && dateFilterState.shortcut === shortcut;
+    
+    if (isActive) {
+      btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.remove('bg-surface-container-high', 'text-on-surface');
+    } else {
+      btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      btn.classList.add('bg-surface-container-high', 'text-on-surface');
+    }
+  });
+}
+
+function updateDateRangeInfo() {
+  const rangeInfo = document.getElementById('dateRangeInfo');
+  if (!rangeInfo) return;
+  
+  if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
+    const start = dateFilterState.pickerStart;
+    const end = dateFilterState.pickerEnd || start;
+    
+    const formatDate = (date) => {
+      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    };
+    
+    if (start.getTime() === end.getTime()) {
+      rangeInfo.textContent = `Fecha: ${formatDate(start)}`;
+    } else {
+      rangeInfo.textContent = `Rango: ${formatDate(start)} - ${formatDate(end)}`;
+    }
+    rangeInfo.classList.remove('hidden');
+  } else {
+    rangeInfo.classList.add('hidden');
+  }
+}
+
+function getDateFilterRange() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
+    return {
+      start: dateFilterState.pickerStart,
+      end: dateFilterState.pickerEnd || dateFilterState.pickerStart
+    };
+  }
+  
+  // Modo shortcut
+  switch (dateFilterState.shortcut) {
+    case 'today':
+      return { start: today, end: today };
+    
+    case 'tomorrow': {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return { start: tomorrow, end: tomorrow };
+    }
+    
+    case 'weekend': {
+      // Sábado y domingo de esta semana
+      const dayOfWeek = today.getDay(); // 0 = domingo, 6 = sábado
+      const saturday = new Date(today);
+      const sunday = new Date(today);
+      
+      if (dayOfWeek === 0) {
+        // Hoy es domingo, el finde es hoy
+        saturday.setDate(today.getDate() - 1);
+        sunday.setDate(today.getDate());
+      } else if (dayOfWeek === 6) {
+        // Hoy es sábado, el finde es hoy y mañana
+        saturday.setDate(today.getDate());
+        sunday.setDate(today.getDate() + 1);
+      } else {
+        // Día de semana, calcular próximo finde
+        const daysUntilSaturday = 6 - dayOfWeek;
+        saturday.setDate(today.getDate() + daysUntilSaturday);
+        sunday.setDate(today.getDate() + daysUntilSaturday + 1);
+      }
+      
+      return { start: saturday, end: sunday };
+    }
+    
+    case '7days': {
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      return { start: today, end: weekEnd };
+    }
+    
+    case 'all':
+    default:
+      return null; // Sin filtro de fecha
+  }
 }
 
 function refreshFilterFieldLabel(type) {
@@ -1437,6 +1730,8 @@ function resetFilterField() {
     if (minSlider) minSlider.value = 1;
     if (maxSlider) maxSlider.value = 30;
     updateDurationSlider();
+  } else if (currentFilterField === 'date') {
+    clearDatePicker();
   }
 
   applyFilters();
@@ -2485,28 +2780,24 @@ function applyFilters() {
       if (!hasMatch) return false;
     }
 
-    // Date filter
-    if (currentFilters.date !== 'all' && activity.date) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const activityDate = new Date(activity.date);
-      activityDate.setHours(0, 0, 0, 0);
-
-      if (currentFilters.date === 'today') {
-        if (activityDate.getTime() !== today.getTime()) return false;
-      } else if (currentFilters.date === 'tomorrow') {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        if (activityDate.getTime() !== tomorrow.getTime()) return false;
-      } else if (currentFilters.date === 'week') {
-        const weekFromNow = new Date(today);
-        weekFromNow.setDate(weekFromNow.getDate() + 7);
-        if (activityDate > weekFromNow) return false;
-      } else if (currentFilters.date === 'month') {
-        const monthFromNow = new Date(today);
-        monthFromNow.setMonth(monthFromNow.getMonth() + 1);
-        if (activityDate > monthFromNow) return false;
-      }
+    // Date filter (hybrid: shortcuts + picker with range overlap logic)
+    const dateRange = getDateFilterRange();
+    if (dateRange && activity.date && activity.endDate) {
+      const actStart = new Date(activity.date);
+      const actEnd = new Date(activity.endDate);
+      actStart.setHours(0, 0, 0, 0);
+      actEnd.setHours(0, 0, 0, 0);
+      
+      // Evento visible si hay solapamiento con el rango de filtro
+      // (inicio_evento <= fin_filtro) AND (fin_evento >= inicio_filtro)
+      const overlap = actStart <= dateRange.end && actEnd >= dateRange.start;
+      if (!overlap) return false;
+    } else if (dateRange && activity.date) {
+      // Fallback: si no hay endDate, usar date como único día
+      const actDate = new Date(activity.date);
+      actDate.setHours(0, 0, 0, 0);
+      const inRange = actDate >= dateRange.start && actDate <= dateRange.end;
+      if (!inRange) return false;
     }
 
     // Time filter - multi-select
@@ -2846,15 +3137,25 @@ function updateActiveFilterChips() {
   
   // Check for active filters and create chips
   
-  // Date filters
-  if (currentFilters.date === 'today') {
-    chips.push({ label: 'Hoy', type: 'date', value: 'today' });
-  } else if (currentFilters.date === 'week') {
-    chips.push({ label: 'Esta semana', type: 'date', value: 'week' });
-  } else if (currentFilters.date === 'tomorrow') {
-    chips.push({ label: 'Mañana', type: 'date', value: 'tomorrow' });
-  } else if (currentFilters.date === 'month') {
-    chips.push({ label: 'Este mes', type: 'date', value: 'month' });
+  // Date filters (hybrid)
+  if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
+    const start = dateFilterState.pickerStart;
+    const end = dateFilterState.pickerEnd || start;
+    const formatDate = (date) => date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    
+    if (start.getTime() === end.getTime()) {
+      chips.push({ label: `Fecha: ${formatDate(start)}`, type: 'date', value: 'picker' });
+    } else {
+      chips.push({ label: `Fecha: ${formatDate(start)}-${formatDate(end)}`, type: 'date', value: 'picker' });
+    }
+  } else if (dateFilterState.mode === 'shortcut' && dateFilterState.shortcut !== 'all') {
+    const shortcutLabels = {
+      'today': 'Hoy',
+      'tomorrow': 'Mañana',
+      'weekend': 'Este finde',
+      '7days': '7 días'
+    };
+    chips.push({ label: shortcutLabels[dateFilterState.shortcut], type: 'date', value: dateFilterState.shortcut });
   }
   
   // Category filters - grouped into single chip
@@ -2938,8 +3239,17 @@ function updateActiveFilterChips() {
 function removeFilterChip(type, value) {
   switch (type) {
     case 'date':
+      // Limpiar estado híbrido de fecha
+      dateFilterState.mode = 'shortcut';
+      dateFilterState.shortcut = 'all';
+      dateFilterState.pickerStart = null;
+      dateFilterState.pickerEnd = null;
+      
+      // Actualizar select legacy
       currentFilters.date = 'all';
-      document.getElementById('dateSelect').value = 'all';
+      const dateSelect = document.getElementById('dateSelect');
+      if (dateSelect) dateSelect.value = 'all';
+      
       // Also clear KPI if it was set
       const todayIndex = activeKPIFilters.indexOf('today');
       const weekIndex = activeKPIFilters.indexOf('week');

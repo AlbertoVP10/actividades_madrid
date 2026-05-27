@@ -518,3 +518,45 @@ body { min-height: max(884px, 100dvh); }
   color: #666;
   line-height: 1.5;
 }
+
+/* Date filter styles */
+.date-shortcut {
+  transition: all 0.2s ease;
+}
+.date-shortcut.active {
+  background-color: var(--primary-container, #E8F5E9);
+  border-color: var(--primary, #4CAF50);
+  color: var(--on-primary-container, #1B5E20);
+}
+
+/* Native date input styling */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+input[type="date"]:focus {
+  border-color: var(--primary, #4CAF50);
+  outline: none;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
