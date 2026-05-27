@@ -979,7 +979,10 @@
             <span class="material-symbols-outlined text-primary">search</span>
             <span class="text-sm">Buscar</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_search" class="text-label-sm text-primary font-medium hidden truncate max-w-[120px]"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('category')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">

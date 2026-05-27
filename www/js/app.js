@@ -4801,6 +4801,20 @@ function clearFilters() {
 
 // Update filter indicators in the filters list view
 function updateFilterIndicators() {
+  // Search indicator
+  const searchIndicator = document.getElementById('filterIndicator_search');
+  if (searchIndicator) {
+    const searchValue = currentFilters.search || '';
+    if (searchValue.length > 0) {
+      // Truncate if too long (max 15 chars + ...)
+      const displayText = searchValue.length > 15 ? searchValue.substring(0, 15) + '...' : searchValue;
+      searchIndicator.textContent = `"${displayText}"`;
+      searchIndicator.classList.remove('hidden');
+    } else {
+      searchIndicator.classList.add('hidden');
+    }
+  }
+
   // Category indicator
   const catIndicator = document.getElementById('filterIndicator_category');
   if (catIndicator) {
