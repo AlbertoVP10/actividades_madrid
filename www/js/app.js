@@ -1184,6 +1184,14 @@ let dateFilterState = {
   pickerEnd: null        // Date | null
 };
 
+// Calendar state
+let calendarState = {
+  currentMonth: new Date().getMonth(),
+  currentYear: new Date().getFullYear(),
+  selecting: false,      // true when waiting for second date
+  hoverDate: null        // for visual feedback
+};
+
 let currentFilterField = null;
 
 function openFilterField(field) {
@@ -1301,35 +1309,9 @@ function renderFilterFieldContent(field) {
     // Actualizar estado visual de los atajos de fecha
     updateDateShortcutStyles();
     
-    // Actualizar inputs del picker
-    const startInput = document.getElementById('datePickerStart');
-    const endInput = document.getElementById('datePickerEnd');
-    const endContainer = document.getElementById('datePickerEndContainer');
-    const rangeInfo = document.getElementById('dateRangeInfo');
-    const clearBtn = document.getElementById('clearDateBtn');
-    
-    if (dateFilterState.mode === 'picker') {
-      if (startInput && dateFilterState.pickerStart) {
-        startInput.value = formatDateForInput(dateFilterState.pickerStart);
-      }
-      if (endInput && dateFilterState.pickerEnd) {
-        endInput.value = formatDateForInput(dateFilterState.pickerEnd);
-      }
-      if (endContainer) {
-        endContainer.classList.toggle('hidden', !dateFilterState.pickerStart);
-      }
-      if (clearBtn) {
-        clearBtn.classList.remove('hidden');
-      }
-      updateDateRangeInfo();
-    } else {
-      // Modo shortcut - limpiar inputs
-      if (startInput) startInput.value = '';
-      if (endInput) endInput.value = '';
-      if (endContainer) endContainer.classList.add('hidden');
-      if (rangeInfo) rangeInfo.classList.add('hidden');
-      if (clearBtn) clearBtn.classList.add('hidden');
-    }
+    // Inicializar/renderizar calendario
+    renderCalendar();
+    updateCalendarInfo();
   }
 }
 
@@ -1418,11 +1400,77 @@ function parseInputDate(value) {
 }
 
 function setDateShortcut(shortcut) {
-  // Cambiar a modo shortcut y limpiar picker
+  // Cambiar a modo shortcut
   dateFilterState.mode = 'shortcut';
   dateFilterState.shortcut = shortcut;
-  dateFilterState.pickerStart = null;
-  dateFilterState.pickerEnd = null;
+  calendarState.selecting = false;
+  
+  // Calcular el rango según el atajo y sincronizar con el calendario
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  switch (shortcut) {
+    case 'today':
+      dateFilterState.pickerStart = new Date(today);
+      dateFilterState.pickerEnd = new Date(today);
+      break;
+    
+    case 'tomorrow': {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      dateFilterState.pickerStart = tomorrow;
+      dateFilterState.pickerEnd = new Date(tomorrow);
+      break;
+    }
+    
+    case 'weekend': {
+      const dayOfWeek = today.getDay();
+      const saturday = new Date(today);
+      const sunday = new Date(today);
+      
+      if (dayOfWeek === 0) {
+        // Hoy es domingo
+        saturday.setDate(today.getDate() - 1);
+        sunday.setDate(today.getDate());
+      } else if (dayOfWeek === 6) {
+        // Hoy es sábado
+        saturday.setDate(today.getDate());
+        sunday.setDate(today.getDate() + 1);
+      } else {
+        // Día de semana
+        const daysUntilSaturday = 6 - dayOfWeek;
+        saturday.setDate(today.getDate() + daysUntilSaturday);
+        sunday.setDate(today.getDate() + daysUntilSaturday + 1);
+      }
+      
+      dateFilterState.pickerStart = saturday;
+      dateFilterState.pickerEnd = sunday;
+      break;
+    }
+    
+    case '7days': {
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      dateFilterState.pickerStart = new Date(today);
+      dateFilterState.pickerEnd = weekEnd;
+      break;
+    }
+    
+    case 'all':
+    default:
+      dateFilterState.pickerStart = null;
+      dateFilterState.pickerEnd = null;
+      break;
+  }
+  
+  // Sincronizar calendario con el mes del inicio del rango
+  if (dateFilterState.pickerStart) {
+    calendarState.currentMonth = dateFilterState.pickerStart.getMonth();
+    calendarState.currentYear = dateFilterState.pickerStart.getFullYear();
+  } else {
+    calendarState.currentMonth = today.getMonth();
+    calendarState.currentYear = today.getFullYear();
+  }
   
   // Actualizar select legacy para compatibilidad
   const dateSelect = document.getElementById('dateSelect');
@@ -1432,89 +1480,200 @@ function setDateShortcut(shortcut) {
       'today': 'today',
       'tomorrow': 'tomorrow',
       '7days': 'week',
-      'weekend': 'all' // No hay equivalente legacy
+      'weekend': 'all'
     };
     dateSelect.value = legacyMap[shortcut] || 'all';
   }
   
-  // Limpiar inputs visuales
-  const startInput = document.getElementById('datePickerStart');
-  const endInput = document.getElementById('datePickerEnd');
-  const endContainer = document.getElementById('datePickerEndContainer');
-  const rangeInfo = document.getElementById('dateRangeInfo');
-  const clearBtn = document.getElementById('clearDateBtn');
-  
-  if (startInput) startInput.value = '';
-  if (endInput) endInput.value = '';
-  if (endContainer) endContainer.classList.add('hidden');
-  if (rangeInfo) rangeInfo.classList.add('hidden');
-  if (clearBtn) clearBtn.classList.add('hidden');
-  
+  // Actualizar UI
+  renderCalendar();
+  updateCalendarInfo();
   updateDateShortcutStyles();
   applyFilters();
 }
 
-function handleDatePickerChange() {
-  const startInput = document.getElementById('datePickerStart');
-  const endInput = document.getElementById('datePickerEnd');
-  const endContainer = document.getElementById('datePickerEndContainer');
-  const clearBtn = document.getElementById('clearDateBtn');
+// ==================== CALENDAR FUNCTIONS ====================
+
+function changeCalendarMonth(delta) {
+  calendarState.currentMonth += delta;
+  if (calendarState.currentMonth > 11) {
+    calendarState.currentMonth = 0;
+    calendarState.currentYear++;
+  } else if (calendarState.currentMonth < 0) {
+    calendarState.currentMonth = 11;
+    calendarState.currentYear--;
+  }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  const monthYearLabel = document.getElementById('calendarMonthYear');
+  if (!grid || !monthYearLabel) return;
   
-  const startValue = startInput ? startInput.value : '';
-  const endValue = endInput ? endInput.value : '';
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  monthYearLabel.textContent = `${monthNames[calendarState.currentMonth]} ${calendarState.currentYear}`;
   
-  // Cambiar a modo picker
-  dateFilterState.mode = 'picker';
+  // Calcular días del mes
+  const firstDay = new Date(calendarState.currentYear, calendarState.currentMonth, 1);
+  const lastDay = new Date(calendarState.currentYear, calendarState.currentMonth + 1, 0);
+  const daysInMonth = lastDay.getDate();
   
-  if (startValue) {
-    dateFilterState.pickerStart = parseInputDate(startValue);
-    
-    // Mostrar input de fin y botón limpiar
-    if (endContainer) endContainer.classList.remove('hidden');
-    if (clearBtn) clearBtn.classList.remove('hidden');
-    
-    if (endValue) {
-      dateFilterState.pickerEnd = parseInputDate(endValue);
-    } else {
-      // Si solo hay inicio, fin = inicio (un día)
-      dateFilterState.pickerEnd = new Date(dateFilterState.pickerStart);
-    }
-  } else {
-    // No hay fecha de inicio, limpiar todo
-    dateFilterState.pickerStart = null;
-    dateFilterState.pickerEnd = null;
-    if (endContainer) endContainer.classList.add('hidden');
-    if (clearBtn) clearBtn.classList.add('hidden');
+  // Día de la semana del primer día (0=domingo, ajustar a 0=lunes)
+  let startDayOfWeek = firstDay.getDay() - 1;
+  if (startDayOfWeek < 0) startDayOfWeek = 6;
+  
+  // Días del mes anterior para rellenar
+  const prevMonthLastDay = new Date(calendarState.currentYear, calendarState.currentMonth, 0).getDate();
+  
+  let html = '';
+  
+  // Días del mes anterior (gris)
+  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+    const day = prevMonthLastDay - i;
+    html += `<div class="calendar-day text-on-surface-variant/30 text-center py-2 text-label-md">${day}</div>`;
   }
   
-  // Desactivar atajos visuales
+  // Días del mes actual
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(calendarState.currentYear, calendarState.currentMonth, day);
+    date.setHours(0, 0, 0, 0);
+    
+    const isToday = date.getTime() === today.getTime();
+    const isSelected = isDateInSelection(date);
+    const isStart = dateFilterState.pickerStart && date.getTime() === dateFilterState.pickerStart.getTime();
+    const isEnd = dateFilterState.pickerEnd && date.getTime() === dateFilterState.pickerEnd.getTime();
+    const isRange = isDateInRange(date);
+    
+    let classes = 'calendar-day text-center py-2 text-label-md cursor-pointer transition-all rounded-lg ';
+    
+    if (isStart || isEnd) {
+      // Inicio o fin del rango (color primario fuerte)
+      classes += 'bg-primary text-on-primary font-semibold';
+    } else if (isRange) {
+      // Dentro del rango (color primario suave)
+      classes += 'bg-primary-container text-on-primary-container';
+    } else if (isToday) {
+      // Hoy (borde primario)
+      classes += 'border-2 border-primary text-primary';
+    } else {
+      // Día normal
+      classes += 'text-on-surface hover:bg-surface-variant';
+    }
+    
+    html += `<div class="${classes}" onclick="handleCalendarDayClick(${day})" data-day="${day}">${day}</div>`;
+  }
+  
+  // Días del mes siguiente para completar la última semana
+  const totalCells = startDayOfWeek + daysInMonth;
+  const remainingCells = (7 - (totalCells % 7)) % 7;
+  for (let day = 1; day <= remainingCells; day++) {
+    html += `<div class="calendar-day text-on-surface-variant/30 text-center py-2 text-label-md">${day}</div>`;
+  }
+  
+  grid.innerHTML = html;
+}
+
+function isDateInSelection(date) {
+  if (!dateFilterState.pickerStart) return false;
+  const start = dateFilterState.pickerStart.getTime();
+  const end = dateFilterState.pickerEnd ? dateFilterState.pickerEnd.getTime() : start;
+  const check = date.getTime();
+  return check >= start && check <= end;
+}
+
+function isDateInRange(date) {
+  if (!dateFilterState.pickerStart || !dateFilterState.pickerEnd) return false;
+  const start = dateFilterState.pickerStart.getTime();
+  const end = dateFilterState.pickerEnd.getTime();
+  const check = date.getTime();
+  return check > start && check < end;
+}
+
+function handleCalendarDayClick(day) {
+  const clickedDate = new Date(calendarState.currentYear, calendarState.currentMonth, day);
+  clickedDate.setHours(0, 0, 0, 0);
+  
+  // Si estamos en modo shortcut, cambiar a picker
+  dateFilterState.mode = 'picker';
+  
+  if (!dateFilterState.pickerStart || (dateFilterState.pickerStart && dateFilterState.pickerEnd)) {
+    // Primer clic o reinicio - establecer inicio
+    dateFilterState.pickerStart = clickedDate;
+    dateFilterState.pickerEnd = null;
+    calendarState.selecting = true;
+  } else if (calendarState.selecting) {
+    // Segundo clic - establecer fin
+    const start = dateFilterState.pickerStart;
+    
+    if (clickedDate < start) {
+      // Si clic antes del inicio, invertir
+      dateFilterState.pickerEnd = start;
+      dateFilterState.pickerStart = clickedDate;
+    } else {
+      dateFilterState.pickerEnd = clickedDate;
+    }
+    calendarState.selecting = false;
+  }
+  
+  // Actualizar UI
+  renderCalendar();
+  updateCalendarInfo();
   updateDateShortcutStyles();
-  updateDateRangeInfo();
   applyFilters();
 }
 
-function clearDatePicker() {
+function updateCalendarInfo() {
+  const info = document.getElementById('calendarInfo');
+  const text = document.getElementById('calendarRangeText');
+  const clearBtn = document.getElementById('clearDateFilterBtn');
+  
+  if (!info || !text) return;
+  
+  if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
+    const start = dateFilterState.pickerStart;
+    const end = dateFilterState.pickerEnd || start;
+    
+    const formatDate = (date) => {
+      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    };
+    
+    if (start.getTime() === end.getTime()) {
+      text.textContent = `Fecha: ${formatDate(start)}`;
+    } else {
+      text.textContent = `${formatDate(start)} - ${formatDate(end)}`;
+    }
+    
+    info.classList.remove('hidden');
+    if (clearBtn) clearBtn.classList.remove('hidden');
+  } else {
+    info.classList.add('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+  }
+}
+
+function clearDateFilter() {
   dateFilterState.mode = 'shortcut';
   dateFilterState.shortcut = 'all';
   dateFilterState.pickerStart = null;
   dateFilterState.pickerEnd = null;
+  calendarState.selecting = false;
   
-  const startInput = document.getElementById('datePickerStart');
-  const endInput = document.getElementById('datePickerEnd');
-  const endContainer = document.getElementById('datePickerEndContainer');
-  const rangeInfo = document.getElementById('dateRangeInfo');
-  const clearBtn = document.getElementById('clearDateBtn');
-  
-  if (startInput) startInput.value = '';
-  if (endInput) endInput.value = '';
-  if (endContainer) endContainer.classList.add('hidden');
-  if (rangeInfo) rangeInfo.classList.add('hidden');
-  if (clearBtn) clearBtn.classList.add('hidden');
+  // Reset calendar to current month
+  const today = new Date();
+  calendarState.currentMonth = today.getMonth();
+  calendarState.currentYear = today.getFullYear();
   
   // Actualizar select legacy
   const dateSelect = document.getElementById('dateSelect');
   if (dateSelect) dateSelect.value = 'all';
   
+  renderCalendar();
+  updateCalendarInfo();
   updateDateShortcutStyles();
   applyFilters();
 }
@@ -1534,17 +1693,6 @@ function updateDateShortcutStyles() {
     }
   });
 }
-
-function updateDateRangeInfo() {
-  const rangeInfo = document.getElementById('dateRangeInfo');
-  if (!rangeInfo) return;
-  
-  if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
-    const start = dateFilterState.pickerStart;
-    const end = dateFilterState.pickerEnd || start;
-    
-    const formatDate = (date) => {
-      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     };
     
     if (start.getTime() === end.getTime()) {
@@ -1731,7 +1879,7 @@ function resetFilterField() {
     if (maxSlider) maxSlider.value = 30;
     updateDurationSlider();
   } else if (currentFilterField === 'date') {
-    clearDatePicker();
+    clearDateFilter();
   }
 
   applyFilters();

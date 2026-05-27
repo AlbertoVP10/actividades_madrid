@@ -529,27 +529,22 @@ body { min-height: max(884px, 100dvh); }
   color: var(--on-primary-container, #1B5E20);
 }
 
-/* Native date input styling */
-input[type="date"] {
-  position: relative;
+/* Calendar styles */
+#calendarGrid {
+  min-height: 200px;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
-  background: transparent;
-  bottom: 0;
-  color: transparent;
-  cursor: pointer;
-  height: auto;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: auto;
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  user-select: none;
 }
 
-input[type="date"]:focus {
-  border-color: var(--primary, #4CAF50);
-  outline: none;
+.calendar-day:hover:not(.bg-primary):not(.bg-primary-container) {
+  background-color: var(--surface-variant, #E0E0E0);
 }
 
 /* Scrollbar hide utility */
