@@ -2949,7 +2949,8 @@ function applyFilters() {
         if (hour !== null) {
           if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
           if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
-          if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+          // Noche: 18:00 a 06:00 (cubre madrugada y noche)
+          if (currentFilters.time.includes('evening') && (hour >= 18 || hour < 6)) matchesTime = true;
         }
       }
       
@@ -3181,7 +3182,8 @@ function updateKPIs() {
         if (hour !== null) {
           if (currentFilters.time.includes('morning') && hour >= 6 && hour < 12) matchesTime = true;
           if (currentFilters.time.includes('afternoon') && hour >= 12 && hour < 18) matchesTime = true;
-          if (currentFilters.time.includes('evening') && hour >= 18 && hour < 24) matchesTime = true;
+          // Noche: 18:00 a 06:00 (cubre madrugada y noche)
+          if (currentFilters.time.includes('evening') && (hour >= 18 || hour < 6)) matchesTime = true;
         }
       }
       
