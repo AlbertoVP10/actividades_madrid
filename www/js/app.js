@@ -1693,18 +1693,6 @@ function updateDateShortcutStyles() {
     }
   });
 }
-    };
-    
-    if (start.getTime() === end.getTime()) {
-      rangeInfo.textContent = `Fecha: ${formatDate(start)}`;
-    } else {
-      rangeInfo.textContent = `Rango: ${formatDate(start)} - ${formatDate(end)}`;
-    }
-    rangeInfo.classList.remove('hidden');
-  } else {
-    rangeInfo.classList.add('hidden');
-  }
-}
 
 function getDateFilterRange() {
   const today = new Date();

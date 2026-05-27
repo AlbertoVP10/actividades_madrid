@@ -1117,18 +1117,18 @@
         <div id="filterField_date" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">📅 Fecha</label>
           
-          <!-- Atajos en grid 2x2 -->
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="setDateShortcut('today')" data-shortcut="today" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+          <!-- Atajos horizontales tipo pills -->
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button type="button" onclick="setDateShortcut('today')" data-shortcut="today" class="date-shortcut px-5 py-2.5 rounded-full border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container whitespace-nowrap">
               Hoy
             </button>
-            <button type="button" onclick="setDateShortcut('tomorrow')" data-shortcut="tomorrow" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+            <button type="button" onclick="setDateShortcut('tomorrow')" data-shortcut="tomorrow" class="date-shortcut px-5 py-2.5 rounded-full border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container whitespace-nowrap">
               Mañana
             </button>
-            <button type="button" onclick="setDateShortcut('weekend')" data-shortcut="weekend" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
-              Este finde
+            <button type="button" onclick="setDateShortcut('weekend')" data-shortcut="weekend" class="date-shortcut px-5 py-2.5 rounded-full border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container whitespace-nowrap">
+              Este fin de semana
             </button>
-            <button type="button" onclick="setDateShortcut('7days')" data-shortcut="7days" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
+            <button type="button" onclick="setDateShortcut('7days')" data-shortcut="7days" class="date-shortcut px-5 py-2.5 rounded-full border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container whitespace-nowrap">
               7 días
             </button>
           </div>
