@@ -2143,16 +2143,19 @@ function toggleAudienceButton(button, audience) {
 function openFiltersView() {
   const filtersView = document.getElementById('filtersView');
   if (!filtersView) return;
-  
+
   // Guarda el tab activo de la navbar (no la vista anterior)
   const activeTab = document.querySelector('.bottom-tab.bg-primary-container');
   filtersView.dataset.activeTab = activeTab ? activeTab.dataset.tab : 'home';
-  
+
   showView('filters');
   filtersView.scrollTop = 0;
-  
+
   // Mostrar activeFiltersBar si hay filtros activos
   updateActiveFilterChips();
+
+  // Actualizar indicadores de filtros en la lista
+  updateFilterIndicators();
 }
 
 function closeFiltersView() {
@@ -3053,6 +3056,9 @@ function applyFilters() {
 
   // Update active filter chips
   updateActiveFilterChips();
+
+  // Update filter indicators in filters list
+  updateFilterIndicators();
 
   // Update map markers if in map view
   if (currentView === 'map' && map) {
@@ -4791,6 +4797,105 @@ function clearFilters() {
   
   // Force update of active filter chips to ensure bar is hidden when empty
   updateActiveFilterChips();
+}
+
+// Update filter indicators in the filters list view
+function updateFilterIndicators() {
+  // Category indicator
+  const catIndicator = document.getElementById('filterIndicator_category');
+  if (catIndicator) {
+    const count = multiSelectState.category.length;
+    if (count > 0) {
+      catIndicator.textContent = count === 1 ? '1 seleccionada' : `${count} seleccionadas`;
+      catIndicator.classList.remove('hidden');
+    } else {
+      catIndicator.classList.add('hidden');
+    }
+  }
+  
+  // District indicator
+  const distIndicator = document.getElementById('filterIndicator_district');
+  if (distIndicator) {
+    const count = multiSelectState.district.length;
+    if (count > 0) {
+      distIndicator.textContent = count === 1 ? '1 seleccionado' : `${count} seleccionados`;
+      distIndicator.classList.remove('hidden');
+    } else {
+      distIndicator.classList.add('hidden');
+    }
+  }
+  
+  // Audience indicator
+  const audIndicator = document.getElementById('filterIndicator_audience');
+  if (audIndicator) {
+    const count = multiSelectState.audience.length;
+    if (count > 0) {
+      audIndicator.textContent = count === 1 ? '1 seleccionado' : `${count} seleccionados`;
+      audIndicator.classList.remove('hidden');
+    } else {
+      audIndicator.classList.add('hidden');
+    }
+  }
+  
+  // Time indicator
+  const timeIndicator = document.getElementById('filterIndicator_time');
+  if (timeIndicator) {
+    const count = multiSelectState.time.length;
+    if (count > 0) {
+      timeIndicator.textContent = count === 1 ? '1 seleccionado' : `${count} seleccionados`;
+      timeIndicator.classList.remove('hidden');
+    } else {
+      timeIndicator.classList.add('hidden');
+    }
+  }
+  
+  // Date indicator
+  const dateIndicator = document.getElementById('filterIndicator_date');
+  if (dateIndicator) {
+    if (dateFilterState.mode === 'picker' && dateFilterState.pickerStart) {
+      const start = dateFilterState.pickerStart;
+      const end = dateFilterState.pickerEnd || start;
+      const formatDate = (date) => date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+      
+      if (start.getTime() === end.getTime()) {
+        dateIndicator.textContent = formatDate(start);
+      } else {
+        dateIndicator.textContent = `${formatDate(start)} - ${formatDate(end)}`;
+      }
+      dateIndicator.classList.remove('hidden');
+    } else if (dateFilterState.mode === 'shortcut' && dateFilterState.shortcut !== 'all') {
+      const shortcutLabels = {
+        'today': 'Hoy',
+        'tomorrow': 'Mañana',
+        'weekend': 'Este finde',
+        '7days': '7 días'
+      };
+      dateIndicator.textContent = shortcutLabels[dateFilterState.shortcut] || '';
+      dateIndicator.classList.remove('hidden');
+    } else {
+      dateIndicator.classList.add('hidden');
+    }
+  }
+  
+  // Duration indicator
+  const durIndicator = document.getElementById('filterIndicator_duration');
+  if (durIndicator) {
+    const min = durationFilterState.min;
+    const max = durationFilterState.max;
+    
+    // Only show if not default range (1-30)
+    if (min > 1 || max < 30) {
+      if (min === max) {
+        durIndicator.textContent = min === 1 ? '1 día' : `${min} días`;
+      } else {
+        const maxText = max >= 30 ? '30+' : max;
+        durIndicator.textContent = `${min}-${maxText} días`;
+      }
+      durIndicator.classList.remove('hidden');
+    } else {
+      durIndicator.classList.add('hidden');
+    }
+  }
 }
 
 // Close sort modal on outside click

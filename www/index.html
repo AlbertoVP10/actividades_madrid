@@ -983,11 +983,14 @@
         </button>
 
         <button type="button" onclick="openFilterField('category')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
-        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">category</span>
             <span class="text-sm">Categoría</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_category" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('district')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -995,7 +998,10 @@
             <span class="material-symbols-outlined text-primary">place</span>
             <span class="text-sm">Distrito</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_district" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('audience')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -1003,7 +1009,10 @@
             <span class="material-symbols-outlined text-primary">people</span>
             <span class="text-sm">Público</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_audience" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('date')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -1011,7 +1020,10 @@
             <span class="material-symbols-outlined text-primary">calendar_month</span>
             <span class="text-sm">Fecha</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_date" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('time')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -1019,7 +1031,10 @@
             <span class="material-symbols-outlined text-primary">schedule</span>
             <span class="text-sm">Horario</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_time" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button type="button" onclick="openFilterField('duration')" class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
@@ -1027,7 +1042,10 @@
             <span class="material-symbols-outlined text-primary">timer</span>
             <span class="text-sm">Duración</span>
           </div>
-          <span class="material-symbols-outlined text-primary">chevron_right</span>
+          <div class="flex items-center gap-2">
+            <span id="filterIndicator_duration" class="text-label-sm text-primary font-medium hidden"></span>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </div>
         </button>
 
         <button class="w-full flex items-center bg-on-primary justify-between p-2 hover:bg-surface shadow-sm shadow-primary/20">
