@@ -931,7 +931,7 @@
     </div>
 
   <!-- Filters View (Hidden by default) -->
-  <div id="filtersView" class="hidden pb-4 space-y-4 px-2">
+  <div id="filtersView" class="hidden pb-4 space-y-4 px-2" style="padding-bottom: 100px;">
     <div class="top-0 z-10 bg-background border-b border-surface-variant/20 flex items-center gap-2">
       <button onclick="toggleFilters()" class="hover:bg-surface-variant rounded-full" aria-label="Volver" style="display:inline-flex;align-items:center;justify-content:center;">
         <span class="material-symbols-outlined">arrow_back_ios</span>
@@ -940,20 +940,6 @@
     </div>
 
     <div class="space-y-4 pt-3">
-      <div class="flex items-center justify-between gap-2">
-        <button onclick="toggleFilters()" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-container hover:text-on-primary-container transition-colors flex flex-col items-center justify-center leading-tight">
-          <span class="flex items-center gap-1">
-            <span class="material-symbols-outlined text-base">check</span>
-            Aplicar
-          </span>
-          <span class="text-xs opacity-90">(<span id="filterResultCount">0</span>)</span>
-        </button>
-        <button onclick="clearFilters()" class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-variant transition-colors flex items-center justify-center gap-1">
-          <span class="material-symbols-outlined text-base">delete</span>
-          Limpiar
-        </button>
-      </div>
-
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h3 class="font-title-md text-title-md text-on-surface mb-2">Favoritos</h3>
@@ -1071,6 +1057,24 @@
             <input id="favoritesOnly" type="checkbox" class="sr-only peer" onchange="applyFilters()">
             <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de acciones fija inferior -->
+    <div id="filtersActionBar" class="fixed bottom-[80px] left-0 right-0 z-[90] bg-surface/95 backdrop-blur-sm border-t border-outline-variant/30 px-4 py-3 shadow-lg">
+      <div class="flex items-center justify-between gap-3 max-w-lg mx-auto">
+        <!-- Botón Limpiar - diseño minimalista -->
+        <button onclick="clearFilters()" class="flex items-center gap-2 px-4 py-3 text-on-surface-variant hover:text-error transition-colors">
+          <span class="material-symbols-outlined text-base">delete_outline</span>
+          <span class="text-sm font-medium">Limpiar</span>
+        </button>
+        
+        <!-- Botón Aplicar - diseño destacado -->
+        <button onclick="toggleFilters()" class="flex-1 bg-primary hover:bg-primary-light text-on-primary px-6 py-3 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-md">
+          <span class="material-symbols-outlined text-base">check</span>
+          <span>Aplicar</span>
+          <span class="text-xs opacity-90">(<span id="filterResultCountBottom">0</span>)</span>
         </button>
       </div>
     </div>

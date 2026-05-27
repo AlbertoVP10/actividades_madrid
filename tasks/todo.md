@@ -1,63 +1,66 @@
-# Tarea: Migrar procesamiento de actividades de app.js al notebook
+# Tarea: Reubicación de Botones de Acción en Pantalla de Filtros
 
-## Objetivo
-Mover todo el procesamiento de la lista de actividades que actualmente se hace en `www/js/app.js` al notebook `prueba.ipynb`, de forma que el notebook:
-1. Descargue las actividades de Madrid
-2. Procese y filtre las actividades (igual que hace app.js)
-3. Suba el archivo procesado a Firebase Storage
+## Plan de Implementación
 
-## Análisis de app.js - Funciones a migrar
+### 1. Análisis de la estructura actual
+- [x] Localizar el componente FiltersView en index.html
+- [x] Identificar los botones "Aplicar" y "Limpiar" actuales
+- [x] Entender el layout y estructura del contenedor de filtros
 
-### 1. Extracción y transformación de datos
-- [x] `extractCategory(type)` - Extrae categoría legible del tipo de evento
-- [x] `extractDistrict(districtUrl)` - Extrae nombre del distrito desde URL
+### 2. Cambios a realizar
 
-### 2. Filtrado de actividades
-- [x] Filtrar actividades pasadas (fecha >= hoy)
-- [x] Filtros por categoría, distrito, audiencia, fecha, hora
-- [x] Filtro de búsqueda por texto
-- [x] Filtro "solo gratuitas"
-- [x] Filtro de favoritos
-- [x] Filtro de proximidad (cerca de ubicación)
+#### A. Eliminar botones de la posición superior
+- [x] Eliminar el div que contiene los botones "Aplicar" y "Limpiar" de la parte superior del filtersView
 
-### 3. Ordenamiento
-- [x] Por fecha reciente
-- [x] Por fecha antigua
-- [x] Por precio (gratuitas primero)
-- [x] Por distancia (si hay ubicación)
+#### B. Crear barra de acciones fija inferior
+- [x] Crear un nuevo contenedor sticky/fixed en la parte inferior
+- [x] Posicionar por encima del menú de navegación base (bottom nav)
+- [x] Asegurar que permanezca visible durante el scroll
 
-### 4. Cálculos adicionales
-- [x] `calculateDistance()` - Calcular distancia entre coordenadas
-- [x] Añadir campo `distance` a cada actividad
+#### C. Estilizar botones según especificaciones
+- [x] Botón "Limpiar": diseño minimalista (texto + icono de papelera), sin fondo gris
+- [x] Botón "Aplicar": mantener color salmón/coral, texto blanco, esquinas redondeadas
+- [x] Botón "Aplicar": mostrar contador dinámico de resultados
 
-### 5. Estructura de datos final
-Cada actividad debe tener:
-- id, title, description, category, location, district
-- lat, lon, date, endDate, time
-- free, price, audience, link, street
-- distance (opcional, si se calcula)
+#### D. Ajustar área de scroll
+- [x] Agregar padding/margin inferior al contenedor de filtros para evitar que el último elemento quede tapado
 
-## Implementación
+### 3. Criterios de Aceptación
+- [x] Los botones ya no son visibles en la parte superior
+- [x] La barra de botones permanece fija en la parte inferior durante el scroll
+- [x] El botón "Limpiar" se visualiza como texto plano con icono
+- [x] El botón "Aplicar" mantiene su estilo y actualiza el contador dinámicamente
+- [x] El último elemento de la lista es visible completamente
+- [x] La funcionalidad de los botones es la misma
 
-### Notebook - Celdas a añadir/modificar:
+### 4. Testing
+- [x] Verificar comportamiento en scroll
+- [x] Verificar actualización del contador
+- [x] Verificar funcionalidad de limpiar filtros
+- [x] Verificar funcionalidad de aplicar filtros
 
-1. **Celda de descarga** (ya existe)
-   - Descargar JSON de datos.madrid.es
+## Resumen de Cambios
 
-2. **Celda de procesamiento** (NUEVA)
-   - Funciones extract_category() y extract_district()
-   - Filtrado de actividades pasadas
-   - Normalización de datos
-   - Añadir campos calculados
+### Archivos modificados:
+1. **www/index.html**
+   - Eliminados los botones "Aplicar" y "Limpiar" de la parte superior del filtersView
+   - Agregada barra de acciones fija inferior (`#filtersActionBar`) con:
+     - Botón "Limpiar": diseño minimalista (texto + icono `delete_outline`)
+     - Botón "Aplicar": color primario salmón/coral (`bg-primary`), texto blanco, esquinas redondeadas (`rounded-full`)
+   - Agregado padding inferior de 100px al contenedor filtersView para evitar que el contenido quede tapado
+   - La barra está posicionada en `bottom-[80px]` para quedar justo encima del menú de navegación
 
-3. **Celda de guardado local** (ya existe)
-   - Guardar actividades.json procesado
+2. **www/js/app.js**
+   - Actualizada función `applyFilters()` para sincronizar el contador de resultados en ambos elementos (`filterResultCount` y `filterResultCountBottom`)
+   - Actualizada función `openFiltersView()` para mostrar la barra de acciones al abrir la vista de filtros
+   - Actualizada función `closeFiltersView()` para ocultar la barra de acciones al cerrar la vista de filtros
+   - Actualizada función `openFilterField()` para ocultar la barra de acciones cuando se navega a un campo específico de filtro
 
-4. **Celda de subida a Firebase** (ya existe)
-   - Subir archivo a Firebase Storage
-
-## Notas
-- El notebook ya tiene código para descargar y subir a Firebase
-- Falta implementar las funciones de procesamiento equivalentes a app.js
-- Las fechas deben manejarse como objetos datetime (no timestamps JS)
-- Las coordenadas deben ser float
+### Características implementadas:
+- ✅ Barra fija en la parte inferior (z-index 90, por encima del contenido pero debajo del bottom nav)
+- ✅ Fondo con efecto blur para mejor legibilidad sobre el contenido
+- ✅ Botón "Limpiar" con diseño minimalista (solo texto e icono, sin fondo)
+- ✅ Botón "Aplicar" con color primario del tema (`#F08080`), texto blanco, bordes redondeados
+- ✅ Contador dinámico de resultados en tiempo real
+- ✅ Padding inferior ajustado para que el último elemento sea visible
+- ✅ Comportamiento responsive (max-width en la barra para pantallas grandes)

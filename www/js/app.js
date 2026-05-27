@@ -1220,6 +1220,12 @@ function openFilterField(field) {
   // Ocultar activeFiltersBar cuando se abre filterFieldView
   const filtersBar = document.getElementById('activeFiltersBar');
   if (filtersBar) filtersBar.classList.add('hidden');
+  
+  // Ocultar la barra de acciones fija inferior
+  const actionBar = document.getElementById('filtersActionBar');
+  if (actionBar) {
+    actionBar.classList.add('hidden');
+  }
 }
 
 function renderFilterFieldContent(field) {
@@ -2156,6 +2162,12 @@ function openFiltersView() {
 
   // Actualizar indicadores de filtros en la lista
   updateFilterIndicators();
+  
+  // Mostrar la barra de acciones fija inferior
+  const actionBar = document.getElementById('filtersActionBar');
+  if (actionBar) {
+    actionBar.classList.remove('hidden');
+  }
 }
 
 function closeFiltersView() {
@@ -2166,6 +2178,12 @@ function closeFiltersView() {
   const activeTab = filtersView.dataset.activeTab || 'home';
   setBottomTab(activeTab);
   applyFilters();
+  
+  // Ocultar la barra de acciones fija inferior
+  const actionBar = document.getElementById('filtersActionBar');
+  if (actionBar) {
+    actionBar.classList.add('hidden');
+  }
 }
 
 function toggleFilters() {
@@ -3042,10 +3060,14 @@ function applyFilters() {
   renderActivities();
   renderStats();
   
-  // Update filter result count in button
+  // Update filter result count in buttons
   const filterCountEl = document.getElementById('filterResultCount');
   if (filterCountEl) {
     filterCountEl.textContent = filteredActivities.length;
+  }
+  const filterCountBottomEl = document.getElementById('filterResultCountBottom');
+  if (filterCountBottomEl) {
+    filterCountBottomEl.textContent = filteredActivities.length;
   }
   
   // Sync tabs with current filters
