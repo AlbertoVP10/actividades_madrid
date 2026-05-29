@@ -10,7 +10,7 @@
   gap: 0.25rem;
   padding: 0.5rem 0.5rem;
   border-radius: 0.5rem;
-  border: 2px solid var(--color-outline-variant, #e0e0e0) !important;
+  border: 2px solid #e4beb4 !important;
   background-color: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
