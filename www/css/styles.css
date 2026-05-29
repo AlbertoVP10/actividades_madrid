@@ -1,6 +1,49 @@
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+/* Clase reutilizable para botones de filtros */
+.filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--color-outline-variant, #e0e0e0);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  border-color: var(--color-primary, #F08080);
+  background-color: var(--color-primary-container, #F8AD9D);
+}
+
+.filter-button .material-symbols-outlined {
+  color: var(--color-primary, #F08080);
+  font-size: 1.25rem;
+}
+
+.filter-button .filter-button-text {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-on-surface, #1f2937);
+  text-align: left;
+}
+
+/* Estado activo/seleccionado */
+.filter-button.active,
+.filter-button.bg-primary-container {
+  background-color: var(--color-primary-container, #F8AD9D);
+  border-color: var(--color-primary, #F08080);
+}
+
+.filter-button.active .filter-button-text,
+.filter-button.bg-primary-container .filter-button-text {
+  color: var(--color-on-primary-container, #5b4039);
+}
 .material-symbols-outlined-filled {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
