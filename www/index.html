@@ -1299,9 +1299,20 @@
         </div>
       </div>
 
-      <div class="flex gap-2">
-        <button type="button" onclick="applyFilterField()" class="flex-1 py-3 rounded-xl bg-primary text-white font-medium">Aplicar</button>
-        <button type="button" onclick="resetFilterField()" class="flex-1 py-3 rounded-xl bg-surface-container-high text-on-surface font-medium">Borrar</button>
+      <!-- Botones de acción - mismo formato que filtersView -->
+      <div class="flex items-center justify-between gap-3 pt-4 border-t border-outline-variant">
+        <!-- Botón Borrar - diseño minimalista -->
+        <button type="button" onclick="resetFilterField()" class="flex items-center gap-2 px-4 py-3 text-on-surface-variant hover:text-error transition-colors">
+          <span class="material-symbols-outlined text-base">delete_outline</span>
+          <span class="text-sm font-medium">Borrar</span>
+        </button>
+        
+        <!-- Botón Aplicar - diseño destacado -->
+        <button type="button" onclick="applyFilterField()" class="bg-primary hover:bg-primary-light text-on-primary px-6 py-3 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-md">
+          <span class="material-symbols-outlined text-base">check</span>
+          <span>Aplicar</span>
+          <span class="text-xs opacity-90">(<span id="filterFieldResultCount">0</span>)</span>
+        </button>
       </div>
     </div>
   </div>

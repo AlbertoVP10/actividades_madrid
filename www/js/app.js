@@ -3069,6 +3069,11 @@ function applyFilters() {
   if (filterCountBottomEl) {
     filterCountBottomEl.textContent = filteredActivities.length;
   }
+  // Update filter field result count
+  const filterFieldResultCountEl = document.getElementById('filterFieldResultCount');
+  if (filterFieldResultCountEl) {
+    filterFieldResultCountEl.textContent = filteredActivities.length;
+  }
   
   // Sync tabs with current filters
   syncTabsWithFilters();
