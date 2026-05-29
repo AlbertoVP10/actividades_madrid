@@ -1817,6 +1817,7 @@ function resetFilterField() {
   if (currentFilterField === 'search') {
     const searchInput = document.getElementById('filterSearchInput');
     if (searchInput) searchInput.value = '';
+    currentFilters.search = '';
   } else if (currentFilterField === 'date') {
     clearDateFilter();
   } else if (['freeOnly', 'favoritesOnly'].includes(currentFilterField)) {
@@ -1868,6 +1869,7 @@ function resetFilterField() {
     if (minSlider) minSlider.value = 1;
     if (maxSlider) maxSlider.value = 30;
     updateDurationSlider();
+    updateDurationShortcutStyles();
   } else if (currentFilterField === 'date') {
     clearDateFilter();
   }
