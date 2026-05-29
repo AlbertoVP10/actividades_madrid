@@ -1977,16 +1977,16 @@ function populateFilters() {
   categories.forEach(cat => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'flex items-center justify-left gap-1 px-2 py-2 rounded-lg border-2 border-outline-variant text-center cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    button.className = 'filter-button';
     
     // Add icon
     const iconSpan = document.createElement('span');
-    iconSpan.className = 'material-symbols-outlined text-primary';
+    iconSpan.className = 'material-symbols-outlined';
     iconSpan.textContent = categoryIcons[cat] || 'category';
     button.appendChild(iconSpan);
     
     const textSpan = document.createElement('span');
-    textSpan.className = 'font-label-lg text-label-lg text-on-surface';
+    textSpan.className = 'filter-button-text';
     textSpan.textContent = cat;
     button.appendChild(textSpan);
     
@@ -2006,16 +2006,16 @@ function populateFilters() {
   districts.forEach(d => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'flex items-center justify-left gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant text-left cursor-pointer transition-all hover:border-primary hover:bg-primary-container';
+    button.className = 'filter-button';
     
     // Add icon
     const iconSpan = document.createElement('span');
-    iconSpan.className = 'material-symbols-outlined text-primary';
+    iconSpan.className = 'material-symbols-outlined';
     iconSpan.textContent = 'location_on';
     button.appendChild(iconSpan);
     
     const textSpan = document.createElement('span');
-    textSpan.className = 'font-label-lg text-label-lg text-on-surface';
+    textSpan.className = 'filter-button-text';
     textSpan.textContent = d;
     button.appendChild(textSpan);
     
