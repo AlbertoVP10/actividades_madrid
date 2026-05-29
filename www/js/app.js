@@ -1821,9 +1821,11 @@ function resetFilterField() {
   if (!currentFilterField) return;
 
   if (currentFilterField === 'search') {
-    const searchInput = document.getElementById('filterSearchInput');
-    if (searchInput) searchInput.value = '';
     currentFilters.search = '';
+    const headerSearchInput = document.getElementById('searchInput');
+    const filterSearchInput = document.getElementById('filterSearchInput');
+    if (headerSearchInput) headerSearchInput.value = '';
+    if (filterSearchInput) filterSearchInput.value = '';
   } else if (currentFilterField === 'date') {
     clearDateFilter();
   } else if (['freeOnly', 'favoritesOnly'].includes(currentFilterField)) {
