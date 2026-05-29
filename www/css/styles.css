@@ -10,15 +10,15 @@
   gap: 0.25rem;
   padding: 0.5rem 0.5rem;
   border-radius: 0.5rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e0e0e0 !important;
   background-color: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .filter-button:hover {
-  border-color: #F08080;
-  background-color: #F8AD9D;
+  border-color: #F08080 !important;
+  background-color: #F8AD9D !important;
 }
 
 .filter-button .material-symbols-outlined {
@@ -36,8 +36,8 @@
 /* Estado activo/seleccionado */
 .filter-button.active,
 .filter-button.bg-primary-container {
-  background-color: #F8AD9D;
-  border-color: #F08080;
+  background-color: #F8AD9D !important;
+  border-color: #F08080 !important;
 }
 
 .filter-button.active .filter-button-text,
