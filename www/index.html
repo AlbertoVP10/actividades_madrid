@@ -1142,19 +1142,23 @@
         <div id="filterField_date" class="field-panel hidden space-y-4">
           <label class="text-label-sm text-on-surface-variant">📅 Fecha</label>
           
-          <!-- Atajos en grid 2x2 -->
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="setDateShortcut('today')" data-shortcut="today" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
-              Hoy
+          <!-- Atajos en grid 2x2 - mismo formato que categoría -->
+          <div class="filter-grid">
+            <button type="button" onclick="setDateShortcut('today')" data-shortcut="today" class="date-shortcut flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">today</span>
+              <span class="font-label-lg text-label-lg text-on-surface">Hoy</span>
             </button>
-            <button type="button" onclick="setDateShortcut('tomorrow')" data-shortcut="tomorrow" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
-              Mañana
+            <button type="button" onclick="setDateShortcut('tomorrow')" data-shortcut="tomorrow" class="date-shortcut flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">event</span>
+              <span class="font-label-lg text-label-lg text-on-surface">Mañana</span>
             </button>
-            <button type="button" onclick="setDateShortcut('weekend')" data-shortcut="weekend" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
-              Este fin de semana
+            <button type="button" onclick="setDateShortcut('weekend')" data-shortcut="weekend" class="date-shortcut flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">calendar_view_week</span>
+              <span class="font-label-lg text-label-lg text-on-surface">Fin de semana</span>
             </button>
-            <button type="button" onclick="setDateShortcut('7days')" data-shortcut="7days" class="date-shortcut px-4 py-3 rounded-xl border border-outline-variant text-label-md transition-all bg-surface-container-high text-on-surface hover:border-primary hover:bg-primary-container">
-              7 días
+            <button type="button" onclick="setDateShortcut('7days')" data-shortcut="7days" class="date-shortcut flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-outline-variant cursor-pointer transition-all hover:border-primary hover:bg-primary-container">
+              <span class="material-symbols-outlined text-primary">date_range</span>
+              <span class="font-label-lg text-label-lg text-on-surface">7 días</span>
             </button>
           </div>
           

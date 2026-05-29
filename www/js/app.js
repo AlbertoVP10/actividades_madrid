@@ -1695,10 +1695,10 @@ function updateDateShortcutStyles() {
     
     if (isActive) {
       btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
-      btn.classList.remove('bg-surface-container-high', 'text-on-surface');
+      btn.classList.remove('border-outline-variant');
     } else {
       btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
-      btn.classList.add('bg-surface-container-high', 'text-on-surface');
+      btn.classList.add('border-outline-variant');
     }
   });
 }
