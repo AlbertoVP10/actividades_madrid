@@ -1353,6 +1353,9 @@ function updateDurationSlider() {
   
   // Actualizar estilo de atajos
   updateDurationShortcutStyles();
+  
+  // Aplicar filtros para actualizar contador en tiempo real
+  applyFilters();
 }
 
 function updateDurationShortcutStyles() {
@@ -1385,6 +1388,9 @@ function setDurationShortcut(min, max) {
   if (maxSlider) maxSlider.value = max;
   
   updateDurationSlider();
+  
+  // Aplicar filtros para actualizar contador en tiempo real
+  applyFilters();
 }
 
 // ==================== DATE FILTER FUNCTIONS ====================
@@ -1869,7 +1875,6 @@ function resetFilterField() {
     if (minSlider) minSlider.value = 1;
     if (maxSlider) maxSlider.value = 30;
     updateDurationSlider();
-    updateDurationShortcutStyles();
   } else if (currentFilterField === 'date') {
     clearDateFilter();
   }
