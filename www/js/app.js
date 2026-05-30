@@ -5116,8 +5116,8 @@ const categoryColors = {
   'default': '#F3F4F6'
 };
 
-// Icon mapping for categories
-const categoryIcons = {
+// Emoji icon mapping for home cards (different from the existing categoryIcons)
+const homeCategoryEmojis = {
   'Teatro': '🎭',
   'Títeres': '🎪',
   'Música': '🎵',
@@ -5317,7 +5317,7 @@ function renderSeeMoreCard(remainingCount, sectionType) {
 // Render compact card (nearby list)
 function renderCompactCard(activity) {
   const isFavorite = favorites.includes(String(activity.id));
-  const icon = categoryIcons[activity.category] || categoryIcons.default;
+  const icon = homeCategoryEmojis[activity.category] || homeCategoryEmojis.default;
   const bgColor = categoryColors[activity.category] || categoryColors.default;
   const timeText = activity.distance ? `🕒 ${Math.round(activity.distance * 10)} min` : '';
   const locationText = activity.district || activity.location || 'Madrid';
