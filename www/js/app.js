@@ -5067,34 +5067,32 @@ if (isAppEnv && !window.location.hash) {
 // NEW HOME REDESIGN FUNCTIONS
 // ============================================
 
-// Helper function to get activity image URL
+// Default image URL (same as in detail view)
+const DEFAULT_ACTIVITY_IMAGE = 'https://st3.depositphotos.com/1594308/13059/i/450/depositphotos_130595028-stock-photo-dynamic-friends-enjoying-party-and.jpg';
+
+// Helper function to get activity image URL (same logic as detail view)
 function getActivityImage(activity) {
-  // Check if there's an image in the imagenesMap
-  if (activity.app_id && imagenesMap[activity.app_id]) {
-    return imagenesMap[activity.app_id];
+  // Buscar imagen en el mapa de Firebase (usando app_id o id)
+  const activityId = activity.app_id || activity.id;
+  const firebaseImageUrl = imagenesMap[activityId];
+  
+  // Usar imagen de Firebase si existe
+  if (firebaseImageUrl) {
+    return firebaseImageUrl;
   }
+  
   // Check if activity has image property
   if (activity.image) {
     return activity.image;
   }
+  
   // Check if activity has image_url property
   if (activity.image_url) {
     return activity.image_url;
   }
-  // Return default image based on category
-  const categoryImages = {
-    'Teatro': 'category-images/teatro.jpg',
-    'Títeres': 'category-images/titeres.jpg',
-    'Música': 'category-images/musica.jpg',
-    'Talleres': 'category-images/talleres.jpg',
-    'Deporte': 'category-images/deporte.jpg',
-    'Cuentacuentos': 'category-images/cuentos.jpg',
-    'Parques': 'category-images/parques.jpg',
-    'Danza': 'category-images/danza.jpg',
-    'Excursiones': 'category-images/excursiones.jpg',
-    'Medio ambiente': 'category-images/naturaleza.jpg'
-  };
-  return categoryImages[activity.category] || 'splashscreen.jpg';
+  
+  // Return default image (same as detail view)
+  return DEFAULT_ACTIVITY_IMAGE;
 }
 
 // Home state
@@ -5271,7 +5269,7 @@ function renderLargeCard(activity) {
   
   return `
     <div class="home-card-large" onclick="showDetail('${activity.id}')">
-      <img src="${imageUrl}" alt="${activity.title}" class="home-card-large-image" onerror="this.src='splashscreen.jpg'">
+      <img src="${imageUrl}" alt="${activity.title}" class="home-card-large-image" onerror="this.src='${DEFAULT_ACTIVITY_IMAGE}'">
       <div class="home-card-large-overlay">
         ${isFree ? '<span class="home-card-large-badge">GRATIS</span>' : ''}
         <div class="home-card-large-rating">
@@ -5292,7 +5290,7 @@ function renderMediumCard(activity) {
   
   return `
     <div class="home-card-medium" onclick="showDetail('${activity.id}')">
-      <img src="${imageUrl}" alt="${activity.title}" class="home-card-medium-image" onerror="this.src='splashscreen.jpg'">
+      <img src="${imageUrl}" alt="${activity.title}" class="home-card-medium-image" onerror="this.src='${DEFAULT_ACTIVITY_IMAGE}'">
       <div class="home-card-medium-content">
         <h3 class="home-card-medium-title">${activity.title}</h3>
         <p class="home-card-medium-meta">${dateStr} ${distance ? '• ' + distance : ''}</p>
