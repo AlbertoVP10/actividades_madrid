@@ -3100,6 +3100,11 @@ function applyFilters() {
   if (currentView === 'map' && map) {
     updateMapMarkers();
   }
+  
+  // Render new home sections
+  if (typeof renderNewHome === 'function') {
+    renderNewHome();
+  }
 }
 
 // Adjust map size based on filter chips visibility
@@ -4396,6 +4401,12 @@ function showView(view) {
   document.getElementById('infoView').classList.toggle('hidden', view !== 'info');
   document.getElementById('statsView').classList.add('hidden');
   document.getElementById('pagination').classList.toggle('hidden', view !== 'list');
+  
+  // Hide filtered list view when switching to other views
+  const filteredListView = document.getElementById('filteredListView');
+  if (filteredListView && view !== 'filteredList') {
+    filteredListView.classList.add('hidden');
+  }
 
   if (view === 'profile') {
     const profileView = document.getElementById('profileView');
@@ -5051,3 +5062,496 @@ const isAppEnv = typeof cordova !== 'undefined' || (window.webkit && window.webk
 if (isAppEnv && !window.location.hash) {
   history.replaceState({ view: 'home' }, '', '#home');
 }
+
+// ============================================
+// NEW HOME REDESIGN FUNCTIONS
+// ============================================
+
+// Helper function to get activity image URL
+function getActivityImage(activity) {
+  // Check if there's an image in the imagenesMap
+  if (activity.app_id && imagenesMap[activity.app_id]) {
+    return imagenesMap[activity.app_id];
+  }
+  // Check if activity has image property
+  if (activity.image) {
+    return activity.image;
+  }
+  // Check if activity has image_url property
+  if (activity.image_url) {
+    return activity.image_url;
+  }
+  // Return default image based on category
+  const categoryImages = {
+    'Teatro': 'category-images/teatro.jpg',
+    'Títeres': 'category-images/titeres.jpg',
+    'Música': 'category-images/musica.jpg',
+    'Talleres': 'category-images/talleres.jpg',
+    'Deporte': 'category-images/deporte.jpg',
+    'Cuentacuentos': 'category-images/cuentos.jpg',
+    'Parques': 'category-images/parques.jpg',
+    'Danza': 'category-images/danza.jpg',
+    'Excursiones': 'category-images/excursiones.jpg',
+    'Medio ambiente': 'category-images/naturaleza.jpg'
+  };
+  return categoryImages[activity.category] || 'splashscreen.jpg';
+}
+
+// Home state
+let homeQuickFilter = 'HOY';
+let selectedDistrict = localStorage.getItem('selectedDistrict') || 'Retiro';
+
+// Category color mapping for icons
+const categoryColors = {
+  'Teatro': '#FCE4EC',
+  'Títeres': '#E8D5F2',
+  'Música': '#E3F2FD',
+  'Talleres': '#FFF3E0',
+  'Deporte': '#E8F5E9',
+  'Cuentacuentos': '#E1F5FE',
+  'Parques': '#F1F8E9',
+  'Danza': '#F3E5F5',
+  'Excursiones': '#E0F7FA',
+  'Medio ambiente': '#E8F5E9',
+  'default': '#F3F4F6'
+};
+
+// Icon mapping for categories
+const categoryIcons = {
+  'Teatro': '🎭',
+  'Títeres': '🎪',
+  'Música': '🎵',
+  'Talleres': '🎨',
+  'Deporte': '⚽',
+  'Cuentacuentos': '📚',
+  'Parques': '🌳',
+  'Danza': '💃',
+  'Excursiones': '🏔️',
+  'Medio ambiente': '🌿',
+  'default': '📍'
+};
+
+// Quick filter selection
+function selectQuickFilter(filter) {
+  homeQuickFilter = filter;
+  
+  // Update UI
+  document.querySelectorAll('.home-filter-chip').forEach(chip => {
+    if (chip.dataset.filter === filter) {
+      chip.classList.remove('inactive');
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+      chip.classList.add('inactive');
+    }
+  });
+  
+  // Re-render home sections with new filter
+  renderNewHome();
+}
+
+// Get activities for a section
+function getHomeSectionActivities(sectionType, limit = 6) {
+  const now = new Date();
+  const weekendDays = [0, 6]; // Sunday = 0, Saturday = 6
+  const isWeekend = weekendDays.includes(now.getDay());
+  
+  let filtered = [...allActivities];
+  
+  // Apply quick filter date logic
+  if (homeQuickFilter === 'HOY') {
+    const today = now.toISOString().split('T')[0];
+    filtered = filtered.filter(a => a.date && a.date.toISOString().split('T')[0] === today);
+  } else if (homeQuickFilter === 'FINDE') {
+    filtered = filtered.filter(a => {
+      if (!a.date) return false;
+      const day = a.date.getDay();
+      return day === 0 || day === 6;
+    });
+  }
+  
+  // Apply section-specific filters
+  switch (sectionType) {
+    case 'featured':
+      // Destacadas o Fiestas
+      filtered = filtered.filter(a => 
+        a.category === 'Destacadas' || 
+        a.category === 'Fiestas' ||
+        a.featured === true
+      );
+      // Sort by distance if location available, else by date
+      if (userLocation) {
+        filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+      } else {
+        filtered.sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
+      }
+      break;
+      
+    case 'family':
+      // Niñas y niños o Familias
+      filtered = filtered.filter(a => 
+        a.audience?.includes('Niñas y niños') || 
+        a.audience?.includes('Familias') ||
+        a.category === 'Talleres' ||
+        a.category === 'Teatro'
+      );
+      if (userLocation) {
+        filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+      }
+      break;
+      
+    case 'personalized':
+      // Based on user preferences
+      const prefs = JSON.parse(localStorage.getItem('userPreferences') || '[]');
+      const prefMap = {
+        'titeres': 'Teatro',
+        'musica': 'Música',
+        'talleres': 'Talleres',
+        'deporte': 'Deporte',
+        'cuentos': 'Cuentacuentos',
+        'parques': 'Parques',
+        'teatro': 'Teatro',
+        'danza': 'Danza',
+        'excursiones': 'Excursiones'
+      };
+      const preferredCategories = prefs.map(p => prefMap[p]).filter(Boolean);
+      
+      if (preferredCategories.length > 0) {
+        filtered = filtered.filter(a => preferredCategories.includes(a.category));
+      }
+      if (userLocation) {
+        filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+      }
+      break;
+      
+    case 'babies':
+      // 0-4 years: bebé, bebeteca, 0-3, 0 a 4, primera infancia
+      const babyKeywords = ['bebé', 'bebe', 'bebeteca', '0-3', '0 a 4', '0 a 3', 'primera infancia', 'baby'];
+      filtered = filtered.filter(a => {
+        const text = (a.title + ' ' + (a.description || '')).toLowerCase();
+        return babyKeywords.some(kw => text.includes(kw)) ||
+               a.audience?.includes('Bebés') ||
+               a.audience?.includes('0-4');
+      });
+      break;
+      
+    case 'outdoor':
+      // Aire libre: parque, jardín, huerto, plaza, Madrid Río
+      const outdoorKeywords = ['parque', 'jardín', 'jardin', 'huerto', 'plaza', 'madrid río', 'aire libre', 'exterior'];
+      filtered = filtered.filter(a => {
+        const text = (a.title + ' ' + (a.description || '') + ' ' + (a.location || '')).toLowerCase();
+        return outdoorKeywords.some(kw => text.includes(kw)) ||
+               a.category === 'Medio ambiente' ||
+               a.category === 'Deporte' ||
+               a.category === 'Parques';
+      });
+      break;
+      
+    case 'nearby':
+      // Closest activities
+      if (userLocation) {
+        filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+      } else {
+        filtered.sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
+      }
+      break;
+  }
+  
+  return {
+    items: filtered.slice(0, limit),
+    total: filtered.length
+  };
+}
+
+// Render large card (featured)
+function renderLargeCard(activity) {
+  const imageUrl = getActivityImage(activity);
+  const isFree = activity.price === 0 || activity.price === '0' || activity.free;
+  const rating = activity.rating || (Math.random() * (5 - 4) + 4).toFixed(1); // Mock rating if not available
+  
+  return `
+    <div class="home-card-large" onclick="showDetail('${activity.id}')">
+      <img src="${imageUrl}" alt="${activity.title}" class="home-card-large-image" onerror="this.src='splashscreen.jpg'">
+      <div class="home-card-large-overlay">
+        ${isFree ? '<span class="home-card-large-badge">GRATIS</span>' : ''}
+        <div class="home-card-large-rating">
+          <span class="material-symbols-outlined" style="font-size: 14px; color: #F59E0B;">star</span>
+          ${rating}
+        </div>
+        <h3 class="home-card-large-title">${activity.title}</h3>
+      </div>
+    </div>
+  `;
+}
+
+// Render medium card
+function renderMediumCard(activity) {
+  const imageUrl = getActivityImage(activity);
+  const dateStr = activity.date ? activity.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+  const distance = activity.distance ? `${Math.round(activity.distance)} km` : '';
+  
+  return `
+    <div class="home-card-medium" onclick="showDetail('${activity.id}')">
+      <img src="${imageUrl}" alt="${activity.title}" class="home-card-medium-image" onerror="this.src='splashscreen.jpg'">
+      <div class="home-card-medium-content">
+        <h3 class="home-card-medium-title">${activity.title}</h3>
+        <p class="home-card-medium-meta">${dateStr} ${distance ? '• ' + distance : ''}</p>
+      </div>
+    </div>
+  `;
+}
+
+// Render see more card
+function renderSeeMoreCard(remainingCount, sectionType) {
+  return `
+    <div class="home-see-more-card" onclick="openFilteredList('${sectionType}')">
+      <div class="home-see-more-circle">
+        <span class="material-symbols-outlined" style="color: #4A90D9;">arrow_forward</span>
+      </div>
+      <span class="home-see-more-text">Ver más</span>
+      ${remainingCount > 0 ? `<span class="home-see-more-count">${remainingCount} más</span>` : ''}
+    </div>
+  `;
+}
+
+// Render compact card (nearby list)
+function renderCompactCard(activity) {
+  const isFavorite = favorites.includes(String(activity.id));
+  const icon = categoryIcons[activity.category] || categoryIcons.default;
+  const bgColor = categoryColors[activity.category] || categoryColors.default;
+  const timeText = activity.distance ? `🕒 ${Math.round(activity.distance * 10)} min` : '';
+  const locationText = activity.district || activity.location || 'Madrid';
+  
+  return `
+    <div class="home-card-compact" onclick="showDetail('${activity.id}')">
+      <div class="home-card-compact-icon" style="background: ${bgColor};">
+        <span style="font-size: 28px;">${icon}</span>
+      </div>
+      <div class="home-card-compact-content">
+        <h3 class="home-card-compact-title">${activity.title}</h3>
+        <div class="home-card-compact-meta">
+          ${timeText ? `<span class="home-card-compact-time">${timeText}</span>` : ''}
+          <span>📍 ${locationText}</span>
+        </div>
+      </div>
+      <button class="home-card-compact-favorite ${isFavorite ? 'active' : ''}" 
+              onclick="event.stopPropagation(); toggleHomeFavorite('${activity.id}')">
+        <span class="material-symbols-outlined">${isFavorite ? 'favorite' : 'favorite_border'}</span>
+      </button>
+    </div>
+  `;
+}
+
+// Toggle favorite from home
+function toggleHomeFavorite(activityId) {
+  const index = favorites.indexOf(String(activityId));
+  if (index === -1) {
+    favorites.push(String(activityId));
+  } else {
+    favorites.splice(index, 1);
+  }
+  localStorage.setItem('madridFavorites', JSON.stringify(favorites));
+  renderNewHome(); // Re-render to update UI
+}
+
+// Render carousel section
+function renderCarouselSection(containerId, sectionType, cardRenderer, limit = 6) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const { items, total } = getHomeSectionActivities(sectionType, limit);
+  
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="home-empty-state">
+        <span class="material-symbols-outlined home-empty-state-icon">search_off</span>
+        <p>No hay planes disponibles</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = items.map(activity => cardRenderer(activity)).join('');
+  
+  // Add "Ver más" card if there are more items
+  if (total > limit) {
+    html += renderSeeMoreCard(total - limit, sectionType);
+  }
+  
+  container.innerHTML = html;
+}
+
+// Render the new home
+function renderNewHome() {
+  // Update location text
+  const locationText = document.getElementById('homeLocationText');
+  if (locationText) {
+    locationText.textContent = `📍 ${selectedDistrict}, Madrid`;
+  }
+  
+  // Render sections
+  renderCarouselSection('homeFeaturedCarousel', 'featured', renderLargeCard, 5);
+  renderCarouselSection('homeFamilyCarousel', 'family', renderMediumCard, 6);
+  renderCarouselSection('homePersonalizedCarousel', 'personalized', renderMediumCard, 6);
+  renderCarouselSection('homeBabiesCarousel', 'babies', renderMediumCard, 6);
+  renderCarouselSection('homeOutdoorCarousel', 'outdoor', renderMediumCard, 6);
+  
+  // Render nearby list (vertical)
+  const nearbyContainer = document.getElementById('homeNearbyList');
+  if (nearbyContainer) {
+    const { items, total } = getHomeSectionActivities('nearby', 5);
+    if (items.length === 0) {
+      nearbyContainer.innerHTML = `
+        <div class="home-empty-state">
+          <span class="material-symbols-outlined home-empty-state-icon">location_off</span>
+          <p>No hay planes cercanos</p>
+        </div>
+      `;
+    } else {
+      nearbyContainer.innerHTML = items.map(activity => renderCompactCard(activity)).join('');
+    }
+  }
+}
+
+// Filtered list view state
+let filteredListSection = null;
+let filteredListSort = 'distance';
+
+// Open filtered list view
+function openFilteredList(sectionType) {
+  filteredListSection = sectionType;
+  
+  // Hide home, show filtered list
+  document.getElementById('homeView').classList.add('hidden');
+  document.getElementById('filteredListView').classList.remove('hidden');
+  
+  // Set title
+  const titles = {
+    'featured': 'Planes Destacados',
+    'family': 'Planes Familiares y de Niños',
+    'personalized': 'Planes para ti',
+    'babies': 'Para los más Pequeños',
+    'outdoor': 'Al Aire Libre',
+    'nearby': 'Planes Cercanos'
+  };
+  document.getElementById('filteredListTitle').textContent = titles[sectionType] || 'Planes';
+  
+  // Render filter chips
+  renderFilteredListChips(sectionType);
+  
+  // Render content
+  renderFilteredList();
+}
+
+// Close filtered list view
+function closeFilteredList() {
+  document.getElementById('filteredListView').classList.add('hidden');
+  document.getElementById('homeView').classList.remove('hidden');
+  filteredListSection = null;
+}
+
+// Render filter chips for filtered list
+function renderFilteredListChips(sectionType) {
+  const container = document.getElementById('filteredListChips');
+  if (!container) return;
+  
+  const chips = [];
+  
+  // Add quick filter chip
+  const filterLabels = {
+    'HOY': 'Hoy',
+    'FINDE': 'Este finde',
+    'TALLERES': 'Talleres',
+    'TEATRO': 'Teatro',
+    'AIRE_LIBRE': 'Aire libre'
+  };
+  chips.push(`<span class="filtered-list-chip">${filterLabels[homeQuickFilter] || homeQuickFilter}</span>`);
+  
+  // Add district chip
+  chips.push(`<span class="filtered-list-chip">📍 ${selectedDistrict}</span>`);
+  
+  // Add section-specific chips
+  const sectionChips = {
+    'featured': ['Destacadas'],
+    'family': ['Familias', 'Niños'],
+    'personalized': ['Personalizado'],
+    'babies': ['0-4 años'],
+    'outdoor': ['Aire libre'],
+    'nearby': ['Cercanos']
+  };
+  
+  if (sectionChips[sectionType]) {
+    sectionChips[sectionType].forEach(chip => {
+      chips.push(`<span class="filtered-list-chip">${chip}</span>`);
+    });
+  }
+  
+  container.innerHTML = chips.join('');
+}
+
+// Render filtered list content
+function renderFilteredList() {
+  const container = document.getElementById('filteredListContent');
+  if (!container || !filteredListSection) return;
+  
+  // Get all activities for this section (no limit)
+  const { items } = getHomeSectionActivities(filteredListSection, 1000);
+  
+  // Apply sorting
+  let sorted = [...items];
+  if (filteredListSort === 'distance' && userLocation) {
+    sorted.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+  } else if (filteredListSort === 'recent') {
+    sorted.sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
+  } else if (filteredListSort === 'rating') {
+    sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  }
+  
+  if (sorted.length === 0) {
+    container.innerHTML = `
+      <div class="home-empty-state">
+        <span class="material-symbols-outlined home-empty-state-icon">search_off</span>
+        <p>No se encontraron planes con estos filtros</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = sorted.map(activity => renderCompactCard(activity)).join('');
+}
+
+// Sort filtered list
+function sortFilteredList() {
+  const select = document.getElementById('filteredListSort');
+  if (select) {
+    filteredListSort = select.value;
+    renderFilteredList();
+  }
+}
+
+// Show notifications
+function showNotifications() {
+  // TODO: Implement notifications view
+  alert('Notificaciones: Próximamente');
+}
+
+// Override the existing renderHome function to use new design
+const originalRenderHome = renderHome;
+renderHome = function() {
+  // Call the new home renderer
+  renderNewHome();
+};
+
+// Initialize new home on load
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait for activities to load
+  const checkAndRender = setInterval(() => {
+    if (allActivities.length > 0) {
+      clearInterval(checkAndRender);
+      renderNewHome();
+    }
+  }, 100);
+  
+  // Stop checking after 10 seconds
+  setTimeout(() => clearInterval(checkAndRender), 10000);
+});

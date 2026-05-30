@@ -574,47 +574,137 @@
     </div>
   </div>
   
-  <!-- Home View -->
-  <!-- Primary views (bottom tabs) -->
-  <div id="homeView" class="space-y-4 hidden">
-    <!-- Indicador de fuente de datos -->
-    <div class="flex justify-end px-2">
-      <span id="homeSourceLabel" class="text-label-sm text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full">🏛️ Madrid</span>
-    </div>
-    <div class="bg-surface-container-high rounded-3xl p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <p class="text-label-sm text-on-surface-variant">Para ti</p>
-          <h2 class="font-title-md text-title-md">Recomendado según tus preferencias</h2>
-        </div>
+  <!-- Home View - Redesigned -->
+  <div id="homeView" class="hidden pb-24">
+    <!-- Header: Greeting & Notifications -->
+    <div class="home-header">
+      <div class="flex items-center justify-between">
+        <h1 class="home-greeting">¡Hola, Familia! 👋</h1>
+        <button class="home-notification-btn" onclick="showNotifications()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="home-notification-badge" id="notificationBadge"></span>
+        </button>
       </div>
-      <div id="homeRecommended" class="grid gap-3"></div>
-      <div class="mt-4 flex justify-end">
-        <button onclick="viewAllHomeSection('recommended')" class="text-primary font-medium hover:underline">Ver todos</button>
-      </div>
-    </div>
-
-    <div class="bg-surface-container-high rounded-3xl p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <p class="text-label-sm text-on-surface-variant">Favorito de los usuarios</p>
-          <h2 class="font-title-md text-title-md">Lo que más guardan</h2>
-        </div>
-      </div>
-      <div id="homePopular" class="grid gap-3"></div>
-      <div class="mt-4 flex justify-end">
-        <button onclick="viewAllHomeSection('popular')" class="text-primary font-medium hover:underline">Ver todos</button>
+      
+      <!-- Location Selector -->
+      <div class="home-location-selector" onclick="openLocationModal()">
+        <span class="material-symbols-outlined text-primary" style="font-size: 18px;">location_on</span>
+        <span class="home-location-text">
+          <span class="home-location-district" id="homeLocationText">📍 Retiro, Madrid</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">expand_more</span>
+        </span>
       </div>
     </div>
 
-    <div class="bg-surface-container-high rounded-3xl p-4">
-      <div class="flex items-center justify-between mb-3">
+    <!-- Quick Filters -->
+    <div class="home-quick-filters">
+      <button class="home-filter-chip active" data-filter="HOY" onclick="selectQuickFilter('HOY')">HOY</button>
+      <button class="home-filter-chip inactive" data-filter="FINDE" onclick="selectQuickFilter('FINDE')">ESTE FINDE</button>
+      <button class="home-filter-chip inactive" data-filter="TALLERES" onclick="selectQuickFilter('TALLERES')">TALLERES</button>
+      <button class="home-filter-chip inactive" data-filter="TEATRO" onclick="selectQuickFilter('TEATRO')">TEATRO</button>
+      <button class="home-filter-chip inactive" data-filter="AIRE_LIBRE" onclick="selectQuickFilter('AIRE_LIBRE')">AIRE LIBRE</button>
+    </div>
+
+    <!-- Section 1: Planes Destacados -->
+    <div class="home-section">
+      <div class="home-section-header">
         <div>
-          <p class="text-label-sm text-on-surface-variant">Descubrimientos</p>
-          <h2 class="font-title-md text-title-md">Nuevos eventos para explorar</h2>
+          <h2 class="home-section-title">Planes Destacados</h2>
         </div>
+        <button class="home-see-all" onclick="openFilteredList('featured')">Ver todo</button>
       </div>
-      <div id="homeDiscoveries" class="grid gap-3"></div>
+      <div class="home-carousel" id="homeFeaturedCarousel">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- Section 2: Planes Familiares y de Niños -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <div>
+          <h2 class="home-section-title">Planes Familiares y de Niños</h2>
+        </div>
+        <button class="home-see-all" onclick="openFilteredList('family')">Ver todo</button>
+      </div>
+      <div class="home-carousel" id="homeFamilyCarousel">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- Section 3: Planes para ti ✨ -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <div>
+          <h2 class="home-section-title">Planes para ti ✨</h2>
+          <p class="home-section-subtitle">Personalizado</p>
+        </div>
+        <button class="home-see-all" onclick="openFilteredList('personalized')">Ver todo</button>
+      </div>
+      <div class="home-carousel" id="homePersonalizedCarousel">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- Section 4: Para los más Pequeños (0 a 4 años) -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <div>
+          <h2 class="home-section-title">Para los más Pequeños (0 a 4 años) 👶</h2>
+        </div>
+        <button class="home-see-all" onclick="openFilteredList('babies')">Ver todo</button>
+      </div>
+      <div class="home-carousel" id="homeBabiesCarousel">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- Section 5: Al Aire Libre -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <div>
+          <h2 class="home-section-title">Al Aire Libre 🌳</h2>
+        </div>
+        <button class="home-see-all" onclick="openFilteredList('outdoor')">Ver todo</button>
+      </div>
+      <div class="home-carousel" id="homeOutdoorCarousel">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- Section 6: Planes Cercanos (Vertical List) -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <div>
+          <h2 class="home-section-title">Planes Cercanos</h2>
+        </div>
+        <button class="home-see-all" onclick="openFilteredList('nearby')">Ver todo</button>
+      </div>
+      <div class="home-nearby-list" id="homeNearbyList">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtered List View (for "Ver todo" / "Ver más") -->
+  <div id="filteredListView" class="hidden pb-24">
+    <div class="filtered-list-header">
+      <button class="filtered-list-back" onclick="closeFilteredList()">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h2 class="filtered-list-title" id="filteredListTitle">Planes</h2>
+    </div>
+    <div class="filtered-list-filters" id="filteredListChips">
+      <!-- Active filter chips -->
+    </div>
+    <div class="filtered-list-sort">
+      <select id="filteredListSort" onchange="sortFilteredList()" class="bg-surface-container-low rounded-lg px-3 py-2 text-sm">
+        <option value="distance">📍 Más cercanos</option>
+        <option value="recent">📅 Más recientes</option>
+        <option value="rating">⭐ Mejor valorados</option>
+      </select>
+    </div>
+    <div id="filteredListContent" class="space-y-2">
+      <!-- Activities list -->
     </div>
   </div>
 
