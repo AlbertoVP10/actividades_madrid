@@ -227,43 +227,47 @@ def main():
     archivo_entrada = args.input
     archivo_salida = args.output
     
-    # Descargar de Firebase si no existe localmente
-    if not os.path.exists(archivo_entrada):
-        print(f"📥 Descargando actividades desde Firebase...")
-        config = get_firebase_config()
-        bucket = config.get("storageBucket")
-        
-        if bucket:
-            data = download_from_firebase(bucket, "actividades_procesadas.json")
-            if data:
-                os.makedirs(os.path.dirname(archivo_entrada), exist_ok=True)
-                save_json_atomic(archivo_entrada, data)
-                print(f"✅ Descargadas {len(data)} actividades")
-            else:
-                print("❌ No se pudieron descargar actividades")
-                sys.exit(1)
-        else:
-            print("❌ FIREBASE_storageBucket no configurado")
-            sys.exit(1)
+    # Configurar Firebase
+    config = get_firebase_config()
+    bucket = config.get("storageBucket")
     
-    # 1. Cargar el histórico existente
+    if not bucket:
+        print("❌ FIREBASE_storageBucket no configurado")
+        sys.exit(1)
+    
+    # 1. Descargar histórico clasificado de Firebase
+    print(f"📥 Descargando histórico clasificado desde Firebase...")
+    historico_data = download_from_firebase(bucket, "descripcion_clasificada.json")
     historico_clasificado = {}
-    if os.path.exists(archivo_salida):
-        print(f"📂 Cargando histórico existente: {archivo_salida}")
-        try:
-            datos_viejos = load_json(archivo_salida, [])
-            historico_clasificado = {item["app_id"]: item for item in datos_viejos}
-            print(f"   ✅ {len(historico_clasificado)} actividades ya clasificadas")
-        except Exception as e:
-            print(f"   ⚠️ Error cargando histórico: {e}")
+    if historico_data:
+        if isinstance(historico_data, list):
+            historico_clasificado = {item["app_id"]: item for item in historico_data}
+        elif isinstance(historico_data, dict):
+            historico_clasificado = historico_data
+        print(f"   ✅ {len(historico_clasificado)} actividades ya clasificadas en Firebase")
+        # Guardar localmente
+        os.makedirs(os.path.dirname(archivo_salida), exist_ok=True)
+        save_json_atomic(archivo_salida, list(historico_clasificado.values()))
+    else:
+        print(f"   ℹ️ No hay histórico previo en Firebase (se creará nuevo)")
     
-    # 2. Cargar catálogo actual y filtrar nuevos
+    # 2. Descargar actividades de entrada desde Firebase
+    print(f"\n📥 Descargando actividades desde Firebase...")
+    catalogo_actual = download_from_firebase(bucket, "actividades_procesadas.json")
+    
+    if not catalogo_actual:
+        print("❌ No se pudieron descargar actividades de Firebase")
+        sys.exit(1)
+    
+    print(f"   ✅ Descargadas {len(catalogo_actual)} actividades")
+    
+    # Guardar localmente
+    os.makedirs(os.path.dirname(archivo_entrada), exist_ok=True)
+    save_json_atomic(archivo_entrada, catalogo_actual)
+    
+    # 3. Filtrar actividades nuevas (que no están en el histórico)
     nuevas_actividades = []
-    print(f"\n📋 Cargando catálogo actual...")
-    
-    catalogo_actual = load_json(archivo_entrada, [])
-    
-    if isinstance(catalogo_actual, list):
+    print(f"\n📋 Filtrando actividades nuevas...")
         for item in catalogo_actual:
             uid = item.get("app_id")
             desc = item.get("description", "")
@@ -285,7 +289,7 @@ def main():
         print(f"   ⚠️ Limitado a {args.limit} actividades (modo testing)")
         nuevas_actividades = nuevas_actividades[:args.limit]
     
-    # 3. Procesar nuevas actividades
+    # 4. Procesar nuevas actividades
     if nuevas_actividades:
         tamanio_lote = args.batch_size
         total_lotes = -(-len(nuevas_actividades) // tamanio_lote)
@@ -329,30 +333,28 @@ def main():
     else:
         print("\n✅ No hay actividades nuevas para procesar.")
     
-    # 4. Subir a Firebase si se solicitó
-    if args.upload:
-        print("\n☁️ Subiendo resultado a Firebase...")
-        config = get_firebase_config()
-        
-        if PYREBASE_AVAILABLE and config.get("storageBucket"):
-            try:
-                firebase = pyrebase.initialize_app(config)
-                storage = firebase.storage()
-                
-                url = upload_to_firebase(
-                    storage,
-                    archivo_salida,
-                    "descripcion_clasificada.json"
-                )
-                
-                if url:
-                    print(f"   ✅ Subido correctamente")
-                else:
-                    print(f"   ❌ Error al subir")
-            except Exception as e:
-                print(f"   ❌ Error: {e}")
-        else:
-            print("   ⚠️ Firebase no disponible")
+    # 5. Subir resultado actualizado a Firebase (siempre, no solo con --upload)
+    print("\n☁️ Subiendo resultado actualizado a Firebase...")
+    
+    if PYREBASE_AVAILABLE and bucket:
+        try:
+            firebase = pyrebase.initialize_app(config)
+            storage = firebase.storage()
+            
+            url = upload_to_firebase(
+                storage,
+                archivo_salida,
+                "descripcion_clasificada.json"
+            )
+            
+            if url:
+                print(f"   ✅ Subido correctamente")
+            else:
+                print(f"   ❌ Error al subir")
+        except Exception as e:
+            print(f"   ❌ Error: {e}")
+    else:
+        print("   ⚠️ Firebase no disponible")
     
     print("\n" + "=" * 60)
     print(f"⏰ Fin: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
