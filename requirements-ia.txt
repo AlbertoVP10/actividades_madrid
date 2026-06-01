@@ -1,16 +1,16 @@
 # Dependencias para enriquecimiento IA con Groq
-# Versiones fijas para evitar conflictos de dependencias
+# Versiones compatibles con pyrebase4
 
 # Cliente Groq API
 groq==0.9.0
 
-# HTTP requests
-requests==2.31.0
-urllib3==2.0.7
+# HTTP requests - versión compatible con pyrebase4
+requests==2.29.0
+urllib3==1.26.18
 
 # Firebase (para subir/descargar de storage)
 pyrebase4==4.7.1
 
-# Dependencias de pyrebase4 que pueden causar conflictos
+# Dependencias de pyrebase4
 pycryptodome==3.20.0
 python-jwt==4.1.0
