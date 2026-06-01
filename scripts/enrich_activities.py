@@ -291,32 +291,37 @@ def main():
         total_lotes = -(-len(nuevas_actividades) // tamanio_lote)
         
         print(f"\n🚀 Procesando {len(nuevas_actividades)} actividades en lotes de {tamanio_lote}...")
+        print(f"   Total de lotes: {total_lotes}")
         print()
         
         for i in range(0, len(nuevas_actividades), tamanio_lote):
             lote = nuevas_actividades[i:i+tamanio_lote]
             lote_num = i // tamanio_lote + 1
             
-            print(f"Procesando lote {lote_num} de {total_lotes}...")
+            print(f"⏳ [{lote_num}/{total_lotes}] Procesando lote {lote_num} de {total_lotes}...")
             
             try:
+                print(f"      📤 Enviando {len(lote)} actividades a Groq...")
                 resultados_lote = clasificar_lote_groq(client, lote)
                 
                 # Integrar resultados en histórico
                 for res in resultados_lote:
                     historico_clasificado[res["app_id"]] = res
                 
-                print(f"   ✅ {len(resultados_lote)} actividades clasificadas")
+                print(f"      ✅ {len(resultados_lote)} actividades clasificadas")
+                print(f"      📊 Progreso: {len(historico_clasificado)} / {len(nuevas_actividades) + len(historico_clasificado) - len(resultados_lote)} total")
                 
                 # Guardar incrementalmente
+                print(f"      💾 Guardando progreso...")
                 save_json_atomic(archivo_salida, list(historico_clasificado.values()))
                 
                 # Esperar entre peticiones (rate limit de Groq)
                 if i + tamanio_lote < len(nuevas_actividades):
+                    print(f"      ⏱️ Esperando 12s (rate limit)...")
                     time.sleep(12)
                     
             except Exception as e:
-                print(f"   ❌ Error procesando lote {lote_num}: {e}")
+                print(f"      ❌ Error procesando lote {lote_num}: {e}")
                 continue
         
         print(f"\n✅ Procesamiento completado!")
