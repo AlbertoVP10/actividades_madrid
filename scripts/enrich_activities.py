@@ -268,6 +268,8 @@ def main():
     # 3. Filtrar actividades nuevas (que no están en el histórico)
     nuevas_actividades = []
     print(f"\n📋 Filtrando actividades nuevas...")
+    
+    if isinstance(catalogo_actual, list):
         for item in catalogo_actual:
             uid = item.get("app_id")
             desc = item.get("description", "")
@@ -280,8 +282,10 @@ def main():
                     "app_id": uid,
                     "description": desc
                 })
+    else:
+        print(f"   ⚠️ El catálogo no es una lista válida")
     
-    print(f"   Total actividades: {len(catalogo_actual)}")
+    print(f"   Total actividades: {len(catalogo_actual) if isinstance(catalogo_actual, list) else 0}")
     print(f"   Nuevas a procesar: {len(nuevas_actividades)}")
     
     # Aplicar límite si se especificó
