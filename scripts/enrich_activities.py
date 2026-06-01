@@ -12,19 +12,7 @@ import json
 import time
 import argparse
 from datetime import datetime
-from typing import List, Dict, Any
-
-# Añadir directorio padre al path para imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from utils.firebase_helper import (
-    get_firebase_config,
-    download_from_firebase,
-    upload_to_firebase,
-    save_json_atomic,
-    load_json,
-    PYREBASE_AVAILABLE
-)
+from typing import List, Dict, Any, Optional
 
 # Intentar importar Groq
 try:
@@ -33,6 +21,77 @@ try:
 except ImportError:
     GROQ_AVAILABLE = False
     print("⚠️ Groq no instalado. Instala con: pip install groq")
+
+# Intentar importar pyrebase
+try:
+    import pyrebase
+    PYREBASE_AVAILABLE = True
+except ImportError:
+    PYREBASE_AVAILABLE = False
+
+
+def get_firebase_config() -> Dict[str, str]:
+    """Get Firebase configuration from environment variables."""
+    return {
+        "apiKey": os.getenv("FIREBASE_apiKey", ""),
+        "authDomain": os.getenv("FIREBASE_authDomain", ""),
+        "projectId": os.getenv("FIREBASE_projectId", ""),
+        "storageBucket": os.getenv("FIREBASE_storageBucket", ""),
+        "messagingSenderId": os.getenv("FIREBASE_messagingSenderId", ""),
+        "appId": os.getenv("FIREBASE_appId", ""),
+        "databaseURL": ""
+    }
+
+
+def save_json_atomic(path: str, data: Any) -> None:
+    """Save JSON data atomically to avoid corruption."""
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def load_json(path: str, default: Any = None) -> Any:
+    """Load JSON data from file."""
+    if default is None:
+        default = {}
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ Could not read {path}: {e}")
+            return default
+    return default
+
+
+def download_from_firebase(bucket: str, filename: str) -> Optional[Any]:
+    """Download a JSON file from Firebase Storage."""
+    import requests
+    url = f"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{filename.replace('/', '%2F')}?alt=media"
+    try:
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        print(f"⚠️ Error downloading {filename}: {e}")
+    return None
+
+
+def upload_to_firebase(storage, local_path: str, remote_path: str) -> Optional[str]:
+    """Upload a file to Firebase Storage."""
+    if not PYREBASE_AVAILABLE or not storage:
+        print("⚠️ Pyrebase not available or storage not initialized")
+        return None
+    
+    try:
+        storage.child(remote_path).put(local_path)
+        url = storage.child(remote_path).get_url(None)
+        print(f"✅ Uploaded: {remote_path}")
+        return url
+    except Exception as e:
+        print(f"❌ Error uploading {remote_path}: {e}")
+        return None
 
 
 def parse_args():
@@ -70,7 +129,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def clasificar_lote_groq(client: Groq, lote_textos: List[dict]) -> List[dict]:
+def clasificar_lote_groq(client, lote_textos: List[dict]) -> List[dict]:
     """
     Clasifica un lote de actividades usando Groq API.
     
@@ -272,7 +331,6 @@ def main():
         
         if PYREBASE_AVAILABLE and config.get("storageBucket"):
             try:
-                import pyrebase
                 firebase = pyrebase.initialize_app(config)
                 storage = firebase.storage()
                 
