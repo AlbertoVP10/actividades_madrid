@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 """
-Script para enriquecer actividades con campos de IA.
+Script para enriquecer actividades con campos de IA usando Groq.
 Genera: es_aire_libre, edad_minima, edad_maxima
 
-Ejecución: python scripts/enrich_activities.py \
-           --input data/actividades_procesadas.json \
-           --output data/actividades_procesadas_ia.json \
-           --batch-size 32
+Ejecución: python scripts/enrich_activities.py
 """
 
 import os
 import sys
 import json
-import argparse
 import time
+import argparse
 from datetime import datetime
 from typing import List, Dict, Any
 
 # Añadir directorio padre al path para imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from models.zero_shot import AirClassifier
-from models.qa_age import AgeExtractor
-from utils.text_processor import batch_generator, clean_text
 from utils.firebase_helper import (
     get_firebase_config,
     download_from_firebase,
@@ -32,11 +26,19 @@ from utils.firebase_helper import (
     PYREBASE_AVAILABLE
 )
 
+# Intentar importar Groq
+try:
+    from groq import Groq
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
+    print("⚠️ Groq no instalado. Instala con: pip install groq")
+
 
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Enriquece actividades con campos de IA"
+        description="Enriquece actividades con campos de IA usando Groq"
     )
     parser.add_argument(
         "--input", "-i",
@@ -45,25 +47,20 @@ def parse_args():
     )
     parser.add_argument(
         "--output", "-o",
-        default="data/actividades_procesadas_ia.json",
+        default="data/descripcion_clasificada.json",
         help="Archivo JSON de salida"
     )
     parser.add_argument(
         "--batch-size", "-b",
         type=int,
-        default=32,
-        help="Tamaño de batch para procesamiento"
+        default=2,
+        help="Tamaño de lote para procesamiento (recomendado: 2)"
     )
     parser.add_argument(
         "--limit", "-l",
         type=int,
         default=None,
         help="Limitar número de actividades a procesar (para testing)"
-    )
-    parser.add_argument(
-        "--skip-existing",
-        action="store_true",
-        help="Saltar actividades ya procesadas en el archivo de salida"
     )
     parser.add_argument(
         "--upload",
@@ -73,171 +70,73 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_activities(input_path: str) -> List[Dict[str, Any]]:
-    """Carga actividades desde archivo JSON."""
-    print(f"📥 Cargando actividades desde: {input_path}")
-    
-    # Si no existe localmente, intentar descargar de Firebase
-    if not os.path.exists(input_path):
-        print("   Archivo no encontrado localmente, descargando de Firebase...")
-        config = get_firebase_config()
-        bucket = config.get("storageBucket")
-        
-        if bucket:
-            data = download_from_firebase(bucket, "actividades_procesadas.json")
-            if data:
-                os.makedirs(os.path.dirname(input_path), exist_ok=True)
-                save_json_atomic(input_path, data)
-                print(f"   ✅ Descargado y guardado en {input_path}")
-                return data
-        
-        print("   ❌ No se pudo obtener el archivo")
-        return []
-    
-    # Cargar desde archivo local
-    data = load_json(input_path, [])
-    print(f"   ✅ Cargadas {len(data)} actividades")
-    return data
-
-
-def process_activities(
-    activities: List[Dict[str, Any]],
-    air_classifier: AirClassifier,
-    age_extractor: AgeExtractor,
-    batch_size: int = 32,
-    existing_results: Dict[str, Dict] = None
-) -> List[Dict[str, Any]]:
+def clasificar_lote_groq(client: Groq, lote_textos: List[dict]) -> List[dict]:
     """
-    Procesa actividades enriqueciéndolas con campos de IA.
+    Clasifica un lote de actividades usando Groq API.
     
     Args:
-        activities: Lista de actividades
-        air_classifier: Clasificador de aire libre
-        age_extractor: Extractor de edades
-        batch_size: Tamaño de batch
-        existing_results: Resultados existentes para saltar
+        client: Cliente de Groq inicializado
+        lote_textos: Lista de dicts con 'app_id' y 'description'
         
     Returns:
-        Lista de actividades enriquecidas
+        Lista de resultados clasificados
     """
-    if existing_results is None:
-        existing_results = {}
-    
-    enriched = []
-    total = len(activities)
-    processed = 0
-    skipped = 0
-    
-    print(f"\n🚀 Procesando {total} actividades...")
-    print(f"   Batch size: {batch_size}")
-    print()
-    
-    start_time = time.time()
-    
-    for batch in batch_generator(activities, batch_size):
-        batch_start = time.time()
-        
-        for activity in batch:
-            app_id = activity.get('app_id') or activity.get('id')
-            
-            # Verificar si ya existe
-            if app_id in existing_results:
-                enriched.append(existing_results[app_id])
-                skipped += 1
-                continue
-            
-            # Preparar texto
-            title = activity.get('title', '')
-            description = activity.get('description', '')
-            clean_desc = clean_text(description)
-            
-            # Si no hay descripción, usar título
-            if not clean_desc and title:
-                clean_desc = clean_text(title)
-            
-            # Clasificar aire libre
-            try:
-                es_aire_libre = air_classifier.classify_single(clean_desc, title)
-            except Exception as e:
-                print(f"   ⚠️ Error clasificando {app_id}: {e}")
-                es_aire_libre = None
-            
-            # Extraer edades
-            try:
-                ages = age_extractor.extract_ages(clean_desc, title)
-            except Exception as e:
-                print(f"   ⚠️ Error extrayendo edades {app_id}: {e}")
-                ages = {'edad_minima': None, 'edad_maxima': None}
-            
-            # Crear actividad enriquecida
-            enriched_activity = {
-                **activity,
-                'es_aire_libre': es_aire_libre,
-                'edad_minima': ages['edad_minima'],
-                'edad_maxima': ages['edad_maxima']
-            }
-            
-            enriched.append(enriched_activity)
-            processed += 1
-        
-        # Progreso
-        batch_time = time.time() - batch_start
-        progress = len(enriched)
-        percent = (progress / total) * 100
-        elapsed = time.time() - start_time
-        avg_time = elapsed / progress if progress > 0 else 0
-        eta = avg_time * (total - progress)
-        
-        print(f"   📊 {progress}/{total} ({percent:.1f}%) | "
-              f"Procesadas: {processed} | Saltadas: {skipped} | "
-              f"Batch: {batch_time:.1f}s | ETA: {eta/60:.1f}min")
-    
-    total_time = time.time() - start_time
-    print(f"\n✅ Procesamiento completado en {total_time/60:.1f} minutos")
-    print(f"   Total: {len(enriched)} actividades")
-    
-    return enriched
+    bloque_input = ""
+    for item in lote_textos:
+        bloque_input += f"--- APP_ID: {item['app_id']} ---\n{item['description']}\n--- FIN ---\n\n"
 
+    prompt = f"""Eres un sistema experto en extracción de datos (NER) y procesamiento de lenguaje natural de alta precisión. Tu tarea es analizar descripciones de actividades culturales y de ocio del Ayuntamiento de Madrid para estructurarlas en un formato JSON estricto.
 
-def analyze_results(activities: List[Dict[str, Any]]) -> None:
-    """Analiza y muestra estadísticas de los resultados."""
-    print("\n📊 ESTADÍSTICAS DE RESULTADOS")
-    print("=" * 50)
-    
-    total = len(activities)
-    if total == 0:
-        print("   No hay actividades para analizar")
-        return
-    
-    # es_aire_libre
-    aire_libre_count = sum(1 for a in activities if a.get('es_aire_libre') is True)
-    interior_count = sum(1 for a in activities if a.get('es_aire_libre') is False)
-    unknown_count = sum(1 for a in activities if a.get('es_aire_libre') is None)
-    
-    print(f"\n🌳 Aire Libre:")
-    print(f"   Sí: {aire_libre_count} ({aire_libre_count/total*100:.1f}%)")
-    print(f"   No: {interior_count} ({interior_count/total*100:.1f}%)")
-    print(f"   Desconocido: {unknown_count} ({unknown_count/total*100:.1f}%)")
-    
-    # Edades
-    with_min = sum(1 for a in activities if a.get('edad_minima') is not None)
-    with_max = sum(1 for a in activities if a.get('edad_maxima') is not None)
-    with_both = sum(1 for a in activities 
-                    if a.get('edad_minima') is not None and a.get('edad_maxima') is not None)
-    
-    print(f"\n👶 Edades:")
-    print(f"   Con edad mínima: {with_min} ({with_min/total*100:.1f}%)")
-    print(f"   Con edad máxima: {with_max} ({with_max/total*100:.1f}%)")
-    print(f"   Con ambas: {with_both} ({with_both/total*100:.1f}%)")
-    
-    # Distribución de edades
-    min_ages = [a['edad_minima'] for a in activities if a.get('edad_minima') is not None]
-    max_ages = [a['edad_maxima'] for a in activities if a.get('edad_maxima') is not None]
-    
-    if min_ages:
-        print(f"   Edad mínima promedio: {sum(min_ages)/len(min_ages):.1f}")
-    if max_ages:
-        print(f"   Edad máxima promedio: {sum(max_ages)/len(max_ages):.1f}")
+### INSTRUCCIONES DE PROCESAMIENTO
+1. Analiza detenidamente el identificador del archivo (`app_id`) y el texto de la descripción proporcionada.
+2. Evalúa las condiciones ambientales para determinar si la actividad ocurre al aire libre.
+3. Extrae los rangos de edad aplicando las reglas lógicas e infiriendo los límites numéricos según el contexto de forma matemática.
+
+### LÓGICA DE EXTRACCIÓN DE EDADES (CRÍTICA)
+- Expresiones de rango ("de X a Y", "entre X y Y", "X-Y años"): 'edad_minima' = X, 'edad_maxima' = Y.
+- Expresiones de límite inferior ("a partir de X años", "mayores de X años", ">X"): 'edad_minima' = X, 'edad_maxima' = null.
+- Expresiones de límite superior ("hasta X años", "menores de X años", "<X"): 'edad_minima' = null, 'edad_maxima' = X.
+- Palabras clave de infancia: Si menciona "bebés" sin especificar edad, asume 'edad_minima' = 0.
+- Palabras clave de adultos: Si menciona "adultos", "público adulto" o "mayores de edad", asume 'edad_minima' = 18.
+- Sin restricciones ("para todos los públicos", "público familiar" sin rangos): 'edad_minima' = 0, 'edad_maxima' = null.
+- En caso de total ambigüedad o ausencia de datos: Ambos campos deben ser null.
+
+### FORMATO DE SALIDA REQUERIDO
+Devuelve EXCLUSIVAMENTE un objeto JSON válido que cumpla estrictamente con el siguiente esquema (no incluyas bloques de código markdown, ni texto introductorio, ni notas aclaratorias):
+
+{{
+  "actividades": [
+    {{
+      "app_id": string,
+      "es_aire_libre": boolean,
+      "edad_minima": number | null,
+      "edad_maxima": number | null
+    }}
+  ]
+}}
+
+### DATOS A PROCESAR:
+{bloque_input}"""
+
+    for intento in range(3):
+        try:
+            completion = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+                response_format={"type": "json_object"}
+            )
+            
+            resultado_json = json.loads(completion.choices[0].message.content)
+            return resultado_json.get("actividades", [])
+            
+        except Exception as e:
+            print(f"Error en intento {intento+1}: {e}")
+            if intento < 2:
+                print(f"Aviso: Intento {intento+1} falló. Esperando 10 segundos...")
+                time.sleep(10)
+            else:
+                raise e
 
 
 def main():
@@ -245,60 +144,130 @@ def main():
     args = parse_args()
     
     print("=" * 60)
-    print("🤖 ENRIQUECIMIENTO IA DE ACTIVIDADES")
+    print("🤖 ENRIQUECIMIENTO IA DE ACTIVIDADES (GROQ)")
     print("=" * 60)
     print(f"⏰ Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
     
-    # Cargar actividades
-    activities = load_activities(args.input)
-    
-    if not activities:
-        print("❌ No se encontraron actividades para procesar")
+    # Verificar que Groq está disponible
+    if not GROQ_AVAILABLE:
+        print("❌ Groq no está instalado. Ejecuta: pip install groq")
         sys.exit(1)
     
-    # Limitar para testing si es necesario
+    # Inicializar cliente de Groq
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        print("❌ GROQ_API_KEY no encontrado en variables de entorno")
+        sys.exit(1)
+    
+    client = Groq(api_key=api_key)
+    print("✅ Cliente Groq inicializado")
+    print()
+    
+    # Archivos de entrada y salida
+    archivo_entrada = args.input
+    archivo_salida = args.output
+    
+    # Descargar de Firebase si no existe localmente
+    if not os.path.exists(archivo_entrada):
+        print(f"📥 Descargando actividades desde Firebase...")
+        config = get_firebase_config()
+        bucket = config.get("storageBucket")
+        
+        if bucket:
+            data = download_from_firebase(bucket, "actividades_procesadas.json")
+            if data:
+                os.makedirs(os.path.dirname(archivo_entrada), exist_ok=True)
+                save_json_atomic(archivo_entrada, data)
+                print(f"✅ Descargadas {len(data)} actividades")
+            else:
+                print("❌ No se pudieron descargar actividades")
+                sys.exit(1)
+        else:
+            print("❌ FIREBASE_storageBucket no configurado")
+            sys.exit(1)
+    
+    # 1. Cargar el histórico existente
+    historico_clasificado = {}
+    if os.path.exists(archivo_salida):
+        print(f"📂 Cargando histórico existente: {archivo_salida}")
+        try:
+            datos_viejos = load_json(archivo_salida, [])
+            historico_clasificado = {item["app_id"]: item for item in datos_viejos}
+            print(f"   ✅ {len(historico_clasificado)} actividades ya clasificadas")
+        except Exception as e:
+            print(f"   ⚠️ Error cargando histórico: {e}")
+    
+    # 2. Cargar catálogo actual y filtrar nuevos
+    nuevas_actividades = []
+    print(f"\n📋 Cargando catálogo actual...")
+    
+    catalogo_actual = load_json(archivo_entrada, [])
+    
+    if isinstance(catalogo_actual, list):
+        for item in catalogo_actual:
+            uid = item.get("app_id")
+            desc = item.get("description", "")
+            
+            if not desc:
+                continue
+            
+            if uid not in historico_clasificado:
+                nuevas_actividades.append({
+                    "app_id": uid,
+                    "description": desc
+                })
+    
+    print(f"   Total actividades: {len(catalogo_actual)}")
+    print(f"   Nuevas a procesar: {len(nuevas_actividades)}")
+    
+    # Aplicar límite si se especificó
     if args.limit:
-        print(f"⚠️ Modo testing: limitado a {args.limit} actividades")
-        activities = activities[:args.limit]
+        print(f"   ⚠️ Limitado a {args.limit} actividades (modo testing)")
+        nuevas_actividades = nuevas_actividades[:args.limit]
     
-    # Cargar resultados existentes si se especificó
-    existing_results = {}
-    if args.skip_existing and os.path.exists(args.output):
-        print(f"📂 Cargando resultados existentes desde: {args.output}")
-        existing_data = load_json(args.output, [])
-        for act in existing_data:
-            app_id = act.get('app_id') or act.get('id')
-            if app_id:
-                existing_results[app_id] = act
-        print(f"   ✅ {len(existing_results)} actividades ya procesadas")
+    # 3. Procesar nuevas actividades
+    if nuevas_actividades:
+        tamanio_lote = args.batch_size
+        total_lotes = -(-len(nuevas_actividades) // tamanio_lote)
+        
+        print(f"\n🚀 Procesando {len(nuevas_actividades)} actividades en lotes de {tamanio_lote}...")
+        print()
+        
+        for i in range(0, len(nuevas_actividades), tamanio_lote):
+            lote = nuevas_actividades[i:i+tamanio_lote]
+            lote_num = i // tamanio_lote + 1
+            
+            print(f"Procesando lote {lote_num} de {total_lotes}...")
+            
+            try:
+                resultados_lote = clasificar_lote_groq(client, lote)
+                
+                # Integrar resultados en histórico
+                for res in resultados_lote:
+                    historico_clasificado[res["app_id"]] = res
+                
+                print(f"   ✅ {len(resultados_lote)} actividades clasificadas")
+                
+                # Guardar incrementalmente
+                save_json_atomic(archivo_salida, list(historico_clasificado.values()))
+                
+                # Esperar entre peticiones (rate limit de Groq)
+                if i + tamanio_lote < len(nuevas_actividades):
+                    time.sleep(12)
+                    
+            except Exception as e:
+                print(f"   ❌ Error procesando lote {lote_num}: {e}")
+                continue
+        
+        print(f"\n✅ Procesamiento completado!")
+        print(f"   Total en histórico: {len(historico_clasificado)} actividades")
+    else:
+        print("\n✅ No hay actividades nuevas para procesar.")
     
-    # Inicializar modelos
-    print("\n🧠 Inicializando modelos de IA...")
-    air_classifier = AirClassifier(device="cpu")
-    age_extractor = AgeExtractor(device="cpu")
-    
-    # Procesar actividades
-    enriched = process_activities(
-        activities,
-        air_classifier,
-        age_extractor,
-        batch_size=args.batch_size,
-        existing_results=existing_results
-    )
-    
-    # Analizar resultados
-    analyze_results(enriched)
-    
-    # Guardar resultado
-    print(f"\n💾 Guardando resultado en: {args.output}")
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
-    save_json_atomic(args.output, enriched)
-    print(f"   ✅ Guardado {len(enriched)} actividades")
-    
-    # Subir a Firebase si se solicitó
+    # 4. Subir a Firebase si se solicitó
     if args.upload:
-        print("\n☁️ Subiendo a Firebase...")
+        print("\n☁️ Subiendo resultado a Firebase...")
         config = get_firebase_config()
         
         if PYREBASE_AVAILABLE and config.get("storageBucket"):
@@ -309,8 +278,8 @@ def main():
                 
                 url = upload_to_firebase(
                     storage,
-                    args.output,
-                    "actividades_procesadas_ia.json"
+                    archivo_salida,
+                    "descripcion_clasificada.json"
                 )
                 
                 if url:
@@ -320,7 +289,7 @@ def main():
             except Exception as e:
                 print(f"   ❌ Error: {e}")
         else:
-            print("   ⚠️ Firebase no disponible o configuración incompleta")
+            print("   ⚠️ Firebase no disponible")
     
     print("\n" + "=" * 60)
     print(f"⏰ Fin: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
