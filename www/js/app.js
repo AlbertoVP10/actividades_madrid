@@ -5415,30 +5415,134 @@ function renderNewHome() {
 let filteredListSection = null;
 let filteredListSort = 'distance';
 
-// Open filtered list view
+// Open filtered list view - Now switches to list tab with applied filters
 function openFilteredList(sectionType) {
-  filteredListSection = sectionType;
+  // Apply filters based on section type
+  applySectionFilters(sectionType);
   
-  // Hide home, show filtered list
-  document.getElementById('homeView').classList.add('hidden');
-  document.getElementById('filteredListView').classList.remove('hidden');
+  // Switch to list tab
+  setBottomTab('list');
+}
+
+// Apply filters for a specific home section
+function applySectionFilters(sectionType) {
+  // First clear all existing filters
+  clearFilters();
   
-  // Set title
-  const titles = {
-    'featured': 'Planes Destacados',
-    'family': 'Planes Familiares y de Niños',
-    'personalized': 'Planes para ti',
-    'babies': 'Para los más Pequeños',
-    'outdoor': 'Al Aire Libre',
-    'nearby': 'Planes Cercanos'
-  };
-  document.getElementById('filteredListTitle').textContent = titles[sectionType] || 'Planes';
+  const now = new Date();
   
-  // Render filter chips
-  renderFilteredListChips(sectionType);
+  switch (sectionType) {
+    case 'featured':
+      // Destacadas: filter by category 'Destacada' or 'Fiestas'
+      multiSelectState.category = ['Destacada', 'Fiestas'];
+      break;
+      
+    case 'family':
+      // Planes Familiares y de Niños: 
+      // Filtro Público: "Niñas y niños" o "Familias"
+      // Filtro Fecha: próximos 7 días
+      multiSelectState.audience = ['Niños', 'Familias'];
+      dateFilterState.mode = 'shortcut';
+      dateFilterState.shortcut = '7days';
+      // Calculate date range for 7 days
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      dateFilterState.pickerStart = new Date(now);
+      dateFilterState.pickerEnd = weekEnd;
+      break;
+      
+    case 'personalized':
+      // Based on user preferences
+      const prefs = JSON.parse(localStorage.getItem('userPreferences') || '[]');
+      const prefMap = {
+        'titeres': 'Teatro',
+        'musica': 'Música',
+        'talleres': 'Talleres',
+        'deporte': 'Deporte',
+        'cuentos': 'Cuentacuentos',
+        'parques': 'Parques',
+        'teatro': 'Teatro',
+        'danza': 'Danza',
+        'excursiones': 'Excursiones'
+      };
+      const preferredCategories = prefs.map(p => prefMap[p]).filter(Boolean);
+      if (preferredCategories.length > 0) {
+        multiSelectState.category = preferredCategories;
+      }
+      break;
+      
+    case 'babies':
+      // Para los más Pequeños (0 a 4 años)
+      // Filter by audience 'Bebés' or search keywords in title/description
+      multiSelectState.audience = ['Niños']; // Base filter
+      // Also add search filter for baby-related keywords
+      currentFilters.search = 'bebé OR bebe OR bebeteca OR 0-3 OR 0 a 4 OR primera infancia OR baby';
+      break;
+      
+    case 'outdoor':
+      // Al Aire Libre
+      // Filter by categories related to outdoor activities
+      multiSelectState.category = ['Deportes', 'Excursiones'];
+      // Add search filter for outdoor keywords
+      currentFilters.search = 'parque OR jardín OR jardin OR huerto OR plaza OR madrid río OR aire libre OR exterior';
+      break;
+      
+    case 'nearby':
+      // Planes Cercanos - sort by distance if location available
+      if (userLocation) {
+        setSortState('distance');
+      }
+      break;
+  }
   
-  // Render content
-  renderFilteredList();
+  // Update UI to reflect new filter states
+  updateUIFromFilterState();
+  
+  // Apply the filters
+  applyFilters();
+}
+
+// Update UI elements to match current filter state
+function updateUIFromFilterState() {
+  // Update category grid
+  const categoryGrid = document.getElementById('categoryGrid');
+  if (categoryGrid) {
+    categoryGrid.querySelectorAll('button').forEach(btn => {
+      if (multiSelectState.category.includes(btn.dataset.value)) {
+        btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      } else {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+      }
+    });
+  }
+  
+  // Update audience grid
+  const audienceGrid = document.getElementById('audienceGrid');
+  if (audienceGrid) {
+    audienceGrid.querySelectorAll('button').forEach(btn => {
+      if (multiSelectState.audience.includes(btn.dataset.value)) {
+        btn.classList.add('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.remove('border-outline-variant');
+      } else {
+        btn.classList.remove('bg-primary-container', 'border-primary', 'text-on-primary-container');
+        btn.classList.add('border-outline-variant');
+      }
+    });
+  }
+  
+  // Update date shortcut styles
+  updateDateShortcutStyles();
+  
+  // Update multi-select labels
+  refreshFilterFieldLabel('category');
+  refreshFilterFieldLabel('audience');
+  refreshFilterFieldLabel('date');
+  
+  // Update search input
+  const searchInput = document.getElementById('searchInput');
+  const filterSearchInput = document.getElementById('filterSearchInput');
+  if (searchInput && currentFilters.search) searchInput.value = currentFilters.search;
+  if (filterSearchInput && currentFilters.search) filterSearchInput.value = currentFilters.search;
 }
 
 // Close filtered list view
