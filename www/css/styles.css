@@ -665,8 +665,66 @@ body { min-height: max(884px, 100dvh); }
   color: #1a1a2e;
 }
 
-/* Quick Filters */
+/* New Home Header Styles */
+.home-header-new {
+  background: #ffffff;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.home-greeting-subtitle {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.25rem;
+}
+
+.home-greeting-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+
+.home-profile-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #F08080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.home-profile-btn:active {
+  background: #e07070;
+}
+
+.home-profile-initial {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Home Search Bar */
+.home-search-bar {
+  padding: 0.5rem 1rem 0.75rem;
+  background: #ffffff;
+}
+
+/* Quick Filters - Hidden by default now */
 .home-quick-filters {
+  display: none;
+}
+
+.home-quick-filters {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem 1rem;

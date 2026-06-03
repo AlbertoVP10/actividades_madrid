@@ -5381,10 +5381,22 @@ function renderCarouselSection(containerId, sectionType, cardRenderer, limit = 6
 
 // Render the new home
 function renderNewHome() {
-  // Update location text
-  const locationText = document.getElementById('homeLocationText');
-  if (locationText) {
-    locationText.textContent = `📍 ${selectedDistrict}, Madrid`;
+  // Update greeting name based on user profile
+  const greetingName = document.getElementById('homeGreetingName');
+  const profileInitial = document.getElementById('homeProfileInitial');
+  
+  if (greetingName) {
+    // Get user name from profile settings
+    const userName = profileSettings?.email ? profileSettings.email.split('@')[0] : 'Familia';
+    // Capitalize first letter
+    const displayName = userName.charAt(0).toUpperCase() + userName.slice(1);
+    greetingName.textContent = displayName;
+  }
+  
+  if (profileInitial) {
+    // Get initial from user name or default to 'F'
+    const userName = profileSettings?.email ? profileSettings.email.split('@')[0] : 'F';
+    profileInitial.textContent = userName.charAt(0).toUpperCase();
   }
   
   // Render sections
@@ -5423,6 +5435,22 @@ function openFilteredList(sectionType) {
   const mainContent = document.getElementById('mainContent');
   if (mainContent) {
     mainContent.scrollTop = 0;
+  }
+}
+
+// Apply search from home search bar
+function applyHomeSearch() {
+  const searchInput = document.getElementById('homeSearchInput');
+  if (searchInput && searchInput.value.trim()) {
+    // Copy value to main search input
+    const mainSearchInput = document.getElementById('searchInput');
+    if (mainSearchInput) {
+      mainSearchInput.value = searchInput.value;
+    }
+    // Apply search and switch to list
+    currentFilters.search = searchInput.value;
+    applyFilters();
+    setBottomTab('list');
   }
 }
 

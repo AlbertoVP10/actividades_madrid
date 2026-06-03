@@ -576,33 +576,38 @@
   
   <!-- Home View - Redesigned -->
   <div id="homeView" class="hidden pb-24">
-    <!-- Header: Greeting & Notifications -->
-    <div class="home-header">
+    <!-- Header: Greeting, Notifications & Profile -->
+    <div class="home-header-new">
       <div class="flex items-center justify-between">
-        <h1 class="home-greeting">¡Hola, Familia! 👋</h1>
-        <button class="home-notification-btn" onclick="showNotifications()">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="home-notification-badge" id="notificationBadge"></span>
-        </button>
-      </div>
-      
-      <!-- Location Selector -->
-      <div class="home-location-selector" onclick="openLocationModal()">
-        <span class="material-symbols-outlined text-primary" style="font-size: 18px;">location_on</span>
-        <span class="home-location-text">
-          <span class="home-location-district" id="homeLocationText">📍 Retiro, Madrid</span>
-          <span class="material-symbols-outlined" style="font-size: 16px;">expand_more</span>
-        </span>
+        <div>
+          <p class="home-greeting-subtitle">Buenos días 👋</p>
+          <h1 class="home-greeting-name" id="homeGreetingName">Familia</h1>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="home-notification-btn" onclick="showNotifications()">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="home-notification-badge" id="notificationBadge"></span>
+          </button>
+          <button class="home-profile-btn" onclick="setBottomTab('profile')" id="homeProfileButton">
+            <span class="home-profile-initial" id="homeProfileInitial">F</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Quick Filters -->
-    <div class="home-quick-filters">
-      <button class="home-filter-chip active" data-filter="HOY" onclick="selectQuickFilter('HOY')">HOY</button>
-      <button class="home-filter-chip inactive" data-filter="FINDE" onclick="selectQuickFilter('FINDE')">ESTE FINDE</button>
-      <button class="home-filter-chip inactive" data-filter="TALLERES" onclick="selectQuickFilter('TALLERES')">TALLERES</button>
-      <button class="home-filter-chip inactive" data-filter="TEATRO" onclick="selectQuickFilter('TEATRO')">TEATRO</button>
-      <button class="home-filter-chip inactive" data-filter="AIRE_LIBRE" onclick="selectQuickFilter('AIRE_LIBRE')">AIRE LIBRE</button>
+    <!-- Search & Filter Bar -->
+    <div class="home-search-bar">
+      <div class="flex items-center bg-surface-container-low rounded-full px-2 py-1 border border-outline-variant/30 w-full">
+        <span class="material-symbols-outlined text-on-surface-variant ml-2">search</span>
+        <input type="text" id="homeSearchInput" placeholder="Buscar actividades..." class="flex-1 bg-transparent text-body-md text-on-surface outline-none border-none placeholder:text-on-surface-variant/60 px-2 py-1 min-w-0" oninput="applyHomeSearch()">
+        <button onclick="toggleFilters()" class="text-on-surface-variant p-0 hover:bg-surface-variant rounded-full transition-colors flex-shrink-0 mr-1" title="Filtros">
+          <span class="material-symbols-outlined text-lg">tune</span>
+        </button>
+        <div class="w-px h-6 bg-outline-variant/50 mx-1"></div>
+        <button onclick="openSortModal()" class="text-on-surface-variant p-0 hover:bg-surface-variant rounded-full transition-colors flex-shrink-0 mr-1 ml-1" title="Ordenar">
+          <span class="material-symbols-outlined text-lg">list_arrow</span>
+        </button>
+      </div>
     </div>
 
     <!-- Section 1: Planes Destacados -->
