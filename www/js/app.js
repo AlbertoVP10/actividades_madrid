@@ -4430,7 +4430,7 @@ function showView(view) {
   }
 
   // if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile');
-  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'profile' || view === 'profileSettings' || view === 'detail' || view === 'info' || view === 'filters' || view === 'filterField');
+  if (mainHeader) mainHeader.classList.toggle('hidden', view === 'home' || view === 'profile' || view === 'profileSettings' || view === 'detail' || view === 'info' || view === 'filters' || view === 'filterField');
   if (profileDonateFooter) profileDonateFooter.classList.toggle('hidden', view !== 'profile');
 
   if (view === 'map') {
