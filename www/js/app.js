@@ -5096,7 +5096,7 @@ function getActivityImage(activity) {
 }
 
 // Home state
-let homeQuickFilter = 'HOY';
+let homeQuickFilter = 'ALL'; // Changed from 'HOY' to show all activities by default
 let selectedDistrict = localStorage.getItem('selectedDistrict') || 'Retiro';
 
 // Category color mapping for icons
@@ -5156,7 +5156,7 @@ function getHomeSectionActivities(sectionType, limit = 6) {
   
   let filtered = [...allActivities];
   
-  // Apply quick filter date logic
+  // Apply quick filter date logic (only if not 'ALL')
   if (homeQuickFilter === 'HOY') {
     const today = now.toISOString().split('T')[0];
     filtered = filtered.filter(a => a.date && a.date.toISOString().split('T')[0] === today);
