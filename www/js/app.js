@@ -5422,6 +5422,21 @@ function openFilteredList(sectionType) {
   
   // Switch to list tab
   setBottomTab('list');
+  
+  // Reset scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Also reset listView scroll if it has its own scroll container
+  const listView = document.getElementById('listView');
+  if (listView) {
+    listView.scrollTop = 0;
+  }
+  
+  // Reset main content scroll
+  const mainContent = document.getElementById('mainContent');
+  if (mainContent) {
+    mainContent.scrollTop = 0;
+  }
 }
 
 // Apply filters for a specific home section
