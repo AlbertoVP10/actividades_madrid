@@ -5394,21 +5394,8 @@ function renderNewHome() {
   renderCarouselSection('homeBabiesCarousel', 'babies', renderMediumCard, 6);
   renderCarouselSection('homeOutdoorCarousel', 'outdoor', renderMediumCard, 6);
   
-  // Render nearby list (vertical)
-  const nearbyContainer = document.getElementById('homeNearbyList');
-  if (nearbyContainer) {
-    const { items, total } = getHomeSectionActivities('nearby', 5);
-    if (items.length === 0) {
-      nearbyContainer.innerHTML = `
-        <div class="home-empty-state">
-          <span class="material-symbols-outlined home-empty-state-icon">location_off</span>
-          <p>No hay planes cercanos</p>
-        </div>
-      `;
-    } else {
-      nearbyContainer.innerHTML = items.map(activity => renderCompactCard(activity)).join('');
-    }
-  }
+  // Render nearby carousel (same format as other sections)
+  renderCarouselSection('homeNearbyCarousel', 'nearby', renderMediumCard, 6);
 }
 
 // Filtered list view state
