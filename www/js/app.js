@@ -3730,6 +3730,67 @@ function toggleFavorite(event, id, refreshDetail = false) {
   }
 }
 
+// Toggle favorito desde botones sobre la imagen
+function toggleFavoriteOnImage(event, id) {
+  event = event || window.event;
+  if (event && event.stopPropagation) {
+    event.stopPropagation();
+  }
+  
+  id = String(id);
+  const index = favorites.indexOf(id);
+  if (index > -1) {
+    favorites.splice(index, 1);
+  } else {
+    favorites.push(id);
+  }
+  
+  localStorage.setItem('madridFavorites', JSON.stringify(favorites));
+  updateFavCount();
+  renderActivities();
+  
+  // Actualizar ambos botones (en imagen y en header)
+  const isFav = favorites.includes(id);
+  
+  // Actualizar botón en imagen
+  let detailImageButtonsElem = document.getElementById('detailImageButtons');
+  if (detailImageButtonsElem) {
+    const favBtn = detailImageButtonsElem.querySelector('button:last-child');
+    if (favBtn) {
+      const icon = favBtn.querySelector('span.material-symbols-outlined');
+      if (icon) {
+        if (isFav) {
+          icon.classList.add('filled');
+          favBtn.classList.add('text-red-400');
+        } else {
+          icon.classList.remove('filled');
+          favBtn.classList.remove('text-red-400');
+        }
+      }
+    }
+  }
+  
+  // Actualizar botón en header
+  const detailHeaderButtons = document.getElementById('detailHeaderButtons');
+  if (detailHeaderButtons) {
+    const favBtn = detailHeaderButtons.querySelector('button:last-child');
+    if (favBtn) {
+      const icon = favBtn.querySelector('span.material-symbols-outlined');
+      if (icon) {
+        if (isFav) {
+          icon.classList.add('filled');
+          favBtn.classList.remove('text-white');
+          favBtn.classList.add('bg-white', 'text-primary');
+        } else {
+          icon.classList.remove('filled');
+          favBtn.classList.remove('bg-white', 'text-primary');
+          favBtn.classList.add('text-white');
+        }
+      }
+    }
+  }
+}
+
 // Compartir actividad
 function shareActivity(id) {
   const activity = allActivities.find(a => a.id === id);
@@ -3859,29 +3920,44 @@ function showDetail(id, isNavigation = false) {
     imageContainer.style.overflow = 'hidden';
   }
   
-  // Setup scroll handler for image resize
+  // Setup scroll handler for image resize and header effect
   const scrollContainer = document.getElementById('detailScrollContainer');
+  const stickyHeader = document.getElementById('detailStickyHeader');
+  const detailImageButtonsElem = document.getElementById('detailImageButtons');
+  const SCROLL_THRESHOLD = 150; // Umbral para ocultar imagen completamente
+  
   if (scrollContainer) {
     scrollContainer.onscroll = function() {
       const scrollTop = scrollContainer.scrollTop;
-      const minHeight = window.innerHeight * 0.1;
-      const maxHeight = window.innerHeight * 0.3;
       
-      if (scrollTop > 0) {
-        const newHeight = Math.max(minHeight, maxHeight - (scrollTop * 1.2));
-        imageContainer.style.height = newHeight + 'px';
-        // detailImage.style.opacity = Math.max(0, 1 - scrollTop / 100);
-        // detailImage.style.transform = `scale(${Math.max(0.95, 1 - scrollTop / 800)})`;
-        // if (newHeight <= minHeight + 2) {
-        //   detailImage.style.visibility = 'hidden';
-        // } else {
-        //   detailImage.style.visibility = 'visible';
-        // }
+      // Cuando scroll pasa el umbral, ocultar imagen completamente
+      if (scrollTop > SCROLL_THRESHOLD) {
+        // Ocultar imagen completamente
+        imageContainer.style.height = '0px';
+        imageContainer.style.minHeight = '0px';
+        imageContainer.style.overflow = 'hidden';
+        
+        // Header con color primario
+        if (stickyHeader) {
+          stickyHeader.classList.add('detail-header-scrolled');
+        }
+        // Ocultar botones en imagen
+        if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '0';
       } else {
-        imageContainer.style.height = maxHeight + 'px';
-        detailImage.style.opacity = '1';
-        detailImage.style.transform = 'scale(1)';
-        detailImage.style.visibility = 'visible';
+        // Mostrar imagen con altura proporcional al scroll
+        const maxHeight = window.innerHeight * 0.3;
+        const scrollProgress = scrollTop / SCROLL_THRESHOLD;
+        const newHeight = maxHeight * (1 - scrollProgress);
+        imageContainer.style.height = newHeight + 'px';
+        imageContainer.style.minHeight = '0px';
+        imageContainer.style.overflow = 'hidden';
+        
+        // Header sin color primario
+        if (stickyHeader) {
+          stickyHeader.classList.remove('detail-header-scrolled');
+        }
+        // Mostrar botones en imagen
+        if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '1';
       }
     };
   }
@@ -3889,13 +3965,24 @@ function showDetail(id, isNavigation = false) {
   const titleElement = document.getElementById('detailTitle');
   titleElement.textContent = activity.title;
   
-  // Render header buttons (share and favorite)
+  // Render buttons on image (favorito y compartir)
+  const detailImageButtons = document.getElementById('detailImageButtons');
+  detailImageButtons.innerHTML = `
+    <button onclick="shareActivity('${activity.id}')" class="p-2 rounded-full" title="Compartir">
+      <span class="material-symbols-outlined">share</span>
+    </button>
+    <button onclick="toggleFavoriteOnImage(event || window.event, '${activity.id}')" class="p-2 rounded-full ${isFav ? 'text-red-400' : ''}" title="Favorito">
+      <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
+    </button>
+  `;
+  
+  // Render header buttons (share and favorite) - ocultos inicialmente
   const detailHeaderButtons = document.getElementById('detailHeaderButtons');
   detailHeaderButtons.innerHTML = `
-    <button onclick="shareActivity('${activity.id}')" class="border text-on-surface w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Compartir">
+    <button onclick="shareActivity('${activity.id}')" class="border border-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Compartir">
       <span class="material-symbols-outlined text-xl">share</span>
     </button>
-    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-primary text-on-primary' : 'text-on-surface'} border w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Favorito">
+    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-white text-primary' : 'text-white'} border border-white/40 w-10 h-10 rounded-full flex items-center justify-center transition-colors" title="Favorito">
       <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''}">favorite</span>
     </button>
   `;

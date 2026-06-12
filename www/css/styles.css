@@ -1096,3 +1096,59 @@ body { min-height: max(884px, 100dvh); }
   margin-bottom: 0.5rem;
   opacity: 0.5;
 }
+
+/* Detail View Header Scroll Effect */
+.detail-header-scrolled {
+  background-color: #F08080 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.detail-header-scrolled #detailTitle {
+  color: #ffffff !important;
+}
+
+.detail-header-scrolled #detailBackButton {
+  color: #ffffff !important;
+}
+
+.detail-header-scrolled #detailHeaderButtons button {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.detail-header-scrolled #detailHeaderButtons button.bg-primary {
+  background-color: #ffffff !important;
+  color: #F08080 !important;
+}
+
+/* Botones sobre la imagen */
+#detailImageButtons button {
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+#detailImageButtons button:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Botón volver en header (estado inicial) */
+#detailBackButton {
+  color: #1a1c1c;
+}
+
+/* Título truncado en header */
+.title-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Imagen container cuando se hace scroll */
+#detailImageContainer.image-hidden {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}

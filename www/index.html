@@ -1435,17 +1435,24 @@
 <!-- Activity Detail View (pantalla separada, no modal) -->
 <div id="detailView" class="hidden fixed inset-0 bg-white z-[200] flex flex-col overflow-hidden">
   <!-- Imagen header con scroll effect -->
-  <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 30vh; min-height: 32px;">
+  <div id="detailImageContainer" class="relative flex-shrink-0 transition-all duration-300 ease-out" style="height: 30vh; min-height: 0;">
     <img id="detailImage" src="" alt="" class="w-full h-full object-cover cursor-pointer" onclick="openImageFullscreen()">
-    <button onclick="closeDetail()" class="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm">
-      <span class="material-symbols-outlined">close</span>
-    </button>
+    <!-- Botones favorito y compartir (derecha) -->
+    <div id="detailImageButtons" class="absolute top-4 right-4 flex gap-2 z-20">
+      <!-- Se renderizan dinámicamente desde JS -->
+    </div>
   </div>
   <!-- Contenido scrollable -->
   <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
-    <div style="background-color: #ffffff;" class="sticky top-0 p-4 border-b border-surface-variant/20 grid grid-cols-[1fr_auto] items-center gap-2 z-10">
-      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left px-2 title-clamp-2"></h2>
-      <div id="detailHeaderButtons" class="flex gap-2 items-center"></div>
+    <div id="detailStickyHeader" style="background-color: #ffffff;" class="sticky top-0 p-3 border-b border-surface-variant/20 flex items-center gap-3 z-10 transition-all duration-300">
+      <!-- Botón volver -->
+      <button onclick="closeDetail()" class="p-2 rounded-full transition-colors flex-shrink-0" id="detailBackButton">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <!-- Título -->
+      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left flex-1 title-clamp-1 transition-all duration-300"></h2>
+      <!-- Botones acción -->
+      <div id="detailHeaderButtons" class="flex gap-2 items-center flex-shrink-0"></div>
     </div>
     <div id="detailContent" class="p-4 space-y-4 pb-20">
       <!-- Content will be inserted here -->
