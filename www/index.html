@@ -1450,11 +1450,11 @@
   <div id="detailScrollContainer" class="flex-1 overflow-y-auto">
     <div id="detailStickyHeader" style="background-color: #ffffff;" class="sticky top-0 px-3 py-2 border-b border-surface-variant/20 flex items-center gap-2 z-10 transition-all duration-300">
       <!-- Botón volver (visible solo al hacer scroll) -->
-      <button onclick="closeDetail()" class="w-8 h-8 rounded-full border border-white/40 text-white flex items-center justify-center transition-colors flex-shrink-0 opacity-0 w-0 overflow-hidden" id="detailBackButtonScroll">
-        <span class="material-symbols-outlined text-lg">arrow_back</span>
+      <button onclick="closeDetail()" class="w-9 h-9 rounded-full text-white flex items-center justify-center transition-colors flex-shrink-0 opacity-0 w-0 overflow-hidden" id="detailBackButtonScroll">
+        <span class="material-symbols-outlined text-xl">arrow_back</span>
       </button>
       <!-- Título -->
-      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left flex-1 title-clamp-1 transition-all duration-300 leading-none py-1"></h2>
+      <h2 id="detailTitle" class="font-title-lg text-title-lg text-left flex-1 truncate transition-all duration-300"></h2>
       <!-- Botones acción -->
       <div id="detailHeaderButtons" class="flex gap-2 items-center flex-shrink-0"></div>
     </div>

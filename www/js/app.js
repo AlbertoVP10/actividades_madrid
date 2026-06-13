@@ -4007,14 +4007,14 @@ function showDetail(id, isNavigation = false) {
     </button>
   `;
   
-  // Render header buttons (share and favorite) - más pequeños para top bar compacta
+  // Render header buttons (share and favorite) - w-9 h-9
   const detailHeaderButtons = document.getElementById('detailHeaderButtons');
   detailHeaderButtons.innerHTML = `
-    <button onclick="shareActivity('${activity.id}')" class="border border-white/40 text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors" title="Compartir">
-      <span class="material-symbols-outlined text-lg">share</span>
+    <button onclick="shareActivity('${activity.id}')" class="border border-white/40 text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Compartir">
+      <span class="material-symbols-outlined text-xl">share</span>
     </button>
-    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-white text-primary' : 'text-white'} border border-white/40 w-8 h-8 rounded-full flex items-center justify-center transition-colors" title="Favorito">
-      <span class="material-symbols-outlined text-lg ${isFav ? 'filled' : ''}">favorite</span>
+    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-white text-primary' : 'text-white'} border border-white/40 w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Favorito">
+      <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''}">favorite</span>
     </button>
   `;
   
