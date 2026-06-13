@@ -3924,6 +3924,7 @@ function showDetail(id, isNavigation = false) {
   const scrollContainer = document.getElementById('detailScrollContainer');
   const stickyHeader = document.getElementById('detailStickyHeader');
   const detailImageButtonsElem = document.getElementById('detailImageButtons');
+  const detailImageBackButtonElem = document.getElementById('detailImageBackButton');
   const SCROLL_THRESHOLD = 150; // Umbral para ocultar imagen completamente
   
   if (scrollContainer) {
@@ -3943,6 +3944,7 @@ function showDetail(id, isNavigation = false) {
         }
         // Ocultar botones en imagen
         if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '0';
+        if (detailImageBackButtonElem) detailImageBackButtonElem.style.opacity = '0';
       } else {
         // Mostrar imagen con altura proporcional al scroll
         const maxHeight = window.innerHeight * 0.3;
@@ -3958,6 +3960,7 @@ function showDetail(id, isNavigation = false) {
         }
         // Mostrar botones en imagen
         if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '1';
+        if (detailImageBackButtonElem) detailImageBackButtonElem.style.opacity = '1';
       }
     };
   }
@@ -3965,14 +3968,22 @@ function showDetail(id, isNavigation = false) {
   const titleElement = document.getElementById('detailTitle');
   titleElement.textContent = activity.title;
   
-  // Render buttons on image (favorito y compartir)
+  // Render back button on image (izquierda)
+  const detailImageBackButton = document.getElementById('detailImageBackButton');
+  detailImageBackButton.innerHTML = `
+    <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center transition-colors hover:bg-black/60" title="Volver">
+      <span class="material-symbols-outlined text-xl">arrow_back</span>
+    </button>
+  `;
+  
+  // Render buttons on image (favorito y compartir) - redondos con fondo semitransparente
   const detailImageButtons = document.getElementById('detailImageButtons');
   detailImageButtons.innerHTML = `
-    <button onclick="shareActivity('${activity.id}')" class="p-2 rounded-full" title="Compartir">
-      <span class="material-symbols-outlined">share</span>
+    <button onclick="shareActivity('${activity.id}')" class="w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center transition-colors hover:bg-black/60" title="Compartir">
+      <span class="material-symbols-outlined text-xl">share</span>
     </button>
-    <button onclick="toggleFavoriteOnImage(event || window.event, '${activity.id}')" class="p-2 rounded-full ${isFav ? 'text-red-400' : ''}" title="Favorito">
-      <span class="material-symbols-outlined ${isFav ? 'filled' : ''}">favorite</span>
+    <button onclick="toggleFavoriteOnImage(event || window.event, '${activity.id}')" class="w-10 h-10 rounded-full bg-black/40 ${isFav ? 'text-red-400' : 'text-white'} flex items-center justify-center transition-colors hover:bg-black/60" title="Favorito">
+      <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''}">favorite</span>
     </button>
   `;
   
