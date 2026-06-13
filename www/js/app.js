@@ -3925,6 +3925,8 @@ function showDetail(id, isNavigation = false) {
   const stickyHeader = document.getElementById('detailStickyHeader');
   const detailImageButtonsElem = document.getElementById('detailImageButtons');
   const detailImageBackButtonElem = document.getElementById('detailImageBackButton');
+  const detailBackButtonScroll = document.getElementById('detailBackButtonScroll');
+  const detailTitleElem = document.getElementById('detailTitle');
   const SCROLL_THRESHOLD = 150; // Umbral para ocultar imagen completamente
   
   if (scrollContainer) {
@@ -3945,6 +3947,15 @@ function showDetail(id, isNavigation = false) {
         // Ocultar botones en imagen
         if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '0';
         if (detailImageBackButtonElem) detailImageBackButtonElem.style.opacity = '0';
+        // Mostrar botón volver en header y reducir tamaño título
+        if (detailBackButtonScroll) {
+          detailBackButtonScroll.classList.remove('opacity-0', 'w-0', 'overflow-hidden');
+          detailBackButtonScroll.classList.add('opacity-100', 'w-auto');
+        }
+        if (detailTitleElem) {
+          detailTitleElem.classList.remove('font-title-lg', 'text-title-lg');
+          detailTitleElem.classList.add('font-title-md', 'text-title-md');
+        }
       } else {
         // Mostrar imagen con altura proporcional al scroll
         const maxHeight = window.innerHeight * 0.3;
@@ -3961,6 +3972,15 @@ function showDetail(id, isNavigation = false) {
         // Mostrar botones en imagen
         if (detailImageButtonsElem) detailImageButtonsElem.style.opacity = '1';
         if (detailImageBackButtonElem) detailImageBackButtonElem.style.opacity = '1';
+        // Ocultar botón volver en header y restaurar tamaño título
+        if (detailBackButtonScroll) {
+          detailBackButtonScroll.classList.add('opacity-0', 'w-0', 'overflow-hidden');
+          detailBackButtonScroll.classList.remove('opacity-100', 'w-auto');
+        }
+        if (detailTitleElem) {
+          detailTitleElem.classList.add('font-title-lg', 'text-title-lg');
+          detailTitleElem.classList.remove('font-title-md', 'text-title-md');
+        }
       }
     };
   }
