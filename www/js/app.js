@@ -3712,9 +3712,17 @@ function toggleFavorite(event, id, refreshDetail = false) {
         if (icon) {
           // Update icon fill state
           if (isFav) {
-            icon.classList.add('filled', 'text-white');
+            icon.classList.add('filled');
           } else {
-            icon.classList.remove('filled', 'text-white');
+            icon.classList.remove('filled');
+          }
+          // Update button colors
+          if (isFav) {
+            favBtn.classList.add('bg-primary', 'text-on-primary');
+            favBtn.classList.remove('text-on-surface');
+          } else {
+            favBtn.classList.remove('bg-primary', 'text-on-primary');
+            favBtn.classList.add('text-on-surface');
           }
         }
       }
@@ -3752,11 +3760,11 @@ function toggleFavoriteOnImage(event, id) {
       const icon = favBtn.querySelector('span.material-symbols-outlined');
       if (icon) {
         if (isFav) {
-          icon.classList.add('filled', 'text-white');
-          favBtn.classList.remove('text-white');
+          icon.classList.add('filled');
+          favBtn.classList.add('text-red-400');
         } else {
-          icon.classList.remove('filled', 'text-white');
-          favBtn.classList.add('text-white');
+          icon.classList.remove('filled');
+          favBtn.classList.remove('text-red-400');
         }
       }
     }
@@ -3770,9 +3778,13 @@ function toggleFavoriteOnImage(event, id) {
       const icon = favBtn.querySelector('span.material-symbols-outlined');
       if (icon) {
         if (isFav) {
-          icon.classList.add('filled', 'text-white');
+          icon.classList.add('filled');
+          favBtn.classList.remove('text-white');
+          favBtn.classList.add('bg-white', 'text-primary');
         } else {
-          icon.classList.remove('filled', 'text-white');
+          icon.classList.remove('filled');
+          favBtn.classList.remove('bg-white', 'text-primary');
+          favBtn.classList.add('text-white');
         }
       }
     }
@@ -4001,8 +4013,8 @@ function showDetail(id, isNavigation = false) {
     <button onclick="shareActivity('${activity.id}')" class="border border-white/40 text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Compartir">
       <span class="material-symbols-outlined text-xl">share</span>
     </button>
-    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="text-white border border-white/40 w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Favorito">
-      <span class="material-symbols-outlined text-xl ${isFav ? 'filled text-white' : ''}">favorite</span>
+    <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="${isFav ? 'bg-white text-primary' : 'text-white'} border border-white/40 w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Favorito">
+      <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''}">favorite</span>
     </button>
   `;
   
