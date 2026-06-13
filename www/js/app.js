@@ -3712,9 +3712,9 @@ function toggleFavorite(event, id, refreshDetail = false) {
         if (icon) {
           // Update icon fill state
           if (isFav) {
-            icon.classList.add('filled', 'text-red-400');
+            icon.classList.add('filled', 'text-white');
           } else {
-            icon.classList.remove('filled', 'text-red-400');
+            icon.classList.remove('filled', 'text-white');
           }
         }
       }
@@ -3752,11 +3752,11 @@ function toggleFavoriteOnImage(event, id) {
       const icon = favBtn.querySelector('span.material-symbols-outlined');
       if (icon) {
         if (isFav) {
-          icon.classList.add('filled');
-          favBtn.classList.add('text-red-400');
+          icon.classList.add('filled', 'text-white');
+          favBtn.classList.remove('text-white');
         } else {
-          icon.classList.remove('filled');
-          favBtn.classList.remove('text-red-400');
+          icon.classList.remove('filled', 'text-white');
+          favBtn.classList.add('text-white');
         }
       }
     }
@@ -3770,9 +3770,9 @@ function toggleFavoriteOnImage(event, id) {
       const icon = favBtn.querySelector('span.material-symbols-outlined');
       if (icon) {
         if (isFav) {
-          icon.classList.add('filled', 'text-red-400');
+          icon.classList.add('filled', 'text-white');
         } else {
-          icon.classList.remove('filled', 'text-red-400');
+          icon.classList.remove('filled', 'text-white');
         }
       }
     }
@@ -4002,7 +4002,7 @@ function showDetail(id, isNavigation = false) {
       <span class="material-symbols-outlined text-xl">share</span>
     </button>
     <button onclick="toggleFavorite(event || window.event, '${activity.id}', true)" class="text-white border border-white/40 w-9 h-9 rounded-full flex items-center justify-center transition-colors" title="Favorito">
-      <span class="material-symbols-outlined text-xl ${isFav ? 'filled' : ''} ${isFav ? 'text-red-400' : ''}">favorite</span>
+      <span class="material-symbols-outlined text-xl ${isFav ? 'filled text-white' : ''}">favorite</span>
     </button>
   `;
   
